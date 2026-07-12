@@ -38,6 +38,17 @@
   transition: opacity 1.3s var(--ease-soft), transform 1.3s var(--ease-soft);
 }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+/* Contenido ya visible al cargar la página: aparece en su posición
+   final SIN transición ni desplazamiento. Evita el "salto" de todo el
+   contenido de la primera pantalla en cada carga. */
+.reveal.no-anim,
+.reveal-left.no-anim,
+.reveal-right.no-anim {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
 /* Delay entre elementos de un grupo, subido a 160ms para que la
    cascada (tarjetas de servicios, tarjetas de eje) se lea como una
    secuencia clara, una por una. */
