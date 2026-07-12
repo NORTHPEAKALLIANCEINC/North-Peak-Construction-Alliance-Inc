@@ -489,3 +489,76 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
   .trust-bar__grid { grid-template-columns: repeat(2, 1fr); }
   .trust-bar__item { padding: 1.2rem var(--space-2); }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   TRANSICIONES ENTRE PÁGINAS — View Transitions API
+   ───────────────────────────────────────────────────────────
+   Al navegar entre páginas, el navegador captura la vista antigua y
+   la nueva y las funde. Se acabó el parpadeo blanco entre clics.
+
+   Es API NATIVA del navegador: cero librerías, cero peso. Donde no
+   está soportada, la navegación funciona igual que siempre — no se
+   rompe nada.
+
+   El movimiento es DELIBERADAMENTE SUTIL: un fundido con un
+   desplazamiento mínimo. En un sitio corporativo, una transición
+   llamativa se siente barata y cansa a la tercera visita. La buena
+   transición es la que no se nota, solo se echa de menos.
+═══════════════════════════════════════════════════════════ */
+
+@view-transition {
+  navigation: auto;
+}
+
+/* Duración y curva del fundido general */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 260ms;
+  animation-timing-function: var(--ease-soft);
+}
+
+/* La página saliente se desvanece; la entrante llega desde abajo.
+   Solo opacity y transform: ambas corren en la GPU, así que el
+   movimiento es fluido incluso en equipos modestos. */
+::view-transition-old(root) {
+  animation-name: vt-fade-out;
+}
+::view-transition-new(root) {
+  animation-name: vt-fade-in;
+}
+
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* EL HEADER NO SE TRANSICIONA.
+   Es fijo y está presente en las 7 páginas: debe sentirse PERSISTENTE,
+   como el marco de una aplicación. Si entrara en el fundido, parpadearía
+   en cada clic y delataría que hubo una recarga — justo lo contrario de
+   lo que buscamos. Al darle su propio view-transition-name, el navegador
+   lo trata como el MISMO elemento entre páginas y lo deja quieto. */
+.site-header {
+  view-transition-name: site-header;
+}
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Accesibilidad: quien pida menos movimiento, recibe un fundido limpio
+   sin desplazamiento. No se elimina del todo — un corte seco sería peor. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 120ms;
+  }
+  @keyframes vt-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
