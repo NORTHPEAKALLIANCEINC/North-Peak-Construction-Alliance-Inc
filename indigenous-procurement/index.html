@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- ═══════════════════════════════════════════════════════════
+     TRANSICIONES ENTRE PÁGINAS (View Transitions API)
+     Activa el fundido nativo del navegador al navegar entre páginas.
+     Elimina el parpadeo blanco que aparecía en cada clic.
+     Es una API NATIVA: sin librerías, sin peso añadido. Los navegadores
+     que no la soportan simplemente navegan como siempre — no se rompe
+     nada. La animación en sí se define en layout.css.
+═══════════════════════════════════════════════════════════ -->
+<meta name="view-transition" content="same-origin">
+<!-- Aplica el tema guardado ANTES de que se pinte la página, para
+     evitar un parpadeo (flash) del tema por defecto al cargar. -->
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem('etexca-theme');
+    document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light');
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indigenous Procurement & Purchasing — North Peak Construction Alliance</title>
+<meta name="description" content="We help public bodies and private clients meet Indigenous procurement and purchasing goals in construction, across Ontario and Canada.">
+
+<!-- ASUNCIÓN: dominio placeholder — reemplazar cuando exista el dominio real -->
+<link rel="canonical" href="https://northalliancegroup.ca/indigenous-procurement">
+
+<!-- Open Graph / redes sociales -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://northalliancegroup.ca/indigenous-procurement">
+<meta property="og:site_name" content="North Peak Construction Alliance">
+<meta property="og:title" content="Indigenous Procurement & Purchasing — North Peak Construction Alliance">
+<meta property="og:description" content="We help public bodies and private clients meet Indigenous procurement and purchasing goals in construction, across Ontario and Canada.">
+<meta property="og:locale" content="en_CA">
+<!-- ASUNCIÓN: og:image pendiente — no hay logo/foto de portada todavía (README §3.2) -->
+<!-- <meta property="og:image" content="https://northalliancegroup.ca/og-image.jpg"> -->
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Indigenous Procurement & Purchasing — North Peak Construction Alliance">
+<meta name="twitter:description" content="We help public bodies and private clients meet Indigenous procurement and purchasing goals in construction, across Ontario and Canada.">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+<!-- Tipografías del sistema de diseño v2 (Space Grotesk / Inter / IBM Plex Mono) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css?v=43">
+<link rel="stylesheet" href="/css/style.css?v=43">
+<link rel="stylesheet" href="/css/layout.css?v=43">
+<link rel="stylesheet" href="/css/header.css?v=43">
+<link rel="stylesheet" href="/css/components.css?v=43">
+
+<!-- ═══ Google Search Console: pega tu código de verificación (método "etiqueta HTML") ═══ -->
+<meta name="google-site-verification" content="xJvoHJ7ZN1tag7xE8sJ88pCRUm-I1h6pEgs8XWe0L8o">
+
+<!-- ═══ Google Analytics (GA4): reemplaza G-XXXXXXXXXX por tu ID de medición real ═══ -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     HEADER — BLOQUE COMPARTIDO (idéntico en las 7 páginas).
+     aria-current="page" en el enlace "Contratación Indígena".
+═══════════════════════════════════════════════ -->
+<header class="site-header">
+  <div class="container site-header__row">
+    <a href="/" class="site-header__mark" aria-label="North Peak Construction Alliance — Home">
+      <img class="site-header__logo site-header__logo--dark" src="/images/logo-horizontal.webp" alt="North Peak Construction Alliance Inc.">
+      <img class="site-header__logo site-header__logo--light" src="/images/logo-horizontal-light.webp" alt="" aria-hidden="true">
+    </a>
+    <nav class="site-nav" id="site-nav">
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <a href="/services">Services</a>
+      <a href="/indigenous-procurement" aria-current="page">Indigenous Procurement</a>
+      <a href="/projects">Projects</a>
+      <a href="/careers">Careers</a>
+      <a href="/contact">Contact</a>
+      <a href="/contact" class="site-nav__cta btn btn--ghost btn--sm">Request a consultation</a>
+    </nav>
+    <div class="site-header__actions">
+      <a href="/contact" class="btn btn--ghost btn--sm site-header__cta">Request a consultation</a>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" aria-pressed="false" title="Toggle theme">
+        <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <line x1="12" y1="2.5" x2="12" y2="5"></line>
+            <line x1="12" y1="19" x2="12" y2="21.5"></line>
+            <line x1="4.2" y1="4.2" x2="6" y2="6"></line>
+            <line x1="18" y1="18" x2="19.8" y2="19.8"></line>
+            <line x1="2.5" y1="12" x2="5" y2="12"></line>
+            <line x1="19" y1="12" x2="21.5" y2="12"></line>
+            <line x1="4.2" y1="19.8" x2="6" y2="18"></line>
+            <line x1="18" y1="6" x2="19.8" y2="4.2"></line>
+          </svg>
+        </span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"></path>
+          </svg>
+        </span>
+      </button>
+    </div>
+    <button class="site-header__toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<section class="page-hero grid-texture" id="contratacion-indigena">
+  <div class="container">
+    <div class="page-hero__inner reveal">
+      <span class="readout">Indigenous procurement & purchasing</span>
+      <h1>Your partner for Indigenous participation in construction</h1>
+      <p class="lede">We help general contractors, public bodies and private clients meet their Indigenous procurement and purchasing goals, with real delivery capacity across Ontario and Canada.</p>
+      <div class="page-hero__rule"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="propiedad-indigena" style="background:var(--void-soft);">
+  <div class="container split">
+    <div class="reveal reveal-left">
+      <span class="readout">Ownership structure</span>
+      <h2>An Indigenous-owned company</h2>
+      <p>North Peak Construction Alliance Inc. has Indigenous participation in its ownership structure — part of our identity and of the value we bring to projects with Indigenous inclusion goals.</p>
+    </div>
+    <div class="reveal reveal-right">
+      <p class="statement">Authentic Indigenous participation, not a box-ticking requirement.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section grid-texture" id="beneficios" style="background:var(--void);">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="readout">Benefits</span>
+      <h2>Benefits for clients and public bodies</h2>
+    </div>
+    <div class="service-grid reveal-stagger">
+      <article class="service-card reveal reveal-left" style="--i:0;"><span class="readout">Benefit / 01</span><h3>Meeting Indigenous goals</h3><p>We help meet Indigenous procurement and purchasing targets in bids and contracts.</p></article>
+      <article class="service-card reveal reveal-right" style="--i:1;"><span class="readout">Benefit / 02</span><h3>Supplier diversity</h3><p>We contribute to supplier-diversity programs as an Indigenous-owned partner.</p></article>
+      <article class="service-card reveal reveal-left" style="--i:2;"><span class="readout">Benefit / 03</span><h3>Delivery capability</h3><p>We combine the value of Indigenous participation with real technical capability to deliver the work.</p></article>
+      <article class="service-card reveal reveal-right" style="--i:3;"><span class="readout">Benefit / 04</span><h3>Community impact</h3><p>We contribute to participation and opportunities for the Indigenous communities involved.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="participacion" style="background:var(--void-soft);">
+  <div class="container split split--reverse">
+    <div class="reveal reveal-left">
+      <p class="statement">Concrete, verifiable impact throughout the project — not just words.</p>
+    </div>
+    <div class="reveal reveal-right">
+      <span class="readout">Project participation</span>
+      <h2>Indigenous participation in projects</h2>
+      <p>We embed Indigenous participation in delivery, in job opportunities, and in collaboration with communities.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section grid-texture" id="certificaciones" style="background:var(--void);">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="readout">Certifications & registrations</span>
+      <h2>In progress</h2>
+      <p class="lede">We are advancing the Indigenous participation certification and registration processes. This section will be updated as they are confirmed; we prefer not to claim accreditations that are still in progress.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="ventaja-indigena" style="background:var(--void-soft);">
+  <div class="container">
+    <div class="cta-band reveal">
+      <span class="readout">Indigenous participation advantage</span>
+      <h2>The Indigenous Participation Advantage</h2>
+      <p class="lede">Working with us lets you meet Indigenous procurement, supplier-diversity and community-participation goals without compromising quality or technical delivery. We turn a requirement into a concrete advantage for your project.</p>
+      <div class="cta-band__actions"><a href="/contact" class="btn btn--primary">Let's talk about your bid or project</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER — BLOQUE COMPARTIDO (idéntico en las 7 páginas).
+═══════════════════════════════════════════════ -->
+<footer class="site-footer grid-texture">
+  <div class="container site-footer__top">
+    <div class="site-footer__brand">
+      <a href="/" class="site-footer__mark" aria-label="North Peak Construction Alliance — Home">
+        <img class="site-footer__logo site-footer__logo--dark" src="/images/logo-horizontal.webp" alt="North Peak Construction Alliance Inc.">
+        <img class="site-footer__logo site-footer__logo--light" src="/images/logo-horizontal-light.webp" alt="" aria-hidden="true">
+      </a>
+      <p class="site-footer__tagline">Indigenous-owned construction company. Safe, high-quality construction solutions across Ontario and Canada.</p>
+      <!-- FASE 11 → reemplazar href="#" con los perfiles reales cuando existan. -->
+      <div class="site-footer__social">
+        <a href="#" aria-label="LinkedIn" title="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.3c0-1.27-.02-2.9-1.77-2.9-1.77 0-2.04 1.38-2.04 2.8V21H9z"/></svg></a>
+        <a href="#" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H17V3.6c-.29-.04-1.3-.13-2.47-.13-2.44 0-4.11 1.49-4.11 4.23v2.19H7.7V13h2.72v8z"/></svg></a>
+        <a href="#" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg></a>
+      </div>
+    </div>
+
+    <div class="site-footer__col">
+      <span class="readout">Navigation</span>
+      <nav class="site-footer__links">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/services">Services</a>
+        <a href="/indigenous-procurement">Indigenous Procurement</a>
+      </nav>
+    </div>
+
+    <div class="site-footer__col">
+      <span class="readout">Explore</span>
+      <nav class="site-footer__links">
+        <a href="/projects">Projects</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </nav>
+    </div>
+
+    <div class="site-footer__col">
+      <span class="readout">Contact</span>
+      <ul class="site-footer__contact">
+        <li><span class="meta-label">Phone</span><a href="tel:+16478950939" style="color:inherit; text-decoration:none;">647 895 0939</a></li>
+        <li><span class="meta-label">Email</span><a href="mailto:admin@northalliancegroup.ca" style="color:inherit; text-decoration:none;">admin@northalliancegroup.ca</a></li>
+        <li><span class="meta-label">Address</span>37 Kodiak Crescent, Unit 11, Toronto, ON M3J 3G5</li>
+        <li><span class="meta-label">Corporation No.</span>1521162-0</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container site-footer__bottom">
+    <span>© <span id="year"></span> North Peak Construction Alliance Inc. · All rights reserved</span>
+    <a href="#top" class="site-footer__top-link">Back to top ↑</a>
+  </div>
+</footer>
+
+<!-- CTA flotante — píldora de cristal discreta. En páginas sin hero
+     (como esta) se muestra directamente (ver js/main.js). -->
+<div class="float-cta">
+  <span class="float-cta__text">Need advice?</span>
+  <a href="/contact" class="btn btn--primary btn--sm">Book a consultation</a>
+</div>
+
+<script src="/js/main.js?v=19"></script>
+
+</body>
+</html>
