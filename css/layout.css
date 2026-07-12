@@ -517,9 +517,15 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
   animation-timing-function: var(--ease-soft);
 }
 
-/* La página saliente se desvanece; la entrante llega desde abajo.
-   Solo opacity y transform: ambas corren en la GPU, así que el
-   movimiento es fluido incluso en equipos modestos. */
+/* FUNDIDO PURO — sin ningún desplazamiento.
+   Antes la página entrante subía 8px (translateY). ERROR: ese
+   desplazamiento creaba un BRINCO visible, porque el contenido nuevo
+   aterrizaba en una posición distinta a la del contenido viejo. La
+   inconsistencia entre ambas posiciones generaba justo el ruido que
+   una transición debe eliminar.
+   La regla: si el contenido ocupa el MISMO sitio en las dos páginas
+   (header, contenedor, márgenes), no debe moverse. Solo cambia la
+   opacidad. Cero movimiento = cero brinco. */
 ::view-transition-old(root) {
   animation-name: vt-fade-out;
 }
@@ -528,11 +534,12 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
 }
 
 @keyframes vt-fade-out {
-  to { opacity: 0; }
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }
 @keyframes vt-fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* EL HEADER NO SE TRANSICIONA.
@@ -550,15 +557,13 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
   mix-blend-mode: normal;
 }
 
-/* Accesibilidad: quien pida menos movimiento, recibe un fundido limpio
-   sin desplazamiento. No se elimina del todo — un corte seco sería peor. */
+/* Accesibilidad: quien pida menos movimiento recibe un fundido más
+   corto. No se elimina del todo — un corte seco sería peor que un
+   fundido breve. Ya no hace falta redefinir la animación: al no haber
+   desplazamiento, el fundido puro ya es seguro para todo el mundo. */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation-duration: 120ms;
-  }
-  @keyframes vt-fade-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
   }
 }
