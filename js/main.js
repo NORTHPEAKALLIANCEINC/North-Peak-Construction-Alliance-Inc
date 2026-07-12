@@ -62,6 +62,30 @@ function initScrollReveal() {
     return;
   }
 
+  /* ═══ CORRECCIÓN IMPORTANTE ═══
+     Antes, TODOS los elementos con .reveal arrancaban desplazados 30px
+     hacia abajo — incluidos los que ya estaban VISIBLES al cargar la
+     página. Resultado: en cada carga, todo el contenido de la pantalla
+     inicial "saltaba" de abajo hacia arriba.
+
+     Ese salto quedaba disimulado por el parpadeo blanco entre páginas;
+     al añadir el fundido, quedó al descubierto.
+
+     La regla correcta: el reveal es para lo que aparece AL HACER SCROLL.
+     Lo que ya se ve al cargar debe estar, sencillamente, en su sitio.
+
+     Aquí se marca como visible SIN animación todo lo que ya está en
+     pantalla, y solo se observa lo que queda por debajo del pliegue. */
+  const alturaVentana = window.innerHeight;
+
+  targets.forEach(el => {
+    const arriba = el.getBoundingClientRect().top;
+    if (arriba < alturaVentana * 0.95) {
+      // Ya está a la vista: se muestra en su posición final, sin mover nada.
+      el.classList.add('is-visible', 'no-anim');
+    }
+  });
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -72,6 +96,7 @@ function initScrollReveal() {
   }, { threshold: 0.15 });
 
   targets.forEach((el, i) => {
+    if (el.classList.contains('no-anim')) return;   // ya visible: nada que observar
     el.style.setProperty('--i', i % 6);
     observer.observe(el);
   });
