@@ -1,40 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- ASUNCIÓN: dominio placeholder (northalliancegroup.ca) — reemplazar
-     por el dominio real una vez confirmado en la Fase 1B. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://northalliancegroup.ca/</loc>
-    <lastmod>2026-07-09</lastmod>
+    <lastmod>2026-07-12</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://northalliancegroup.ca/nosotros.html</loc>
-    <lastmod>2026-07-09</lastmod>
+    <loc>https://northalliancegroup.ca/about</loc>
+    <lastmod>2026-07-12</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://northalliancegroup.ca/servicios.html</loc>
-    <lastmod>2026-07-09</lastmod>
+    <loc>https://northalliancegroup.ca/services</loc>
+    <lastmod>2026-07-12</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://northalliancegroup.ca/contratacion-indigena.html</loc>
-    <lastmod>2026-07-09</lastmod>
-    <priority>0.9</priority>
+    <loc>https://northalliancegroup.ca/indigenous-procurement</loc>
+    <lastmod>2026-07-12</lastmod>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://northalliancegroup.ca/proyectos.html</loc>
-    <lastmod>2026-07-09</lastmod>
-    <priority>0.7</priority>
+    <loc>https://northalliancegroup.ca/projects</loc>
+    <lastmod>2026-07-12</lastmod>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://northalliancegroup.ca/carreras.html</loc>
-    <lastmod>2026-07-09</lastmod>
-    <priority>0.6</priority>
+    <loc>https://northalliancegroup.ca/careers</loc>
+    <lastmod>2026-07-12</lastmod>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://northalliancegroup.ca/contacto.html</loc>
-    <lastmod>2026-07-09</lastmod>
-    <priority>0.7</priority>
+    <loc>https://northalliancegroup.ca/contact</loc>
+    <lastmod>2026-07-12</lastmod>
+    <priority>0.8</priority>
   </url>
 </urlset>
