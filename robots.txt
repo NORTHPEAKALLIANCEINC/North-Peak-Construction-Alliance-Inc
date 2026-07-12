@@ -1,8 +1,7 @@
 # North Peak Construction Alliance Inc.
-# ASUNCIÓN: dominio placeholder — actualizar la URL del sitemap
-# con el dominio real una vez confirmado (Fase 1B).
+# https://northalliancegroup.ca
 
 User-agent: *
 Allow: /
 
-Sitemap: https://www.northalliancegroup.ca/sitemap.xml
+Sitemap: https://northalliancegroup.ca/sitemap.xml
