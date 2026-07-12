@@ -124,7 +124,7 @@
   /* Cristal del botón primario. El dorado va en el texto y en la luz
      del borde, nunca en el relleno: de ahí la sensación de calidad. */
   --btn-glass:     rgba(10, 18, 34, 0.72);
-  --btn-text:      var(--cyan);
+  --btn-text:      #E8C87A;   /* dorado claro: sobre cristal OSCURO */
   --btn-edge:      rgba(217, 184, 99, 0.35);
   --btn-sheen:            rgba(255, 255, 255, 0.06);  /* brillo superior */
   --btn-inner-light:      rgba(255, 255, 255, 0.10);
@@ -188,7 +188,7 @@ html[data-theme="light"] {
      en oscuro, pero sobre una base clara — así el botón pertenece a su
      tema en vez de parecer un recorte del modo oscuro. */
   --btn-glass:        rgba(255, 255, 255, 0.78);
-  --btn-text:         var(--cyan);
+  --btn-text:         #6B5210;   /* bronce oscuro: sobre cristal CLARO, legible */
   --btn-edge:         rgba(133, 102, 18, 0.30);
   /* En claro las sombras son AZULES SUAVES, no negras: una sombra negra
      sobre fondo perla ensucia y delata el "modo oscuro mal adaptado". */

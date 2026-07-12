@@ -46,7 +46,9 @@
   background:
     linear-gradient(180deg, var(--btn-sheen), transparent 55%),
     var(--btn-glass);
-  color: var(--cyan);
+  /* Color propio del botón, NO --cyan: sobre cristal claro el dorado
+     claro (#D9B863) no tiene contraste. Se usa un bronce más oscuro. */
+  color: var(--btn-text);
   border: 1px solid var(--btn-edge);
   backdrop-filter: blur(10px);
   box-shadow:
@@ -86,13 +88,17 @@
 .btn--primary > * ,
 .btn--primary { z-index: 1; }
 
+/* El halo se proyecta HACIA ABAJO y contenido, no en todas direcciones.
+   Un halo radial amplio se derramaba sobre el botón contiguo (visible en
+   Brave, que renderiza las sombras con más intensidad). Con un desenfoque
+   menor y desplazamiento vertical, la luz queda dentro de su propia caja. */
 .btn--primary:hover {
   transform: translateY(-1px);
   border-color: var(--cyan-dim);
   box-shadow:
     inset 0 1px 0 0 var(--btn-inner-light-hover),
     0 0 0 1px var(--cyan-dim),
-    0 10px 34px -8px var(--cyan-glow);   /* el halo dorado */
+    0 8px 20px -10px var(--cyan-glow);
 }
 
 .btn--primary:hover::before {
@@ -164,7 +170,7 @@
   border-color: var(--glass-border-strong);
   box-shadow:
     inset 0 1px 0 0 var(--btn-inner-light-hover),
-    0 10px 30px -10px var(--btn-drop-hover);
+    0 8px 18px -10px var(--btn-drop-hover);
 }
 
 .btn--ghost:hover::before { opacity: 1; left: 0; right: 0; }
