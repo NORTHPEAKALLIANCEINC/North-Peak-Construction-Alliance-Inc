@@ -88,12 +88,33 @@
   --radius-lg: 22px;
   --radius-pill: 999px;
 
-  /* ─── Movimiento ─── */
+  /* ═══ MOVIMIENTO ═══
+     Tres curvas, cada una con un trabajo distinto. El `ease` por
+     defecto del navegador (que el CSS usaba en 20 sitios) es plano y
+     sin carácter: acelera y frena por igual, y por eso todo se siente
+     genérico. Estas curvas arrancan rápido y frenan despacio, que es
+     como se mueven las cosas en el mundo real.
+
+     --ease-out  → LO HABITUAL. Hovers, colores, bordes. Arranca de
+                   golpe y frena suave: el usuario percibe respuesta
+                   INMEDIATA, que es lo que hace que una interfaz se
+                   sienta rápida.
+     --ease      → Entradas y movimientos grandes. Frenado muy marcado
+                   (completa el 90% del recorrido en el primer tercio).
+     --ease-soft → Movimientos continuos y suaves, sin protagonismo. */
   --ease:      cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out:  cubic-bezier(0.22, 1, 0.36, 1);
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
-  --dur-fast:  180ms;
-  --dur-base:  320ms;
-  --dur-slow:  600ms;
+
+  /* ═══ DURACIONES ═══
+     Contraintuitivo pero cierto: RÁPIDO se siente CARO.
+     Un hover de 300ms se percibe lento y pesado; a 140ms se siente
+     instantáneo y sólido. Las duraciones largas se reservan para
+     movimientos grandes, donde la distancia justifica el tiempo. */
+  --dur-fast:  140ms;   /* hovers, colores, bordes — respuesta inmediata */
+  --dur-base:  260ms;   /* paneles, menús, cambios de estado */
+  --dur-slow:  500ms;   /* movimientos amplios */
+  --dur-reveal: 700ms;  /* entrada al hacer scroll (antes: 1.3s, pesadísimo) */
 
   /* ─── Superficies traslúcidas (rgba(var(--x-rgb), alpha)) ─── */
   --surface-rgb:   13, 21, 36;

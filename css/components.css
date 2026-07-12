@@ -23,7 +23,7 @@
   padding: 0.95rem 1.6rem;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
-  transition: transform var(--dur-fast) var(--ease-soft), box-shadow var(--dur-base) var(--ease-soft), background var(--dur-fast) ease, border-color var(--dur-fast) ease, color var(--dur-fast) ease;
+  transition: transform var(--dur-fast) var(--ease-soft), box-shadow var(--dur-base) var(--ease-soft), background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
 }
@@ -67,7 +67,7 @@
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   padding: var(--space-4);
-  transition: background 0.4s ease, border-color 0.4s ease;
+  transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
 }
 
 /* ═══════════════════════════════════════════════
@@ -92,7 +92,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  transition: border-color var(--dur-base) var(--ease-soft), transform var(--dur-base) var(--ease-soft), background var(--dur-base) ease;
+  transition: border-color var(--dur-base) var(--ease-soft), transform var(--dur-base) var(--ease-soft), background var(--dur-base) var(--ease-out);
 }
 
 .service-card:hover {
@@ -194,7 +194,7 @@
   padding: 0.8rem 0.9rem;
   color: var(--text-primary);
   outline: none;
-  transition: border-color var(--dur-fast) ease, background var(--dur-fast) ease;
+  transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
 
 .field input::placeholder,
@@ -225,7 +225,7 @@
   padding: 0.5rem 1rem;
   margin-right: 0.9rem;
   cursor: pointer;
-  transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease;
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
 }
 .field input[type="file"]::file-selector-button:hover {
   background: var(--glass-fill-hover);
@@ -267,7 +267,7 @@
   -webkit-backdrop-filter: blur(var(--glass-blur));
   box-shadow: 0 8px 32px rgba(0,0,0,0.35);
   transform: translateY(0);
-  transition: transform var(--dur-base) var(--ease-soft), opacity var(--dur-base) ease, background-color 0.4s ease, border-color 0.4s ease;
+  transition: transform var(--dur-base) var(--ease-soft), opacity var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
 }
 
 .float-cta__text {
@@ -299,7 +299,7 @@
   background: var(--void);
   border-top: 1px solid var(--rule);
   padding: var(--space-6) 0 var(--space-3);
-  transition: background-color 0.4s ease, border-color 0.4s ease;
+  transition: background-color var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
 }
 
 .site-footer__top {
@@ -372,7 +372,7 @@
   background: var(--glass-fill);
   border: 1px solid var(--glass-border);
   color: var(--text-dim);
-  transition: color var(--dur-fast) ease, background var(--dur-fast) ease, border-color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-soft);
+  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-soft);
 }
 .site-footer__social a:hover {
   color: var(--cyan);
@@ -398,7 +398,7 @@
   font-size: 0.88rem;
   color: var(--text-dim);
   text-decoration: none;
-  transition: color var(--dur-fast) ease;
+  transition: color var(--dur-fast) var(--ease-out);
   width: fit-content;
 }
 
@@ -442,7 +442,7 @@
 .site-footer__top-link {
   color: var(--text-faint);
   text-decoration: none;
-  transition: color var(--dur-fast) ease;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .site-footer__top-link:hover { color: var(--cyan); }
@@ -577,7 +577,7 @@
   inset: 0;
   background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.30) 50%, transparent 70%);
   transform: translateX(-130%);
-  transition: transform 0.6s var(--ease-soft);
+  transition: transform var(--dur-slow) var(--ease-soft);
   pointer-events: none;
 }
 .btn--primary:hover::after { transform: translateX(130%); }
