@@ -16,24 +16,24 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact — North Peak Construction Alliance</title>
-<meta name="description" content="Contacte a North Peak Construction Alliance Inc. Teléfono 647 895 0939, Toronto, ON. Let's talk about your project o licitación de construcción.">
+<meta name="description" content="Contact North Peak Construction Alliance Inc. Phone 647 895 0939, Toronto, ON. Let's talk about your project or construction tender.">
 
 <!-- ASUNCIÓN: dominio placeholder — reemplazar cuando exista el dominio real -->
-<link rel="canonical" href="https://www.northpeakconstruction.ca/contacto.html">
+<link rel="canonical" href="https://www.northalliancegroup.ca/contacto.html">
 
 <!-- Open Graph / redes sociales -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.northpeakconstruction.ca/contacto.html">
+<meta property="og:url" content="https://www.northalliancegroup.ca/contacto.html">
 <meta property="og:site_name" content="North Peak Construction Alliance">
 <meta property="og:title" content="Contact — North Peak Construction Alliance">
-<meta property="og:description" content="Contacte a North Peak Construction Alliance Inc. Teléfono 647 895 0939, Toronto, ON. Let's talk about your project o licitación de construcción.">
+<meta property="og:description" content="Contact North Peak Construction Alliance Inc. Phone 647 895 0939, Toronto, ON. Let's talk about your project or construction tender.">
 <meta property="og:locale" content="en_CA">
 <!-- ASUNCIÓN: og:image pendiente — no hay logo/foto de portada todavía (README §3.2) -->
-<!-- <meta property="og:image" content="https://www.northpeakconstruction.ca/og-image.jpg"> -->
+<!-- <meta property="og:image" content="https://www.northalliancegroup.ca/og-image.jpg"> -->
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Contact — North Peak Construction Alliance">
-<meta name="twitter:description" content="Contacte a North Peak Construction Alliance Inc. Teléfono 647 895 0939, Toronto, ON. Let's talk about your project o licitación de construcción.">
+<meta name="twitter:description" content="Contact North Peak Construction Alliance Inc. Phone 647 895 0939, Toronto, ON. Let's talk about your project or construction tender.">
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 
@@ -42,11 +42,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=31">
-<link rel="stylesheet" href="css/style.css?v=31">
-<link rel="stylesheet" href="css/layout.css?v=31">
-<link rel="stylesheet" href="css/header.css?v=31">
-<link rel="stylesheet" href="css/components.css?v=31">
+<link rel="stylesheet" href="css/tokens.css?v=34">
+<link rel="stylesheet" href="css/style.css?v=34">
+<link rel="stylesheet" href="css/layout.css?v=34">
+<link rel="stylesheet" href="css/header.css?v=34">
+<link rel="stylesheet" href="css/components.css?v=34">
 
 <!-- ═══ Google Search Console: pega tu código de verificación (método "etiqueta HTML") ═══ -->
 <meta name="google-site-verification" content="PEGAR_CODIGO_DE_VERIFICACION">
@@ -129,15 +129,32 @@
       <span class="readout">Write to us</span>
       <h2>Contact form</h2>
     </div>
-    <form action="#" method="POST" class="glass-panel reveal" style="max-width:640px; margin:0 auto;">
+    <!-- ═══════════════════════════════════════════
+         FORMULARIO DE CONTACTO — Web3Forms
+         Envía directo a admin@northalliancegroup.ca sin servidor.
+         La access_key NO es secreta: Web3Forms la publica en su propia
+         documentación y puede ir en el HTML sin riesgo.
+         PENDIENTE: sustituir TU_ACCESS_KEY_AQUI por la clave real.
+    ═══════════════════════════════════════════════ -->
+    <form id="contactForm" action="https://api.web3forms.com/submit" method="POST"
+          class="glass-panel reveal" style="max-width:640px; margin:0 auto;">
+
+      <input type="hidden" name="access_key" value="TU_ACCESS_KEY_AQUI">
+      <input type="hidden" name="subject" value="New contact enquiry — northalliancegroup.ca">
+      <input type="hidden" name="from_name" value="North Peak Website">
+      <!-- Trampa antispam: los bots la rellenan, las personas no la ven -->
+      <input type="checkbox" name="botcheck" class="hidden" style="display:none">
+
       <div class="form-grid">
-      <div class="field"><label for="nombre">Name</label><input type="text" id="nombre" name="nombre" required placeholder="Your full name"></div>
+      <div class="field"><label for="nombre">Name</label><input type="text" id="nombre" name="name" required placeholder="Your full name"></div>
       <div class="field"><label for="email">Email</label><input type="email" id="email" name="email" required placeholder="you@company.com"></div>
-      <div class="field"><label for="telefono">Phone</label><input type="tel" id="telefono" name="telefono" placeholder="Your contact number"></div>
-      <div class="field"><label for="empresa">Company</label><input type="text" id="empresa" name="empresa" placeholder="Your company name (optional)"></div>
-      <div class="field field--full"><label for="mensaje">Message</label><textarea id="mensaje" name="mensaje" rows="4" required placeholder="Tell us about your project"></textarea></div>
+      <div class="field"><label for="telefono">Phone</label><input type="tel" id="telefono" name="phone" placeholder="Your contact number"></div>
+      <div class="field"><label for="empresa">Company</label><input type="text" id="empresa" name="company" placeholder="Your company name (optional)"></div>
+      <div class="field field--full"><label for="mensaje">Message</label><textarea id="mensaje" name="message" rows="4" required placeholder="Tell us about your project"></textarea></div>
       </div>
-      <button type="submit" class="btn btn--primary">Send</button>
+
+      <button type="submit" class="btn btn--primary" id="contactSubmit">Send</button>
+      <p class="form-status" id="contactStatus" role="status" aria-live="polite"></p>
     </form>
   </div>
 </section>
@@ -184,7 +201,7 @@
       <span class="readout">Contact</span>
       <ul class="site-footer__contact">
         <li><span class="meta-label">Phone</span><a href="tel:+16478950939" style="color:inherit; text-decoration:none;">647 895 0939</a></li>
-        <li><span class="meta-label">Email</span>Pending</li>
+        <li><span class="meta-label">Email</span><a href="mailto:admin@northalliancegroup.ca" style="color:inherit; text-decoration:none;">admin@northalliancegroup.ca</a></li>
         <li><span class="meta-label">Address</span>37 Kodiak Crescent, Unit 11, Toronto, ON M3J 3G5</li>
         <li><span class="meta-label">Corporation No.</span>1521162-0</li>
       </ul>
@@ -204,7 +221,7 @@
   <a href="contacto.html" class="btn btn--primary btn--sm">Book a consultation</a>
 </div>
 
-<script src="js/main.js?v=16"></script>
+<script src="js/main.js?v=17"></script>
 
 </body>
 </html>

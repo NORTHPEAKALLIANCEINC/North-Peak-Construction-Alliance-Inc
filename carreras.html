@@ -19,17 +19,17 @@
 <meta name="description" content="Job opportunities and subcontractor registration at North Peak Construction Alliance Inc. Submit your application and résumé.">
 
 <!-- ASUNCIÓN: dominio placeholder — reemplazar cuando exista el dominio real -->
-<link rel="canonical" href="https://www.northpeakconstruction.ca/carreras.html">
+<link rel="canonical" href="https://www.northalliancegroup.ca/carreras.html">
 
 <!-- Open Graph / redes sociales -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.northpeakconstruction.ca/carreras.html">
+<meta property="og:url" content="https://www.northalliancegroup.ca/carreras.html">
 <meta property="og:site_name" content="North Peak Construction Alliance">
 <meta property="og:title" content="Careers & Employment — North Peak Construction Alliance">
 <meta property="og:description" content="Job opportunities and subcontractor registration at North Peak Construction Alliance Inc. Submit your application and résumé.">
 <meta property="og:locale" content="en_CA">
 <!-- ASUNCIÓN: og:image pendiente — no hay logo/foto de portada todavía (README §3.2) -->
-<!-- <meta property="og:image" content="https://www.northpeakconstruction.ca/og-image.jpg"> -->
+<!-- <meta property="og:image" content="https://www.northalliancegroup.ca/og-image.jpg"> -->
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Careers & Employment — North Peak Construction Alliance">
@@ -42,11 +42,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=31">
-<link rel="stylesheet" href="css/style.css?v=31">
-<link rel="stylesheet" href="css/layout.css?v=31">
-<link rel="stylesheet" href="css/header.css?v=31">
-<link rel="stylesheet" href="css/components.css?v=31">
+<link rel="stylesheet" href="css/tokens.css?v=34">
+<link rel="stylesheet" href="css/style.css?v=34">
+<link rel="stylesheet" href="css/layout.css?v=34">
+<link rel="stylesheet" href="css/header.css?v=34">
+<link rel="stylesheet" href="css/components.css?v=34">
 
 <!-- ═══ Google Search Console: pega tu código de verificación (método "etiqueta HTML") ═══ -->
 <meta name="google-site-verification" content="PEGAR_CODIGO_DE_VERIFICACION">
@@ -157,16 +157,45 @@
       <h2>Submit your application</h2>
       <p class="lede">Fill out the form and attach your résumé. Use it to apply for a role or register as a subcontractor.</p>
     </div>
-    <form action="#" method="POST" enctype="multipart/form-data" class="glass-panel reveal" style="max-width:680px; margin:0 auto;">
+    <!-- ═══════════════════════════════════════════
+         FORMULARIO DE CARRERAS — Web3Forms
+         Envía a admin@northalliancegroup.ca sin servidor.
+
+         NOTA SOBRE EL CV: los archivos adjuntos son función de PAGO en
+         Web3Forms. En el plan gratuito el formulario funciona, pero no
+         puede llevar el currículum adjunto. Solución: se recoge el resto
+         de datos y se indica al candidato que envíe el CV por correo.
+         El campo de archivo queda COMENTADO abajo: si algún día pasas al
+         plan Pro, lo descomentas y vuelve a funcionar.
+    ═══════════════════════════════════════════════ -->
+    <form id="careersForm" action="https://api.web3forms.com/submit" method="POST"
+          class="glass-panel reveal" style="max-width:680px; margin:0 auto;">
+
+      <input type="hidden" name="access_key" value="TU_ACCESS_KEY_AQUI">
+      <input type="hidden" name="subject" value="New job application — northalliancegroup.ca">
+      <input type="hidden" name="from_name" value="North Peak Careers">
+      <input type="checkbox" name="botcheck" class="hidden" style="display:none">
+
       <div class="form-grid">
-      <div class="field"><label for="nombre">Name</label><input type="text" id="nombre" name="nombre" required placeholder="Your full name"></div>
+      <div class="field"><label for="nombre">Name</label><input type="text" id="nombre" name="name" required placeholder="Your full name"></div>
       <div class="field"><label for="email">Email</label><input type="email" id="email" name="email" required placeholder="you@email.com"></div>
-      <div class="field"><label for="telefono">Phone</label><input type="tel" id="telefono" name="telefono" placeholder="Your contact number"></div>
-      <div class="field"><label for="puesto">Position of interest</label><input type="text" id="puesto" name="puesto" placeholder="Position or trade / subcontractor"></div>
-      <div class="field field--full"><label for="cv">Attach résumé</label><input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx"></div>
-      <div class="field field--full"><label for="mensaje">Message</label><textarea id="mensaje" name="mensaje" rows="4" placeholder="Tell us about your experience"></textarea></div>
+      <div class="field"><label for="telefono">Phone</label><input type="tel" id="telefono" name="phone" placeholder="Your contact number"></div>
+      <div class="field"><label for="puesto">Position of interest</label><input type="text" id="puesto" name="position" placeholder="Position or trade / subcontractor"></div>
+      <div class="field field--full"><label for="mensaje">Message</label><textarea id="mensaje" name="message" rows="4" placeholder="Tell us about your experience"></textarea></div>
+
+      <!-- Plan Pro: descomentar este campo y añadir enctype="multipart/form-data" al <form>
+      <div class="field field--full"><label for="cv">Attach résumé</label><input type="file" id="cv" name="resume" accept=".pdf,.doc,.docx"></div>
+      -->
       </div>
-      <button type="submit" class="btn btn--primary">Submit application</button>
+
+      <p class="form-note">
+        After submitting, please email your résumé to
+        <a href="mailto:admin@northalliancegroup.ca">admin@northalliancegroup.ca</a>
+        with your name in the subject line.
+      </p>
+
+      <button type="submit" class="btn btn--primary" id="careersSubmit">Submit application</button>
+      <p class="form-status" id="careersStatus" role="status" aria-live="polite"></p>
     </form>
   </div>
 </section>
@@ -213,7 +242,7 @@
       <span class="readout">Contact</span>
       <ul class="site-footer__contact">
         <li><span class="meta-label">Phone</span><a href="tel:+16478950939" style="color:inherit; text-decoration:none;">647 895 0939</a></li>
-        <li><span class="meta-label">Email</span>Pending</li>
+        <li><span class="meta-label">Email</span><a href="mailto:admin@northalliancegroup.ca" style="color:inherit; text-decoration:none;">admin@northalliancegroup.ca</a></li>
         <li><span class="meta-label">Address</span>37 Kodiak Crescent, Unit 11, Toronto, ON M3J 3G5</li>
         <li><span class="meta-label">Corporation No.</span>1521162-0</li>
       </ul>
@@ -233,7 +262,7 @@
   <a href="contacto.html" class="btn btn--primary btn--sm">Book a consultation</a>
 </div>
 
-<script src="js/main.js?v=16"></script>
+<script src="js/main.js?v=17"></script>
 
 </body>
 </html>

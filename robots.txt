@@ -5,4 +5,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.northpeakconstruction.ca/sitemap.xml
+Sitemap: https://www.northalliancegroup.ca/sitemap.xml
