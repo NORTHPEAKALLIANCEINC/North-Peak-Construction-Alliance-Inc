@@ -602,13 +602,43 @@
 /* ═══════════════════════════════════════════════
    FORMULARIOS — mensajes de estado y notas
 ═══════════════════════════════════════════════ */
+/* Mensaje de confirmación tras enviar el formulario.
+   Antes quedaba suelto y descolgado bajo el botón. Ahora es una franja
+   de ancho completo, con su fondo y su ícono, que se lee como una
+   confirmación de verdad y no como un texto perdido. */
 .form-status{
-  margin-top: 1rem;
+  display: none;                 /* oculto hasta que hay algo que decir */
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.85rem 1.1rem;
   font-size: 0.9rem;
   line-height: 1.5;
-  min-height: 1.2em;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
 }
-.form-status--ok{ color: var(--cyan); }
+/* Solo se muestra cuando el JS le pone una clase de estado */
+.form-status.form-status--ok,
+.form-status.form-status--error{
+  display: flex;
+}
+.form-status--ok{
+  color: var(--cyan);
+  background: var(--glass-fill);
+  border-color: var(--cyan-dim);
+}
+.form-status--ok::before{
+  content: '✓';
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.form-status--error::before{
+  content: '!';
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.form-status a{ color: inherit; text-decoration: underline; }
 .form-status--error{ color: #C0392B; }
 html[data-theme="light"] .form-status--error{ color: #A93226; }
 
