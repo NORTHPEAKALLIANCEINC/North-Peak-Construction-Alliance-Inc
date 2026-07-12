@@ -598,3 +598,29 @@
     linear-gradient(90deg, rgba(var(--overlay-rgb),0.55) 0%, rgba(var(--overlay-rgb),0.22) 42%, transparent 64%);
 }
 
+
+/* ═══════════════════════════════════════════════
+   FORMULARIOS — mensajes de estado y notas
+═══════════════════════════════════════════════ */
+.form-status{
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  min-height: 1.2em;
+}
+.form-status--ok{ color: var(--cyan); }
+.form-status--error{ color: #C0392B; }
+html[data-theme="light"] .form-status--error{ color: #A93226; }
+
+.form-note{
+  margin-top: 1.25rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+  padding: 0.85rem 1rem;
+  border-left: 2px solid var(--cyan);
+  background: var(--glass-fill);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.form-note a{ color: var(--cyan); }
