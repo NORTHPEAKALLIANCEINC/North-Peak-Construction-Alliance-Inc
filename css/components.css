@@ -242,8 +242,38 @@
 }
 .form-grid .field--full { grid-column: 1 / -1; }
 
-@media (max-width: 560px) {
+/* CAUSA DEL DESBORDE EN MÓVIL: por defecto una celda de grid tiene
+   min-width:auto, es decir, NO PUEDE encogerse por debajo del ancho de
+   su contenido. Los inputs se negaban a estrecharse y empujaban el
+   formulario fuera de la pantalla. min-width:0 los deja encogerse. */
+.form-grid > .field { min-width: 0; }
+
+.form-grid input,
+.form-grid textarea,
+.form-grid select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;   /* el padding cuenta DENTRO del ancho */
+}
+
+/* El textarea solo se redimensiona en vertical: si el usuario lo
+   arrastra a lo ancho, rompía el layout. */
+.form-grid textarea { resize: vertical; }
+
+/* Una sola columna antes: a 560px los campos ya iban apretados. */
+@media (max-width: 720px) {
   .form-grid { grid-template-columns: 1fr; }
+}
+
+/* Botón de envío centrado, y de ancho completo en móvil. */
+.form-grid ~ .btn,
+form .btn--primary[type="submit"] {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 720px) {
+  form .btn--primary[type="submit"] { width: 100%; }
 }
 
 /* ═══════════════════════════════════════════════
@@ -651,4 +681,16 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
   margin-left: 0.4rem;
   letter-spacing: 0;
   text-transform: none;
+}
+
+/* Blindaje del contenedor del formulario en móvil: el padding lateral
+   se reduce y se fuerza box-sizing, para que el panel nunca sobresalga
+   del ancho de la pantalla. */
+@media (max-width: 720px) {
+  form.glass-panel {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+    box-sizing: border-box;
+    max-width: 100%;
+  }
 }
