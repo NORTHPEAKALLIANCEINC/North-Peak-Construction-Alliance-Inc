@@ -1,0 +1,112 @@
+/* ═══════════════════════════════════════════════
+   ETEXCA — style.css
+   ───────────────────────────────────────────────
+   Responsabilidad única: reset + tipografía base.
+   Tokens en tokens.css, estructura en layout.css,
+   header en header.css, componentes en components.css.
+═══════════════════════════════════════════════ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--void);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+
+::selection {
+  background: var(--cyan-glow);
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════
+   TIPOGRAFÍA BASE
+═══════════════════════════════════════════════ */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: var(--fs-h1); font-weight: 600; }
+h2 { font-size: var(--fs-h2); font-weight: 600; }
+h3 { font-size: var(--fs-h3); font-weight: 500; }
+
+p {
+  font-size: var(--fs-body);
+  line-height: var(--lh-relaxed);
+}
+
+.lede {
+  font-size: var(--fs-lede);
+  line-height: var(--lh-normal);
+  color: var(--text-dim);
+  max-width: 46ch;
+}
+
+/* Readout mono: etiquetas técnicas tipo "visor BIM" — coordenadas,
+   escalas, referencias de sección. Sustituye a la numeración § */
+.readout {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--cyan);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.readout::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px 1px var(--cyan-glow);
+  flex-shrink: 0;
+}
+
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ═══════════════════════════════════════════════
+   ACCESIBILIDAD
+═══════════════════════════════════════════════ */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  body { transition: none; }
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

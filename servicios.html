@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- Aplica el tema guardado ANTES de que se pinte la página, para
+     evitar un parpadeo (flash) del tema por defecto al cargar. -->
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem('etexca-theme');
+    document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light');
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services — North Peak Construction Alliance</title>
+<meta name="description" content="Ten service areas: project management, general contracting, skilled labour, commercial and institutional construction, infrastructure and more.">
+
+<!-- ASUNCIÓN: dominio placeholder — reemplazar cuando exista el dominio real -->
+<link rel="canonical" href="https://www.northpeakconstruction.ca/servicios.html">
+
+<!-- Open Graph / redes sociales -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.northpeakconstruction.ca/servicios.html">
+<meta property="og:site_name" content="North Peak Construction Alliance">
+<meta property="og:title" content="Services — North Peak Construction Alliance">
+<meta property="og:description" content="Ten service areas: project management, general contracting, skilled labour, commercial and institutional construction, infrastructure and more.">
+<meta property="og:locale" content="en_CA">
+<!-- ASUNCIÓN: og:image pendiente — no hay logo/foto de portada todavía (README §3.2) -->
+<!-- <meta property="og:image" content="https://www.northpeakconstruction.ca/og-image.jpg"> -->
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Services — North Peak Construction Alliance">
+<meta name="twitter:description" content="Ten service areas: project management, general contracting, skilled labour, commercial and institutional construction, infrastructure and more.">
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+<!-- Tipografías del sistema de diseño v2 (Space Grotesk / Inter / IBM Plex Mono) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/tokens.css?v=31">
+<link rel="stylesheet" href="css/style.css?v=31">
+<link rel="stylesheet" href="css/layout.css?v=31">
+<link rel="stylesheet" href="css/header.css?v=31">
+<link rel="stylesheet" href="css/components.css?v=31">
+
+<!-- ═══ Google Search Console: pega tu código de verificación (método "etiqueta HTML") ═══ -->
+<meta name="google-site-verification" content="PEGAR_CODIGO_DE_VERIFICACION">
+
+<!-- ═══ Google Analytics (GA4): reemplaza G-XXXXXXXXXX por tu ID de medición real ═══ -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     HEADER — BLOQUE COMPARTIDO (idéntico en las 7 páginas).
+     aria-current="page" en el enlace "Servicios".
+═══════════════════════════════════════════════ -->
+<header class="site-header">
+  <div class="container site-header__row">
+    <a href="index.html" class="site-header__mark" aria-label="North Peak Construction Alliance — Home">
+      <img class="site-header__logo site-header__logo--dark" src="images/logo-horizontal.webp" alt="North Peak Construction Alliance Inc.">
+      <img class="site-header__logo site-header__logo--light" src="images/logo-horizontal-light.webp" alt="" aria-hidden="true">
+    </a>
+    <nav class="site-nav" id="site-nav">
+      <a href="index.html">Home</a>
+      <a href="nosotros.html">About</a>
+      <a href="servicios.html" aria-current="page">Services</a>
+      <a href="contratacion-indigena.html">Indigenous Procurement</a>
+      <a href="proyectos.html">Projects</a>
+      <a href="carreras.html">Careers</a>
+      <a href="contacto.html">Contact</a>
+      <a href="contacto.html" class="site-nav__cta btn btn--ghost btn--sm">Request a consultation</a>
+    </nav>
+    <div class="site-header__actions">
+      <a href="contacto.html" class="btn btn--ghost btn--sm site-header__cta">Request a consultation</a>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" aria-pressed="false" title="Toggle theme">
+        <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <line x1="12" y1="2.5" x2="12" y2="5"></line>
+            <line x1="12" y1="19" x2="12" y2="21.5"></line>
+            <line x1="4.2" y1="4.2" x2="6" y2="6"></line>
+            <line x1="18" y1="18" x2="19.8" y2="19.8"></line>
+            <line x1="2.5" y1="12" x2="5" y2="12"></line>
+            <line x1="19" y1="12" x2="21.5" y2="12"></line>
+            <line x1="4.2" y1="19.8" x2="6" y2="18"></line>
+            <line x1="18" y1="6" x2="19.8" y2="4.2"></line>
+          </svg>
+        </span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"></path>
+          </svg>
+        </span>
+      </button>
+    </div>
+    <button class="site-header__toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     § CABECERA DE SERVICIOS — sin imagen (decisión del cliente).
+     PUERTA ABIERTA: para reactivar el banner con imagen, borra esta
+     <section> y descomenta el bloque de más abajo (usa
+     images/servicios-bg[-light].webp con crossfade por tema).
+═══════════════════════════════════════════════ -->
+<section class="page-hero grid-texture" id="servicios">
+  <div class="container">
+    <div class="page-hero__inner reveal">
+      <span class="readout">Practice areas</span>
+      <h1>Services</h1>
+      <p class="lede">We cover the full project cycle, from management and general contracting to specialized on-site execution, with a single standard of safety and quality across Ontario and Canada.</p>
+      <div class="page-hero__rule"></div>
+    </div>
+  </div>
+</section>
+
+<!-- OPCIÓN CON IMAGEN (reactivar borrando la <section> de arriba):
+<section class="hero hero--band" id="servicios">
+  <div class="hero__frame">
+    <img class="hero__frame-img hero__frame-img--dark" src="images/servicios-bg.webp" alt="Casco de obra, planos técnicos y modelo digital de edificio sobre una mesa de trabajo" loading="eager">
+    <img class="hero__frame-img hero__frame-img--light" src="images/servicios-bg-light.webp" alt="" aria-hidden="true" loading="eager">
+    <div class="hero__frame-overlay"></div>
+  </div>
+  <div class="hero__panel-wrap"><div class="container">
+    <div class="page-hero__inner reveal">
+      <span class="readout">Practice areas</span>
+      <h1>Services</h1>
+      <p class="lede">We cover the full project cycle, from management and general contracting to specialized on-site execution, with a single standard of safety and quality across Ontario and Canada.</p>
+      <div class="page-hero__rule"></div>
+    </div>
+  </div></div>
+</section>
+-->
+
+
+<section class="section" id="grilla-servicios" style="background:var(--void);">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="readout">10 categories</span>
+      <h2>What we do</h2>
+    </div>
+    <div class="service-grid reveal-stagger">
+      <article class="service-card reveal reveal-left" style="--i:0;"><span class="readout">Service / 01</span><h3>Project Management</h3><p>We plan, coordinate and control the project from start to finish, safeguarding schedule, budget and quality.</p></article>
+      <article class="service-card reveal reveal-right" style="--i:1;"><span class="readout">Service / 02</span><h3>General Contracting</h3><p>We deliver works as general contractor, integrating and managing subcontractors and suppliers.</p></article>
+      <article class="service-card reveal reveal-left" style="--i:2;"><span class="readout">Service / 03</span><h3>Skilled Labour Supply</h3><p>We provide skilled technical and trades personnel for the various stages of the work.</p></article>
+      <article class="service-card reveal reveal-right" style="--i:3;"><span class="readout">Service / 04</span><h3>Commercial Construction</h3><p>Commercial and mixed-use spaces, in new build or renovation.</p></article>
+      <article class="service-card reveal reveal-left" style="--i:4;"><span class="readout">Service / 05</span><h3>Institutional Construction</h3><p>Buildings for the public and institutional sector, according to their technical and regulatory requirements.</p></article>
+      <article class="service-card reveal reveal-right" style="--i:5;"><span class="readout">Service / 06</span><h3>Infrastructure Services</h3><p>Civil works and supporting infrastructure that sustain and complement the project.</p></article>
+      <article class="service-card reveal reveal-left" style="--i:0;"><span class="readout">Service / 07</span><h3>Restoration & Rehabilitation</h3><p>We recover and upgrade existing buildings with technical rigour.</p></article>
+      <article class="service-card reveal reveal-right" style="--i:1;"><span class="readout">Service / 08</span><h3>Masonry & Bricklaying</h3><p>Masonry and bricklaying with precision and technical finish.</p></article>
+      <article class="service-card reveal reveal-left" style="--i:2;"><span class="readout">Service / 09</span><h3>Concrete & Concrete Repair</h3><p>We execute and repair concrete elements, in new build or corrective interventions.</p></article>
+      <article class="service-card reveal reveal-right" style="--i:3;"><span class="readout">Service / 10</span><h3>Specialized Construction Services</h3><p>Specific solutions tailored to each project's technical requirements.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:var(--void);">
+  <div class="container">
+    <div class="cta-band reveal">
+      <span class="readout">Next step</span>
+      <h2>Have a project in mind?</h2>
+      <p class="lede">Tell us your scope and we'll respond with the next technical steps.</p>
+      <div class="cta-band__actions"><a href="contacto.html" class="btn btn--primary">Request a consultation</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER — BLOQUE COMPARTIDO (idéntico en las 7 páginas).
+═══════════════════════════════════════════════ -->
+<footer class="site-footer grid-texture">
+  <div class="container site-footer__top">
+    <div class="site-footer__brand">
+      <a href="index.html" class="site-footer__mark" aria-label="North Peak Construction Alliance — Home">
+        <img class="site-footer__logo site-footer__logo--dark" src="images/logo-horizontal.webp" alt="North Peak Construction Alliance Inc.">
+        <img class="site-footer__logo site-footer__logo--light" src="images/logo-horizontal-light.webp" alt="" aria-hidden="true">
+      </a>
+      <p class="site-footer__tagline">Indigenous-owned construction company. Safe, high-quality construction solutions across Ontario and Canada.</p>
+      <!-- FASE 11 → reemplazar href="#" con los perfiles reales cuando existan. -->
+      <div class="site-footer__social">
+        <a href="#" aria-label="LinkedIn" title="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.3c0-1.27-.02-2.9-1.77-2.9-1.77 0-2.04 1.38-2.04 2.8V21H9z"/></svg></a>
+        <a href="#" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H17V3.6c-.29-.04-1.3-.13-2.47-.13-2.44 0-4.11 1.49-4.11 4.23v2.19H7.7V13h2.72v8z"/></svg></a>
+        <a href="#" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg></a>
+      </div>
+    </div>
+
+    <div class="site-footer__col">
+      <span class="readout">Navigation</span>
+      <nav class="site-footer__links">
+        <a href="index.html">Home</a>
+        <a href="nosotros.html">About</a>
+        <a href="servicios.html">Services</a>
+        <a href="contratacion-indigena.html">Indigenous Procurement</a>
+      </nav>
+    </div>
+
+    <div class="site-footer__col">
+      <span class="readout">Explore</span>
+      <nav class="site-footer__links">
+        <a href="proyectos.html">Projects</a>
+        <a href="carreras.html">Careers</a>
+        <a href="contacto.html">Contact</a>
+      </nav>
+    </div>
+
+    <div class="site-footer__col">
+      <span class="readout">Contact</span>
+      <ul class="site-footer__contact">
+        <li><span class="meta-label">Phone</span><a href="tel:+16478950939" style="color:inherit; text-decoration:none;">647 895 0939</a></li>
+        <li><span class="meta-label">Email</span>Pending</li>
+        <li><span class="meta-label">Address</span>37 Kodiak Crescent, Unit 11, Toronto, ON M3J 3G5</li>
+        <li><span class="meta-label">Corporation No.</span>1521162-0</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container site-footer__bottom">
+    <span>© <span id="year"></span> North Peak Construction Alliance Inc. · All rights reserved</span>
+    <a href="#top" class="site-footer__top-link">Back to top ↑</a>
+  </div>
+</footer>
+
+<!-- CTA flotante — píldora de cristal discreta. En páginas sin hero
+     (como esta) se muestra directamente (ver js/main.js). -->
+<div class="float-cta">
+  <span class="float-cta__text">Need advice?</span>
+  <a href="contacto.html" class="btn btn--primary btn--sm">Book a consultation</a>
+</div>
+
+<script src="js/main.js?v=16"></script>
+
+</body>
+</html>

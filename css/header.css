@@ -1,0 +1,366 @@
+/* ═══════════════════════════════════════════════
+   ETEXCA — header.css
+   ───────────────────────────────────────────────
+   Header de cristal flotante con zona de logo dedicada.
+   Se intensifica (más opaco/blur) al hacer scroll — controlado
+   por js/main.js añadiendo la clase .is-scrolled al <body>.
+═══════════════════════════════════════════════ */
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header);
+  padding: var(--space-2) 0 0;
+  transition: padding var(--dur-base) var(--ease-soft);
+}
+
+.site-header__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.65rem 0.75rem 0.65rem 1.1rem;
+  background: rgba(var(--surface-rgb), 0.45);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(var(--glass-blur-sm));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+  transition: background var(--dur-base) var(--ease-soft), border-color var(--dur-base) var(--ease-soft);
+}
+
+body.is-scrolled .site-header__row {
+  background: rgba(var(--surface-rgb), 0.78);
+  border-color: var(--glass-border-strong);
+}
+
+/* ─── Zona de logo (antes inexistente) ───
+   Monograma de cristal + wordmark. Reemplazar el <span> del
+   monograma por <img> cuando exista logotipo real del cliente. */
+.site-header__mark {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.site-header__mark-glyph {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border-strong);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--cyan);
+}
+
+.site-header__mark-word {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.site-nav a {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text-dim);
+  transition: color var(--dur-fast) ease, background var(--dur-fast) ease;
+  position: relative;
+  white-space: nowrap;
+  /* Sin esto, algunos navegadores móviles pintan su propio "flash"
+     azul brillante con texto blanco al tocar el link (el "highlight"
+     táctil nativo), tapando el estilo real del menú y haciéndolo
+     ilegible por un instante. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.site-nav a:hover { color: var(--cyan); }
+
+/* ─── Página activa (escritorio) ───
+   El enlace de la página actual lleva aria-current="page" en el
+   HTML. Se marca con color cian permanente + una barra inferior
+   con resplandor, misma familia visual que el indicador del menú
+   móvil. Solo aplica en el nav horizontal (min-width): en móvil el
+   nav se convierte en menú desplegable y usa su propio indicador
+   más abajo. */
+@media (min-width: 1101px) {
+  .site-nav a[aria-current="page"] { color: var(--cyan); }
+  .site-nav a[aria-current="page"]::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--cyan);
+    box-shadow: 0 0 8px 1px var(--cyan-glow);
+  }
+}
+
+.site-header__cta {
+  margin-left: 0.25rem;
+}
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.site-header__toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+}
+
+.site-header__toggle span {
+  width: 20px;
+  height: 1.5px;
+  background: var(--text-primary);
+  border-radius: 1px;
+}
+
+/* ═══════════════════════════════════════════════
+   INTERRUPTOR DE TEMA — modo claro / oscuro
+   ───────────────────────────────────────────────
+   Botón circular de cristal, misma familia visual que el resto
+   del header. Los dos íconos (sol/luna) ocupan la MISMA celda de
+   grid (igual técnica que las caras de .trait-card) y se cruzan
+   con fade + rotación sutil según el atributo data-theme en
+   <html> — sin JS de animación, solo CSS reaccionando al atributo.
+═══════════════════════════════════════════════ */
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur-sm));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-soft);
+}
+
+.theme-toggle:hover {
+  background: var(--glass-fill-hover);
+  border-color: var(--glass-border-strong);
+  transform: translateY(-1px);
+}
+
+.theme-toggle:active { transform: translateY(0) scale(0.94); }
+
+.theme-toggle__icon {
+  grid-area: 1 / 1;
+  display: flex;
+  color: var(--cyan);
+  transition: opacity var(--dur-base) var(--ease-soft), transform var(--dur-base) var(--ease-soft);
+}
+
+.theme-toggle__icon svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
+
+/* Dos temas: claro (sol) y oscuro (luna). Ambos íconos ocupan la
+   misma celda; solo uno es visible según data-theme. */
+.theme-toggle__icon--sun { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+.theme-toggle__icon--moon { opacity: 1; transform: rotate(0deg) scale(1); }
+
+html[data-theme="light"] .theme-toggle__icon--moon { opacity: 0; transform: rotate(90deg) scale(0.5); }
+html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotate(0deg) scale(1); }
+
+/* Selector compuesto (.site-nav .site-nav__cta) a propósito: sube la
+   especificidad por encima de .btn { display: inline-flex } de
+   components.css. Como components.css se carga DESPUÉS de este archivo,
+   con la misma especificidad (una sola clase) ganaba siempre — por eso
+   el botón "Solicitar consulta" del menú (pensado solo para móvil)
+   se colaba también en escritorio.
+   El color se fija aquí a propósito, pero con var(--cyan) — NO con
+   var(--text-on-cyan). El botón real usa .btn--ghost (fondo de cristal
+   translúcido), no .btn--primary (fondo cian sólido). --text-on-cyan
+   está pensado para leerse SOBRE cian, así que aquí se volvía casi
+   negro en modo oscuro y blanco puro en modo claro — invisible sobre
+   el cristal translúcido en ambos temas, y solo visible cuando
+   ".site-nav a:hover" (más específico) lo pisaba con var(--cyan) al
+   pasar el cursor. Con var(--cyan) fijo, el texto se ve igual con o
+   sin hover, en los dos temas. */
+.site-nav .site-nav__cta {
+  display: none;
+  color: var(--cyan);
+}
+
+/* Breakpoint subido de 860px a 1100px: con 7 ítems en el nav, el
+   menú horizontal se aprieta en pantallas medianas. A partir de
+   aquí (y hacia abajo) se usa el menú desplegable/hamburguesa, que
+   lista los 7 ítems cómodamente con su numeración. El nav
+   horizontal solo se muestra en escritorio ancho (min-width:1101px). */
+@media (max-width: 1100px) {
+  .site-header__cta { display: none; }
+  .site-nav {
+    position: fixed;
+    top: 4.6rem;
+    left: var(--gutter);
+    right: var(--gutter);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: rgba(var(--surface-rgb), 0.92);
+    background-image: radial-gradient(circle at 100% 0%, var(--radial-accent), transparent 55%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    padding: 0 0.35rem;
+    counter-reset: navitem;
+    transition: max-height var(--dur-base) var(--ease-soft), opacity var(--dur-fast) ease, padding var(--dur-base) ease;
+  }
+  .site-nav.is-open {
+    max-height: 420px;
+    opacity: 1;
+    padding: 0.5rem 0.35rem 1rem;
+  }
+  .site-nav a {
+    counter-increment: navitem;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 1rem 0.75rem;
+    border-top: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    transition: color var(--dur-fast) ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .site-nav a:first-child { border-top: none; }
+  .site-nav a:not(.site-nav__cta)::before {
+    content: "0" counter(navitem);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--cyan);
+    margin-right: 0.85rem;
+    letter-spacing: 0.06em;
+  }
+  /* Indicador de "sección actual" — antes era un relleno de fondo
+     cian brillante que tapaba el texto y lo hacía illegible. Ahora
+     es una línea inferior que crece de izquierda a derecha; el
+     color de fondo nunca cambia, así que el texto blanco siempre
+     se puede leer. */
+  .site-nav a:not(.site-nav__cta)::after {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.35rem;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--cyan);
+    box-shadow: 0 0 8px 1px var(--cyan-glow);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-base) var(--ease-soft);
+  }
+  .site-nav a:not(.site-nav__cta):active,
+  .site-nav a:not(.site-nav__cta):hover,
+  .site-nav a:not(.site-nav__cta):focus-visible {
+    color: var(--text-primary);
+  }
+  .site-nav a:not(.site-nav__cta):active::after,
+  .site-nav a:not(.site-nav__cta):hover::after,
+  .site-nav a:not(.site-nav__cta):focus-visible::after {
+    transform: scaleX(1);
+  }
+  /* Página activa en el menú móvil: barra inferior visible de forma
+     permanente y texto en color primario, sin depender del hover. */
+  .site-nav a[aria-current="page"]:not(.site-nav__cta) {
+    color: var(--text-primary);
+  }
+  .site-nav a[aria-current="page"]:not(.site-nav__cta)::after {
+    transform: scaleX(1);
+  }
+  .site-nav .site-nav__cta {
+    display: flex;
+    justify-content: center;
+    margin: 0.85rem 0.15rem 0.15rem;
+    border-top: none;
+  }
+  .site-nav .site-nav__cta::before { content: none; }
+  .site-header__toggle { display: flex; }
+}
+
+/* ═══════════════════════════════════════════════
+   LOGOTIPO REAL — composición original del cliente (sin recomponer).
+   Dos versiones (marina / plateada) superpuestas en la MISMA caja;
+   cuál se ve depende solo de data-theme en <html> — crossfade puro
+   en CSS, igual técnica que las imágenes del hero. Nada de filtros
+   invert: se usan los archivos reales, así los huecos de las letras
+   y la línea divisoria se ven exactamente como en el original.
+═══════════════════════════════════════════════ */
+.site-header__mark,
+.site-footer__mark {
+  position: relative;
+  display: block;
+  line-height: 0;
+}
+
+.site-header__logo,
+.site-footer__logo {
+  display: block;
+  width: auto;
+  transition: opacity 0.4s ease;
+}
+
+.site-header__logo { height: 38px; }
+.site-footer__logo { height: 48px; }
+
+/* La 2ª imagen se apila exactamente sobre la 1ª */
+.site-header__logo--light,
+.site-footer__logo--light {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+}
+
+/* Tema claro (por defecto): logo marino visible, plateado oculto */
+.site-header__logo--light,
+.site-footer__logo--light { opacity: 0; }
+
+/* Tema oscuro: se cruza al plateado */
+html[data-theme="dark"] .site-header__logo--dark,
+html[data-theme="dark"] .site-footer__logo--dark { opacity: 0; }
+html[data-theme="dark"] .site-header__logo--light,
+html[data-theme="dark"] .site-footer__logo--light { opacity: 1; }
+
+@media (max-width: 480px) {
+  .site-header__logo { height: 30px; }
+}

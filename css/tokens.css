@@ -1,0 +1,153 @@
+/* ═══════════════════════════════════════════════════════════
+   TOKENS.CSS — Sistema de diseño — "Navy & Gold"
+   ───────────────────────────────────────────────────────────
+   DIRECCIÓN DE COLOR (importante para entender el resto):
+
+   El logotipo aprobado por el cliente es azul marino + gris acero
+   + blanco (es, literalmente, la Opción A del brief). El sitio
+   estaba construido sobre la Opción C (negro / dorado / blanco),
+   con TODOS los neutros en tono cálido (crema, marrón-negro). Un
+   logo frío rodeado de neutros cálidos se lee como un objeto
+   pegado encima — ese era el choque visual.
+
+   Solución: se casan ambas paletas. El AZUL MARINO pasa a ser el
+   color ESTRUCTURAL (fondos, texto, bordes, cristal) y el DORADO
+   queda como ACENTO real (botones, readouts, líneas, glows). Es la
+   combinación clásica de autoridad institucional — la adecuada para
+   una constructora que va a licitaciones públicas.
+
+   NOTA: la variable de acento se sigue llamando --cyan por
+   compatibilidad con el resto del CSS. Su VALOR es dorado. No
+   renombrar: está referenciada en todos los archivos.
+═══════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ─── Superficie base (negro azulado — familia del logo) ─── */
+  --void:            #070C16;
+  --void-soft:       #0D1524;
+  --void-elevated:   #16203A;
+
+  /* ─── Cristal (tinte azul frío) ─── */
+  --glass-fill:       rgba(150, 180, 235, 0.06);
+  --glass-fill-hover: rgba(150, 180, 235, 0.11);
+  --glass-border:     rgba(150, 180, 235, 0.17);
+  --glass-border-strong: rgba(150, 180, 235, 0.32);
+  --glass-blur:       18px;
+  --glass-blur-sm:    10px;
+
+  /* ─── Acento dorado (--cyan por compatibilidad) ─── */
+  --cyan:             #D9B863;
+  --cyan-dim:         rgba(217, 184, 99, 0.5);
+  --cyan-glow:        rgba(217, 184, 99, 0.22);
+  --amber:            #C09A3E;
+  --amber-dim:        rgba(192, 154, 62, 0.55);
+
+  /* ─── Texto (blanco frío) ─── */
+  --text-primary:     #E8EEF9;
+  --text-dim:         rgba(232, 238, 249, 0.66);
+  --text-faint:       rgba(232, 238, 249, 0.40);
+  --text-on-cyan:     #0A1224;
+
+  /* ─── Líneas ─── */
+  --rule:             rgba(150, 180, 235, 0.15);
+  --rule-strong:      rgba(150, 180, 235, 0.27);
+
+  /* ─── Tipografía ─── */
+  --font-display: 'Space Grotesk', 'Helvetica Neue', sans-serif;
+  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --fs-h1:    clamp(1.85rem, 1.1vw + 1.4rem, 2.5rem);
+  --fs-h2:    clamp(1.4rem, 0.8vw + 1.05rem, 1.8rem);
+  --fs-h3:    clamp(1.02rem, 0.35vw + 0.95rem, 1.15rem);
+  --fs-lede:  clamp(0.98rem, 0.25vw + 0.92rem, 1.05rem);
+  --fs-body:  1rem;
+  --fs-label: 0.72rem;
+
+  --lh-tight:   1.12;
+  --lh-normal:  1.5;
+  --lh-relaxed: 1.7;
+
+  --ls-label: 0.14em;
+
+  /* ─── Espaciado / grid ─── */
+  --gutter:        clamp(1.25rem, 4vw, 3rem);
+  --container-max: 1280px;
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6rem;
+
+  /* ─── Bordes / radios ─── */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* ─── Movimiento ─── */
+  --ease:      cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:  180ms;
+  --dur-base:  320ms;
+  --dur-slow:  600ms;
+
+  /* ─── Superficies traslúcidas (rgba(var(--x-rgb), alpha)) ─── */
+  --surface-rgb:   13, 21, 36;
+  --overlay-rgb:    7, 12, 22;
+  --radial-accent: rgba(217, 184, 99, 0.10);
+  --grid-line:     rgba(150, 180, 235, 0.07);
+
+  /* ─── Capas ─── */
+  --z-header:      100;
+  --z-cta:         90;
+  --z-hero-content: 5;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODO CLARO — [data-theme="light"] en <html>.
+   ───────────────────────────────────────────────────────────
+   Neutros FRÍOS (blanco perla / gris azulado), no crema cálida:
+   así el azul marino del logo se asienta de forma natural en vez
+   de leerse como un cuerpo extraño. El texto principal ES azul
+   marino — el mismo tono del logo — lo que convierte al logotipo
+   en el ancla cromática de la página, no en la excepción.
+   El dorado se oscurece a bronce para conservar contraste AA
+   sobre fondo claro, y se usa con moderación: es acento, no relleno.
+═══════════════════════════════════════════════════════════ */
+html[data-theme="light"] {
+  --void:            #EDF1F7;
+  --void-soft:       #F8FAFC;
+  --void-elevated:   #DFE6F0;
+
+  /* Cristal con tinte AZUL (antes marrón): unifica con el logo */
+  --glass-fill:       rgba(15, 32, 62, 0.045);
+  --glass-fill-hover: rgba(15, 32, 62, 0.09);
+  --glass-border:     rgba(15, 32, 62, 0.15);
+  --glass-border-strong: rgba(15, 32, 62, 0.28);
+
+  /* Dorado → bronce profundo: mantiene el carácter de la Opción C
+     con el contraste que exige un fondo claro. */
+  --cyan:             #856612;
+  --cyan-dim:         rgba(138, 106, 20, 0.55);
+  --cyan-glow:        rgba(138, 106, 20, 0.15);
+  --amber:            #705411;
+  --amber-dim:        rgba(112, 84, 17, 0.5);
+
+  /* Texto en AZUL MARINO — el mismo del logotipo */
+  --text-primary:     #0F1E38;
+  --text-dim:         rgba(15, 30, 56, 0.66);
+  --text-faint:       rgba(15, 30, 56, 0.42);
+  --text-on-cyan:     #FFFFFF;
+
+  --rule:             rgba(15, 32, 62, 0.14);
+  --rule-strong:      rgba(15, 32, 62, 0.26);
+
+  --surface-rgb:      248, 250, 252;
+  --overlay-rgb:      237, 241, 247;
+  --radial-accent:    rgba(138, 106, 20, 0.08);
+  --grid-line:        rgba(15, 32, 62, 0.11);
+}

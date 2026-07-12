@@ -1,0 +1,491 @@
+/* ═══════════════════════════════════════════════
+   ETEXCA — layout.css
+   ───────────────────────────────────────────────
+   Responsabilidad única: estructura de página — contenedores,
+   secciones full-bleed, hero/banner con imagen, textura de
+   retícula ("blueprint grid") y el elemento firma: brackets de
+   viewport tipo software BIM/CAD alrededor de paneles de cristal.
+
+   PRINCIPIO CLAVE (hero + banner): la página se adapta a la
+   imagen, no al revés. hero-bg.webp y servicios-bg.webp miden
+   1600×667 px reales (ratio 2.398:1 — fijo, no se toca). Los
+   marcos .hero__frame / .banner__frame usan
+   `aspect-ratio: 1600 / 667`, EXACTAMENTE esa proporción, así
+   que object-fit:cover nunca tiene que recortar ni un píxel: el
+   marco y la imagen siempre tienen la misma forma, en cualquier
+   ancho de pantalla. No hay huecos porque no hay descuadre que
+   rellenar, y no hay zoom porque no hace falta agrandar nada
+   para tapar bordes.
+═══════════════════════════════════════════════ */
+
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+/* ─── Reveal al hacer scroll (js/main.js via IntersectionObserver) ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  /* --ease es una curva de "frenado brusco": completa ~90% del
+     movimiento en el primer tercio del tiempo, así que aunque la
+     duración sea larga, el ojo la percibe como un salto instantáneo
+     seguido de nada. --ease-soft distribuye el movimiento de forma
+     mucho más pareja durante toda la duración — por eso se elige
+     aquí en vez de --ease. */
+  transition: opacity 1.3s var(--ease-soft), transform 1.3s var(--ease-soft);
+}
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+/* Delay entre elementos de un grupo, subido a 160ms para que la
+   cascada (tarjetas de servicios, tarjetas de eje) se lea como una
+   secuencia clara, una por una. */
+.reveal-stagger > * { transition-delay: calc(var(--i, 0) * 160ms); }
+
+/* Variantes direccionales — se combinan con .reveal (que aporta
+   opacity + transition); solo cambian el eje de entrada. */
+.reveal-left { transform: translateX(-64px); }
+.reveal-left.is-visible { transform: translateX(0); }
+.reveal-right { transform: translateX(64px); }
+.reveal-right.is-visible { transform: translateX(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal-left, .reveal-right { opacity: 1; transform: none; transition: none; }
+}
+
+/* Compensar el header fijo al hacer scroll a anclas internas */
+section[id] { scroll-margin-top: 6rem; }
+
+/* ═══════════════════════════════════════════════
+   TEXTURA DE FONDO — retícula de plano técnico
+═══════════════════════════════════════════════ */
+.grid-texture {
+  position: relative;
+}
+.grid-texture::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 40%, transparent 90%);
+}
+
+/* ═══════════════════════════════════════════════
+   SECCIONES
+═══════════════════════════════════════════════ */
+.section {
+  position: relative;
+  padding: var(--space-6) 0;
+  transition: background-color 0.4s ease;
+}
+
+.grid-texture > .container { position: relative; z-index: 2; }
+
+.section-head {
+  max-width: 62ch;
+  margin: 0 auto var(--space-5);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ═══════════════════════════════════════════════
+   HERO
+   .hero__frame es el ÚNICO hijo en flujo normal de .hero, así
+   que la altura de .hero queda definida exactamente por la
+   altura real de la imagen (padding-top de despeje del header +
+   altura del marco + padding-bottom de respiro). .hero__panel-wrap
+   es un hermano: en escritorio se saca del flujo (position:
+   absolute; inset:0) y por eso queda mapeado EXACTAMENTE sobre
+   la caja de contenido de .hero — que es la caja del marco. En
+   móvil vuelve a flujo normal y cae debajo de la imagen.
+═══════════════════════════════════════════════ */
+.hero {
+  position: relative;
+  background: var(--void);
+  /* Sin padding-top: el marco de imagen arranca en el borde
+     superior absoluto de la página. El header flotante es
+     position:fixed y de cristal translúcido, así que se posa
+     ENCIMA de la imagen en vez de empujarla hacia abajo — la
+     imagen llega literalmente al tope, sin acercarla ni recortarla. */
+}
+
+.hero__frame {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 1600 / 667;
+  overflow: hidden;
+}
+
+.hero__frame-img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: opacity 0.6s ease;
+}
+
+/* Las dos versiones (día/noche) ocupan la MISMA caja, superpuestas.
+   Cuál se ve depende solo de data-theme en <html> — ambas ya están
+   descargadas de entrada, así que el cambio es un fundido puro en
+   CSS, nunca una espera de red. Esto es lo que evita el "salto"
+   donde una mitad de la página cambiaba antes que la otra. */
+.hero__frame-img--light { opacity: 0; }
+html[data-theme="light"] .hero__frame-img--dark { opacity: 0; }
+html[data-theme="light"] .hero__frame-img--light { opacity: 1; }
+
+.hero__frame-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* SCRIM CINEMATOGRÁFICO.
+     El texto del hero es BLANCO en los dos temas: es la única forma
+     de garantizar legibilidad sobre una foto (en claro, el cielo es
+     brillante; en oscuro, la noche). Para sostener ese blanco hace
+     falta una base oscura — por eso el degradado usa un azul profundo
+     FIJO y no var(--void): si usara la variable, en tema claro la base
+     sería blanca y el texto desaparecería.
+     El degradado sube desde abajo, así deja intactos el cielo, la
+     Torre CN, la bandera y las grúas (que viven en los dos tercios
+     superiores) y solo oscurece la franja donde se apoya el texto. */
+  background: linear-gradient(
+    180deg,
+    transparent 22%,
+    rgba(7, 12, 22, 0.38) 48%,
+    rgba(7, 12, 22, 0.78) 74%,
+    #070C16 100%
+  );
+}
+
+.hero__panel-wrap {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-5);
+}
+
+.hero__panel {
+  max-width: 620px;
+  padding: var(--space-3) var(--space-4);
+}
+
+/* LOGO DEL HERO — reemplaza la antigua tarjeta de presentación.
+   Va CENTRADO sobre la imagen de portada. Las dos versiones (marina
+   para tema claro, plateada para tema oscuro) ocupan la MISMA caja
+   superpuestas y hacen crossfade solo con data-theme — ambas ya
+   descargadas, sin espera de red. La sombra viene en el propio
+   archivo (canal alfa), no es un box-shadow de CSS.
+   OJO: el tema por defecto es el CLARO, así que la versión visible
+   por defecto es la marina, y la excepción es [data-theme="dark"]. */
+.hero__logo {
+  position: relative;
+  width: min(440px, 68%);
+  aspect-ratio: 1166 / 777;
+  margin: 0 auto;
+}
+
+.hero__logo-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 0.6s ease;
+}
+
+.hero__logo-img--light { opacity: 0; }
+html[data-theme="dark"] .hero__logo-img--dark { opacity: 0; }
+html[data-theme="dark"] .hero__logo-img--light { opacity: 1; }
+
+@media (max-width: 640px) {
+  .hero__logo { width: min(280px, 78%); }
+}
+
+.hero__brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.7rem, 2.1vw + 1rem, 2.75rem);
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
+}
+
+.hero__panel .lede {
+  margin-top: 0.6rem;
+  max-width: 52ch;
+}
+
+.hero__actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: var(--space-3);
+}
+
+@media (min-width: 860px) {
+  .hero__panel-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding-top: 0;
+    padding-bottom: 0;
+    pointer-events: none;
+  }
+  .hero__panel-wrap { align-items: flex-end; padding-bottom: var(--space-5); }
+  .hero__panel-wrap .container { pointer-events: auto; width: 100%; }
+}
+
+/* ═══════════════════════════════════════════════
+   BANNER (Diferenciadores)
+   .banner__hero agrupa marco + panel, con la misma técnica que
+   el hero (marco en flujo normal define la altura, panel se
+   superpone via absolute en escritorio). El trait-grid (3
+   tarjetas de eje) vive FUERA de .banner__hero, en flujo normal
+   sobre el fondo sólido de la sección — nunca compite por
+   espacio con la imagen ni se sale del encuadre.
+═══════════════════════════════════════════════ */
+.banner {
+  position: relative;
+  background: var(--void-soft);
+  transition: background-color 0.4s ease;
+  /* Sin padding-top: .banner__hero (el marco de imagen) debe
+     empezar exactamente donde termina el padding-bottom de la
+     sección de Servicios — un solo respiro, no dos apilados.
+     El padding-bottom se conserva para dar aire al trait-grid
+     antes de la sección de Contacto. */
+  padding: 0 0 var(--space-4) 0;
+}
+
+.banner__hero {
+  position: relative;
+  margin-bottom: var(--space-4);
+}
+
+.banner__frame {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 1600 / 667;
+  overflow: hidden;
+}
+
+.banner__frame-img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: opacity 0.6s ease;
+}
+
+.banner__frame-img--light { opacity: 0; }
+html[data-theme="light"] .banner__frame-img--dark { opacity: 0; }
+html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
+
+.banner__frame-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* El difusor superior funde a --void porque esa es la sección
+     que hay ARRIBA (Servicios). El difusor inferior funde a
+     --void-soft porque esa es la propia sección del banner (donde
+     vive el trait-grid). Usar el mismo color arriba y abajo era el
+     error: --void-soft no coincide con el fondo real de Servicios,
+     así que el borde superior quedaba visible. */
+  background:
+    linear-gradient(180deg, var(--void) 0%, transparent 14%, transparent 86%, var(--void-soft) 100%),
+    linear-gradient(to left, rgba(var(--overlay-rgb),0.7) 0%, rgba(var(--overlay-rgb),0.38) 42%, transparent 68%);
+}
+
+.banner__panel-wrap {
+  padding-top: var(--space-3);
+}
+
+.banner__panel { max-width: 480px; }
+
+.banner__panel h2 {
+  font-size: clamp(1.4rem, 1.6vw + 1rem, 2.1rem);
+}
+
+@media (min-width: 860px) {
+  .banner__panel-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-top: 0;
+    pointer-events: none;
+  }
+  .banner__panel-wrap .container { pointer-events: auto; width: 100%; display: flex; justify-content: flex-end; }
+}
+
+/* El trait-grid ya trae margin-top propio desde components.css
+   (pensado para cuando vivía dentro de .banner .container, justo
+   debajo del panel). Ahora que .banner__hero ya aporta su propio
+   margin-bottom, se anula ese margin-top extra para no duplicar
+   el espaciado vertical. */
+.banner .trait-grid {
+  margin-top: 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* ═══════════════════════════════════════════════
+   .viewport — antes dibujaba brackets de esquina tipo
+   CAD/BIM en el panel del hero y el formulario. Se retiró
+   por pedido del cliente (rompía la estética del cristal).
+   La clase se deja como no-op por compatibilidad; el look
+   de cristal ahora vive solo en .glass-panel.
+═══════════════════════════════════════════════ */
+.viewport {
+  position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HERO CINEMATOGRÁFICO — el mensaje, no el logotipo.
+   ───────────────────────────────────────────────────────────
+   El logo salió del hero (vive en el header, que es su lugar). Un
+   logotipo gigante flotando sobre una foto realista se lee como una
+   calcomanía: no comparte la fuente de luz de la imagen y el ojo lo
+   detecta. Además, un hero debe VENDER — foto + promesa + acción —,
+   no darte la bienvenida con una tarjeta de presentación.
+   El texto va en BLANCO sobre el scrim, abajo a la izquierda: la
+   lectura natural en occidente y la composición que usan las grandes
+   constructoras. En móvil el texto cae debajo de la imagen, en flujo.
+═══════════════════════════════════════════════════════════ */
+.hero__content {
+  max-width: 44rem;
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.9rem, 2.1vw + 1.1rem, 3.05rem);
+  line-height: 1.14;
+  letter-spacing: -0.015em;
+  margin: 0 0 1.15rem;
+}
+
+/* Las dos frases del titular van en la misma línea de color (blanco).
+   Antes la segunda iba en dorado, pero el dorado del TEMA CLARO es un
+   bronce oscuro (#856612) y el texto se apoya sobre un scrim OSCURO:
+   bronce sobre oscuro = ilegible y sucio. Un titular a dos colores
+   además abarata la composición. Blanco puro, y el dorado se reserva
+   para un único punto de acento: el botón. */
+.hero__title-line {
+  display: block;
+}
+
+.hero__lede {
+  font-size: clamp(0.98rem, 0.3vw + 0.9rem, 1.1rem);
+  line-height: 1.62;
+  max-width: 40rem;
+  margin: 0 0 var(--space-3);
+}
+
+/* En ESCRITORIO el texto va sobre la foto → blanco fijo (el scrim
+   oscuro lo sostiene en ambos temas). En MÓVIL el texto cae debajo
+   de la imagen, sobre el fondo de la página → hereda los del tema. */
+@media (min-width: 860px) {
+  /* El hero es SIEMPRE oscuro (por el scrim), así que aquí se fuerza
+     la versión clara del dorado — la del tema oscuro — sin importar
+     qué tema tenga la página. Así el botón brilla en vez de embarrarse. */
+  .hero__content {
+    --cyan:         #D9B863;
+    --cyan-dim:     rgba(217, 184, 99, 0.5);
+    --cyan-glow:    rgba(217, 184, 99, 0.22);
+    --text-on-cyan: #0A1224;
+  }
+  .hero__title { color: #FFFFFF; }
+  .hero__lede  { color: rgba(255, 255, 255, 0.82); }
+  .hero__content .btn--ghost {
+    color: #FFFFFF;
+    border-color: rgba(255, 255, 255, 0.34);
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(var(--glass-blur-sm));
+  }
+  .hero__content .btn--ghost:hover {
+    border-color: rgba(255, 255, 255, 0.62);
+    background: rgba(255, 255, 255, 0.14);
+  }
+}
+
+@media (max-width: 859px) {
+  .hero__title { color: var(--text-primary); }
+  .hero__lede  { color: var(--text-dim); }
+  .hero__content { padding-top: var(--space-2); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BARRA DE CREDENCIALES — franja oscura bajo el hero.
+   ───────────────────────────────────────────────────────────
+   Cumple DOS funciones a la vez:
+   1. Diseño: absorbe la transición entre la foto (que termina en
+      azul profundo) y la página (blanco perla en tema claro). En vez
+      de un corte visible, hay una banda intencionada. En tema oscuro
+      simplemente continúa la oscuridad.
+   2. Negocio: son los cuatro datos que un oficial de compras públicas
+      busca en los primeros diez segundos. TODOS son verificables:
+      propiedad indígena, 10 áreas de servicio, cobertura, y el número
+      de corporación federal real. Nada inventado.
+═══════════════════════════════════════════════════════════ */
+.trust-bar {
+  background: #070C16;
+  border-top: 1px solid rgba(150, 180, 235, 0.10);
+  border-bottom: 1px solid rgba(150, 180, 235, 0.10);
+}
+
+.trust-bar__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(150, 180, 235, 0.10);
+}
+
+.trust-bar__item {
+  background: #070C16;
+  padding: 1.6rem var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.trust-bar__label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(232, 238, 249, 0.45);
+}
+
+.trust-bar__value {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.3;
+  color: #FFFFFF;
+}
+
+.trust-bar__value em {
+  font-style: normal;
+  color: var(--cyan);
+}
+
+@media (max-width: 860px) {
+  .trust-bar__grid { grid-template-columns: repeat(2, 1fr); }
+  .trust-bar__item { padding: 1.2rem var(--space-2); }
+}
