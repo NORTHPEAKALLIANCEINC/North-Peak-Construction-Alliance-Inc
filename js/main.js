@@ -164,3 +164,66 @@ function initThemeToggle() {
     applyTheme(order[(i + 1) % order.length], true);
   });
 }
+
+/* ═══════════════════════════════════════════════════════════
+   FORMULARIOS — Web3Forms
+   ───────────────────────────────────────────────────────────
+   Envío por fetch (sin recargar la página): el visitante ve la
+   confirmación en el sitio, no en una página ajena. Si el JavaScript
+   estuviera desactivado, el <form> tiene action y method, así que
+   funcionaría igualmente por el método clásico. Nunca queda muerto.
+═══════════════════════════════════════════════════════════ */
+(function () {
+  const forms = [
+    { form: 'contactForm', status: 'contactStatus', btn: 'contactSubmit',
+      ok: 'Thank you. Your message has been sent — we will get back to you shortly.' },
+    { form: 'careersForm', status: 'careersStatus', btn: 'careersSubmit',
+      ok: 'Application received. Please remember to email your résumé to admin@northalliancegroup.ca.' }
+  ];
+
+  forms.forEach(cfg => {
+    const f = document.getElementById(cfg.form);
+    if (!f) return;
+    const status = document.getElementById(cfg.status);
+    const btn    = document.getElementById(cfg.btn);
+    const label  = btn ? btn.textContent : '';
+
+    f.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      // Aviso claro si aún no se ha puesto la clave real
+      const key = f.querySelector('[name="access_key"]');
+      if (!key || key.value === 'TU_ACCESS_KEY_AQUI') {
+        status.textContent = 'Form not configured yet. Please email admin@northalliancegroup.ca directly.';
+        status.className = 'form-status form-status--error';
+        return;
+      }
+
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+      status.textContent = '';
+      status.className = 'form-status';
+
+      try {
+        const res = await fetch(f.action, {
+          method: 'POST',
+          body: new FormData(f),
+          headers: { Accept: 'application/json' }
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          status.textContent = cfg.ok;
+          status.className = 'form-status form-status--ok';
+          f.reset();
+        } else {
+          throw new Error(data.message || 'Submission failed');
+        }
+      } catch (err) {
+        status.textContent = 'Something went wrong. Please email admin@northalliancegroup.ca directly.';
+        status.className = 'form-status form-status--error';
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = label; }
+      }
+    });
+  });
+})();
