@@ -612,33 +612,13 @@
 .form-status--error{ color: #C0392B; }
 html[data-theme="light"] .form-status--error{ color: #A93226; }
 
-/* Aviso del CV — tarjeta discreta con ícono de sobre. Sustituye al
-   bloque gris plano: alineado, con el acento dorado solo en el ícono
-   y el enlace, y fondo de cristal integrado con el resto del sitio. */
-.form-note{
-  display: flex;
-  align-items: flex-start;
-  gap: 0.7rem;
-  margin: 1.5rem 0 0.5rem;
-  padding: 0.9rem 1.1rem;
-  font-size: 0.86rem;
-  line-height: 1.55;
-  color: var(--text-dim);
-  background: var(--glass-fill);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
+/* Pista sutil junto a la etiqueta del campo de CV (formato/tamaño).
+   Reemplaza al antiguo aviso que ensuciaba el formulario. */
+.field__hint{
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  margin-left: 0.4rem;
+  letter-spacing: 0;
+  text-transform: none;
 }
-.form-note__icon{
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  color: var(--cyan);
-  margin-top: 1px;
-}
-.form-note a{
-  color: var(--cyan);
-  text-decoration: none;
-  border-bottom: 1px solid var(--cyan-dim);
-  transition: border-color var(--dur-fast) var(--ease-out);
-}
-.form-note a:hover{ border-bottom-color: var(--cyan); }
