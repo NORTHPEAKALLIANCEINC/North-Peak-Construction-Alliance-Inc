@@ -595,6 +595,11 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
 ═══════════════════════════════════════════════════════════ */
 .page-hero.has-bg {
   overflow: hidden;   /* la imagen se queda dentro de la caja actual */
+  /* El .page-hero base pinta un fondo SÓLIDO (var(--void)) que tapaba
+     por completo la imagen del ::before. Aquí se deja solo el resplandor
+     radial (sin la capa sólida), para que la imagen de detrás se vea. */
+  background:
+    radial-gradient(120% 90% at 12% 0%, var(--radial-accent), transparent 62%);
 }
 
 .page-hero.has-bg::before {
