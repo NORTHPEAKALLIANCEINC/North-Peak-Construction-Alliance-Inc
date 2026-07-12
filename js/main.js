@@ -273,3 +273,26 @@ function initThemeToggle() {
     });
   });
 })();
+
+/* ═══════════════════════════════════════════════════════════
+   RESPLANDOR QUE SIGUE AL CURSOR — tarjetas de servicio
+   ───────────────────────────────────────────────────────────
+   Publica la posición del ratón como variables CSS (--mx/--my) en la
+   tarjeta bajo el cursor. El CSS las usa para centrar ahí un halo
+   radial: la luz "sigue" al ratón, como si el cristal reflejara una
+   fuente cercana. Es el detalle que separa una tarjeta viva de una
+   plana. Se omite en dispositivos táctiles (no hay cursor) y si el
+   usuario pide menos movimiento.
+═══════════════════════════════════════════════════════════ */
+(function () {
+  if (window.matchMedia('(hover: none)').matches) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  document.querySelectorAll('.service-card').forEach(card => {
+    card.addEventListener('pointermove', e => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      card.style.setProperty('--my', `${e.clientY - r.top}px`);
+    });
+  });
+})();
