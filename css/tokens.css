@@ -121,7 +121,9 @@
   --overlay-rgb:    7, 12, 22;
   --radial-accent: rgba(217, 184, 99, 0.10);
   --grid-line:     rgba(150, 180, 235, 0.07);
-  --section-veil:  rgba(237, 241, 247, 0.55);  /* velo sobre la imagen de sección */
+  /* Cristal del botón primario: oscuro y translúcido en AMBOS temas.
+     El dorado va en el texto y la luz, no en el relleno. */
+  --btn-glass:     rgba(10, 18, 34, 0.72);
 
   /* ─── Capas ─── */
   --z-header:      100;
@@ -172,5 +174,7 @@ html[data-theme="light"] {
   --overlay-rgb:      237, 241, 247;
   --radial-accent:    rgba(138, 106, 20, 0.08);
   --grid-line:        rgba(15, 32, 62, 0.11);
-  --section-veil:     rgba(237, 241, 247, 0.55);
+  /* En claro el cristal es azul marino profundo: el botón destaca sobre
+     el fondo perla y el texto dorado mantiene contraste alto. */
+  --btn-glass:        rgba(15, 30, 56, 0.94);
 }

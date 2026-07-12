@@ -30,15 +30,81 @@
 
 .btn:active { transform: translateY(1px) scale(0.99); }
 
+/* ═══════════════════════════════════════════════════════════
+   BOTÓN PRIMARIO — cristal con borde luminoso
+   ───────────────────────────────────────────────────────────
+   Antes era un relleno DORADO MACIZO: por eso se veía plástico y
+   barato. Ahora es cristal oscuro translúcido con el dorado reservado
+   al TEXTO y a la LUZ del borde — que es de donde viene la sensación
+   de calidad. La luz superior (::before) simula una fuente detrás del
+   cristal; el halo inferior aparece al pasar el ratón.
+═══════════════════════════════════════════════════════════ */
 .btn--primary {
-  background: var(--cyan);
-  color: var(--text-on-cyan);
-  box-shadow: 0 0 0 0 var(--cyan-glow);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), transparent 55%),
+    var(--btn-glass);
+  color: var(--cyan);
+  border: 1px solid var(--glass-border-strong);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255,255,255,0.10),
+    0 2px 12px -4px rgba(0,0,0,0.4);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
 }
 
+/* Filamento de luz en el borde superior */
+.btn--primary::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 15%; right: 15%;
+  height: 1px;
+  z-index: 1;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  opacity: 0.6;
+  transition: opacity var(--dur-base) var(--ease-out),
+              left var(--dur-base) var(--ease-out),
+              right var(--dur-base) var(--ease-out);
+}
+
+/* Resplandor interior que crece al pasar el ratón */
+.btn--primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(120% 90% at 50% 0%, var(--cyan-glow), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.btn--primary > * ,
+.btn--primary { z-index: 1; }
+
 .btn--primary:hover {
-  box-shadow: 0 0 28px 2px var(--cyan-glow);
   transform: translateY(-1px);
+  border-color: var(--cyan-dim);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255,255,255,0.16),
+    0 0 0 1px var(--cyan-dim),
+    0 10px 34px -8px var(--cyan-glow);   /* el halo dorado */
+}
+
+.btn--primary:hover::before {
+  opacity: 1;
+  left: 0; right: 0;      /* la luz recorre todo el borde */
+}
+
+.btn--primary:hover::after { opacity: 1; }
+
+/* Respuesta al pulsar: se hunde ligeramente. Da sensación de solidez. */
+.btn--primary:active {
+  transform: translateY(0) scale(0.985);
 }
 
 .btn--ghost {
@@ -83,23 +149,89 @@
   .service-grid { grid-template-columns: 1fr; }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   TARJETA DE SERVICIO — cristal con luz de borde
+   ───────────────────────────────────────────────────────────
+   Tres capas construyen el efecto:
+   · ::before → FILAMENTO DE LUZ en el borde superior. Es la firma del
+     cristal: un degradado horizontal que se enciende en el centro y se
+     apaga en los extremos, como si una fuente de luz estuviera detrás.
+   · ::after  → RESPLANDOR que sigue al cursor (--mx/--my desde el JS).
+   · La tarjeta → fondo translúcido con blur y borde sutil.
+   Al pasar el ratón: el filamento gana intensidad, aparece el halo
+   exterior y la tarjeta se eleva. Nada de esto usa imágenes.
+═══════════════════════════════════════════════════════════ */
 .service-card {
-  background: var(--void-soft);
-  background-image: linear-gradient(160deg, var(--glass-fill), transparent 60%);
+  position: relative;
+  isolation: isolate;              /* contiene las capas dentro */
+  overflow: hidden;
+  background:
+    linear-gradient(160deg, var(--glass-fill), transparent 62%),
+    var(--void-soft);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: var(--space-3);
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  transition: border-color var(--dur-base) var(--ease-soft), transform var(--dur-base) var(--ease-soft), background var(--dur-base) var(--ease-out);
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
 }
 
-.service-card:hover {
-  border-color: var(--glass-border-strong);
-  transform: translateY(-4px);
-  background-image: linear-gradient(160deg, var(--glass-fill-hover), transparent 65%);
+/* FILAMENTO DE LUZ en el borde superior */
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  z-index: 1;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--cyan) 35%,
+    var(--cyan) 65%,
+    transparent);
+  opacity: 0.45;
+  transition: opacity var(--dur-base) var(--ease-out),
+              left var(--dur-slow) var(--ease-out),
+              right var(--dur-slow) var(--ease-out);
 }
+
+/* RESPLANDOR que sigue al cursor. --mx/--my los actualiza main.js. */
+.service-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 0%),
+    var(--cyan-glow),
+    transparent 62%);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.service-card > * { position: relative; z-index: 2; }
+
+.service-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--glass-border-strong);
+  /* Halo exterior + luz interior en el borde superior: el "brillo" */
+  box-shadow:
+    0 0 0 1px var(--cyan-dim),
+    0 14px 40px -12px var(--cyan-glow),
+    inset 0 1px 0 0 var(--glass-border-strong);
+}
+
+.service-card:hover::before {
+  opacity: 1;
+  left: 0; right: 0;               /* el filamento se extiende de lado a lado */
+}
+
+.service-card:hover::after { opacity: 1; }
 
 .service-card h3 { font-size: 1.15rem; }
 
