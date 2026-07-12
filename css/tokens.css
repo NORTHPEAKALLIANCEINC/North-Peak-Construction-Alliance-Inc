@@ -121,9 +121,18 @@
   --overlay-rgb:    7, 12, 22;
   --radial-accent: rgba(217, 184, 99, 0.10);
   --grid-line:     rgba(150, 180, 235, 0.07);
-  /* Cristal del botón primario: oscuro y translúcido en AMBOS temas.
-     El dorado va en el texto y la luz, no en el relleno. */
+  /* Cristal del botón primario. El dorado va en el texto y en la luz
+     del borde, nunca en el relleno: de ahí la sensación de calidad. */
   --btn-glass:     rgba(10, 18, 34, 0.72);
+  --btn-text:      var(--cyan);
+  --btn-edge:      rgba(217, 184, 99, 0.35);
+  --btn-sheen:            rgba(255, 255, 255, 0.06);  /* brillo superior */
+  --btn-inner-light:      rgba(255, 255, 255, 0.10);
+  --btn-inner-light-hover:rgba(255, 255, 255, 0.16);
+  --btn-drop:             rgba(0, 0, 0, 0.40);        /* sombra proyectada */
+  --btn-drop-hover:       rgba(0, 0, 0, 0.55);
+  --btn-ghost-light:      rgba(255, 255, 255, 0.65);  /* luz del ghost: neutra */
+  --btn-ghost-glow:       rgba(255, 255, 255, 0.07);
 
   /* ─── Capas ─── */
   --z-header:      100;
@@ -174,7 +183,20 @@ html[data-theme="light"] {
   --overlay-rgb:      237, 241, 247;
   --radial-accent:    rgba(138, 106, 20, 0.08);
   --grid-line:        rgba(15, 32, 62, 0.11);
-  /* En claro el cristal es azul marino profundo: el botón destaca sobre
-     el fondo perla y el texto dorado mantiene contraste alto. */
-  --btn-glass:        rgba(15, 30, 56, 0.94);
+  /* Cristal CLARO para el tema claro: blanco translúcido con un velo
+     cálido. El dorado sigue en el texto y la luz del borde, igual que
+     en oscuro, pero sobre una base clara — así el botón pertenece a su
+     tema en vez de parecer un recorte del modo oscuro. */
+  --btn-glass:        rgba(255, 255, 255, 0.78);
+  --btn-text:         var(--cyan);
+  --btn-edge:         rgba(133, 102, 18, 0.30);
+  /* En claro las sombras son AZULES SUAVES, no negras: una sombra negra
+     sobre fondo perla ensucia y delata el "modo oscuro mal adaptado". */
+  --btn-sheen:            rgba(255, 255, 255, 0.85);
+  --btn-inner-light:      rgba(255, 255, 255, 0.95);
+  --btn-inner-light-hover:rgba(255, 255, 255, 1);
+  --btn-drop:             rgba(15, 30, 56, 0.12);
+  --btn-drop-hover:       rgba(15, 30, 56, 0.20);
+  --btn-ghost-light:      rgba(15, 30, 56, 0.35);     /* luz del ghost en claro */
+  --btn-ghost-glow:       rgba(15, 30, 56, 0.05);
 }

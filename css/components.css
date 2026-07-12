@@ -44,14 +44,14 @@
   isolation: isolate;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.06), transparent 55%),
+    linear-gradient(180deg, var(--btn-sheen), transparent 55%),
     var(--btn-glass);
   color: var(--cyan);
-  border: 1px solid var(--glass-border-strong);
+  border: 1px solid var(--btn-edge);
   backdrop-filter: blur(10px);
   box-shadow:
-    inset 0 1px 0 0 rgba(255,255,255,0.10),
-    0 2px 12px -4px rgba(0,0,0,0.4);
+    inset 0 1px 0 0 var(--btn-inner-light),
+    0 2px 12px -4px var(--btn-drop);
   transition:
     transform var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out),
@@ -90,7 +90,7 @@
   transform: translateY(-1px);
   border-color: var(--cyan-dim);
   box-shadow:
-    inset 0 1px 0 0 rgba(255,255,255,0.16),
+    inset 0 1px 0 0 var(--btn-inner-light-hover),
     0 0 0 1px var(--cyan-dim),
     0 10px 34px -8px var(--cyan-glow);   /* el halo dorado */
 }
@@ -107,19 +107,69 @@
   transform: translateY(0) scale(0.985);
 }
 
+/* GHOST — mismo lenguaje de cristal que el primario, pero NEUTRO.
+   Comparte la construcción (filamento de luz, resplandor, elevación)
+   para que ambos botones se sientan de la misma familia; lo que cambia
+   es el color de la luz: aquí es blanca/neutra, no dorada. Así el
+   primario sigue siendo el que manda visualmente. */
 .btn--ghost {
-  background: var(--glass-fill);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, var(--btn-sheen), transparent 55%),
+    var(--glass-fill);
   color: var(--text-primary);
-  border-color: var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur-sm));
-  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 1px 0 0 var(--btn-inner-light),
+    0 2px 12px -4px var(--btn-drop);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out);
+}
+
+.btn--ghost::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 15%; right: 15%;
+  height: 1px;
+  z-index: 1;
+  background: linear-gradient(90deg, transparent, var(--btn-ghost-light), transparent);
+  opacity: 0.5;
+  transition: opacity var(--dur-base) var(--ease-out),
+              left var(--dur-base) var(--ease-out),
+              right var(--dur-base) var(--ease-out);
+}
+
+.btn--ghost::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(120% 90% at 50% 0%, var(--btn-ghost-glow), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
 }
 
 .btn--ghost:hover {
-  background: var(--glass-fill-hover);
-  border-color: var(--glass-border-strong);
   transform: translateY(-1px);
+  background:
+    linear-gradient(180deg, var(--btn-sheen), transparent 55%),
+    var(--glass-fill-hover);
+  border-color: var(--glass-border-strong);
+  box-shadow:
+    inset 0 1px 0 0 var(--btn-inner-light-hover),
+    0 10px 30px -10px var(--btn-drop-hover);
 }
+
+.btn--ghost:hover::before { opacity: 1; left: 0; right: 0; }
+.btn--ghost:hover::after  { opacity: 1; }
+.btn--ghost:active { transform: translateY(0) scale(0.985); }
 
 .btn--sm { padding: 0.7rem 1.25rem; font-size: 0.72rem; }
 
