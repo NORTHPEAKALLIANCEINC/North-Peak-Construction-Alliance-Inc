@@ -582,22 +582,18 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
 /* ═══════════════════════════════════════════════════════════
    FONDO DE SECCIÓN — imagen borrosa tras el cuadriculado
    ───────────────────────────────────────────────────────────
-   Orden de capas en el page-hero, de atrás hacia adelante:
-     1. La IMAGEN (::before, z-index -1) — borrosa y atenuada
-     2. El CUADRICULADO de ingeniería (::after, z-index 0) — INTACTO
-     3. El TEXTO (.container, z-index 2) — nítido y legible
-
-   La imagen va DETRÁS del cuadriculado y muy desenfocada: se intuye,
-   no compite. El texto encima se lee sin problema porque la imagen
-   nunca llega a tener contraste. La ALTURA de la sección no cambia:
-   la imagen se recorta a la caja existente (inset:0 + overflow), no
-   la empuja. El cuadriculado no se toca en absoluto.
-═══════════════════════════════════════════════════════════ */
+   Capas con z-index POSITIVOS (un z-index:-1 se escondía detrás del
+   fondo de la página y no se veía nada — ese era el fallo):
+     · imagen  → ::before, z-index 0
+     · rejilla → ::after,  z-index 1  (el cuadriculado, INTACTO)
+     · texto   → .container/__inner, z-index 2
+   La imagen va borrosa y con un velo del color de fondo encima, así el
+   texto siempre se lee. La altura de la sección NO cambia: la imagen se
+   recorta a la caja actual con overflow:hidden. */
 .page-hero.has-bg {
-  overflow: hidden;   /* la imagen se queda dentro de la caja actual */
-  /* El .page-hero base pinta un fondo SÓLIDO (var(--void)) que tapaba
-     por completo la imagen del ::before. Aquí se deja solo el resplandor
-     radial (sin la capa sólida), para que la imagen de detrás se vea. */
+  overflow: hidden;
+  /* Se anula el fondo sólido del .page-hero base (tapaba la imagen);
+     queda solo el resplandor radial, por encima de la foto. */
   background:
     radial-gradient(120% 90% at 12% 0%, var(--radial-accent), transparent 62%);
 }
@@ -606,26 +602,34 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
   content: '';
   position: absolute;
   inset: 0;
-  z-index: -1;
-  /* Dos capas: un VELO del color de fondo encima de la IMAGEN. El velo
-     garantiza el contraste del texto pase lo que pase con la foto.
-     La rejilla (.grid-texture::after) queda por encima de todo esto,
-     intacta, porque vive en z-index:0 y esto está en z-index:-1. */
+  z-index: 0;                    /* POSITIVO: dentro del apilado de la sección */
   background-image:
     linear-gradient(var(--section-veil), var(--section-veil)),
     var(--section-bg);
   background-size: cover;
   background-position: center;
-  /* Muy borrosa: se intuye la imagen, no compite con el texto.
-     El scale evita bordes claros en los cantos al desenfocar. */
   filter: blur(7px);
   transform: scale(1.08);
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
-/* En modo oscuro la imagen clara se atenúa y oscurece, para que no
-   destaque como una mancha luminosa sobre el fondo oscuro. */
+/* El cuadriculado (.grid-texture::after) sube a z-index 1: queda por
+   ENCIMA de la imagen y por debajo del texto. Solo se ajusta cuando hay
+   imagen, para no alterar el resto de secciones con rejilla. */
+.page-hero.has-bg::after {
+  z-index: 1;
+}
+
+/* El texto por encima de todo */
+.page-hero.has-bg .page-hero__inner,
+.page-hero.has-bg > .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* En modo oscuro la imagen clara se atenúa y oscurece para no destacar
+   como una mancha luminosa sobre el fondo oscuro. */
 html[data-theme="dark"] .page-hero.has-bg::before {
   filter: blur(8px) brightness(0.5) saturate(0.6);
-  opacity: 0.3;
+  opacity: 0.35;
 }
