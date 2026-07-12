@@ -51,11 +51,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=38">
-<link rel="stylesheet" href="css/style.css?v=38">
-<link rel="stylesheet" href="css/layout.css?v=38">
-<link rel="stylesheet" href="css/header.css?v=38">
-<link rel="stylesheet" href="css/components.css?v=38">
+<link rel="stylesheet" href="css/tokens.css?v=39">
+<link rel="stylesheet" href="css/style.css?v=39">
+<link rel="stylesheet" href="css/layout.css?v=39">
+<link rel="stylesheet" href="css/header.css?v=39">
+<link rel="stylesheet" href="css/components.css?v=39">
 
 <!-- ═══ Google Search Console: pega tu código de verificación (método "etiqueta HTML") ═══ -->
 <meta name="google-site-verification" content="PEGAR_CODIGO_DE_VERIFICACION">
@@ -180,7 +180,7 @@
     <form id="careersForm" action="https://api.web3forms.com/submit" method="POST"
           class="glass-panel reveal" style="max-width:680px; margin:0 auto;">
 
-      <input type="hidden" name="access_key" value="TU_ACCESS_KEY_AQUI">
+      <input type="hidden" name="access_key" value="50ceecdb-5b1e-432e-8954-225883a79ba4">
       <input type="hidden" name="subject" value="New job application — northalliancegroup.ca">
       <input type="hidden" name="from_name" value="North Peak Careers">
       <input type="checkbox" name="botcheck" class="hidden" style="display:none">
@@ -197,11 +197,14 @@
       -->
       </div>
 
-      <p class="form-note">
-        After submitting, please email your résumé to
-        <a href="mailto:admin@northalliancegroup.ca">admin@northalliancegroup.ca</a>
-        with your name in the subject line.
-      </p>
+      <div class="form-note">
+        <svg class="form-note__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>
+        </svg>
+        <span>Once you submit, email your résumé to
+          <a href="mailto:admin@northalliancegroup.ca?subject=R%C3%A9sum%C3%A9%20%E2%80%94%20">admin@northalliancegroup.ca</a>
+          with your name in the subject line.</span>
+      </div>
 
       <button type="submit" class="btn btn--primary" id="careersSubmit">Submit application</button>
       <p class="form-status" id="careersStatus" role="status" aria-live="polite"></p>
