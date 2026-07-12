@@ -578,3 +578,49 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
     animation-duration: 120ms;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   FONDO DE SECCIÓN — imagen borrosa tras el cuadriculado
+   ───────────────────────────────────────────────────────────
+   Orden de capas en el page-hero, de atrás hacia adelante:
+     1. La IMAGEN (::before, z-index -1) — borrosa y atenuada
+     2. El CUADRICULADO de ingeniería (::after, z-index 0) — INTACTO
+     3. El TEXTO (.container, z-index 2) — nítido y legible
+
+   La imagen va DETRÁS del cuadriculado y muy desenfocada: se intuye,
+   no compite. El texto encima se lee sin problema porque la imagen
+   nunca llega a tener contraste. La ALTURA de la sección no cambia:
+   la imagen se recorta a la caja existente (inset:0 + overflow), no
+   la empuja. El cuadriculado no se toca en absoluto.
+═══════════════════════════════════════════════════════════ */
+.page-hero.has-bg {
+  overflow: hidden;   /* la imagen se queda dentro de la caja actual */
+}
+
+.page-hero.has-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* Dos capas: un VELO del color de fondo encima de la IMAGEN. El velo
+     garantiza el contraste del texto pase lo que pase con la foto.
+     La rejilla (.grid-texture::after) queda por encima de todo esto,
+     intacta, porque vive en z-index:0 y esto está en z-index:-1. */
+  background-image:
+    linear-gradient(var(--section-veil), var(--section-veil)),
+    var(--section-bg);
+  background-size: cover;
+  background-position: center;
+  /* Muy borrosa: se intuye la imagen, no compite con el texto.
+     El scale evita bordes claros en los cantos al desenfocar. */
+  filter: blur(7px);
+  transform: scale(1.08);
+  opacity: 0.85;
+}
+
+/* En modo oscuro la imagen clara se atenúa y oscurece, para que no
+   destaque como una mancha luminosa sobre el fondo oscuro. */
+html[data-theme="dark"] .page-hero.has-bg::before {
+  filter: blur(8px) brightness(0.5) saturate(0.6);
+  opacity: 0.3;
+}
