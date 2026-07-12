@@ -203,7 +203,7 @@ function initThemeToggle() {
     { form: 'contactForm', status: 'contactStatus', btn: 'contactSubmit',
       ok: 'Thank you. Your message has been sent — we will get back to you shortly.' },
     { form: 'careersForm', status: 'careersStatus', btn: 'careersSubmit',
-      ok: 'Application received. Please remember to email your résumé to admin@northalliancegroup.ca.' }
+      ok: 'Thank you. Your application has been received — we will be in touch.' }
   ];
 
   forms.forEach(cfg => {
@@ -241,6 +241,27 @@ function initThemeToggle() {
           status.className = 'form-status form-status--ok';
           f.reset();
         } else {
+          /* Si el fallo viene del ARCHIVO ADJUNTO (los adjuntos son función
+             de pago en Web3Forms), se reenvía la solicitud SIN el archivo y
+             se le pide el CV al candidato solo AHORA, ya con sus datos a
+             salvo. Nunca se le adelanta un problema nuestro en el formulario
+             antes de que ocurra. */
+          const file = f.querySelector('input[type="file"]');
+          if (file && file.files.length) {
+            const fd = new FormData(f);
+            fd.delete(file.name);
+            const retry = await fetch(f.action, {
+              method: 'POST', body: fd, headers: { Accept: 'application/json' }
+            });
+            const rdata = await retry.json();
+            if (retry.ok && rdata.success) {
+              status.innerHTML = 'Your application has been received. We could not process the attachment — ' +
+                'please send your résumé to <a href="mailto:admin@northalliancegroup.ca">admin@northalliancegroup.ca</a>.';
+              status.className = 'form-status form-status--ok';
+              f.reset();
+              return;
+            }
+          }
           throw new Error(data.message || 'Submission failed');
         }
       } catch (err) {
