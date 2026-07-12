@@ -24,25 +24,25 @@
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact — North Peak Construction Alliance</title>
-<meta name="description" content="Contact North Peak Construction Alliance Inc. Phone 647 895 0939, Toronto, ON. Let's talk about your project or construction tender.">
+<title>North Peak Construction Alliance Inc. — Indigenous-owned construction in Canada</title>
+<meta name="description" content="Indigenous-owned construction company in Ontario and across Canada: project management, general contracting and on-site delivery with safety and quality.">
 
 <!-- ASUNCIÓN: dominio placeholder — reemplazar cuando exista el dominio real -->
-<link rel="canonical" href="https://northalliancegroup.ca/contact">
+<link rel="canonical" href="https://northalliancegroup.ca/">
 
 <!-- Open Graph / redes sociales -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://northalliancegroup.ca/contact">
+<meta property="og:url" content="https://northalliancegroup.ca/">
 <meta property="og:site_name" content="North Peak Construction Alliance">
-<meta property="og:title" content="Contact — North Peak Construction Alliance">
-<meta property="og:description" content="Contact North Peak Construction Alliance Inc. Phone 647 895 0939, Toronto, ON. Let's talk about your project or construction tender.">
+<meta property="og:title" content="North Peak Construction Alliance Inc. — Indigenous-owned construction in Canada">
+<meta property="og:description" content="Indigenous-owned construction company in Ontario and across Canada: project management, general contracting and on-site delivery with safety and quality.">
 <meta property="og:locale" content="en_CA">
 <!-- ASUNCIÓN: og:image pendiente — no hay logo/foto de portada todavía (README §3.2) -->
 <!-- <meta property="og:image" content="https://northalliancegroup.ca/og-image.jpg"> -->
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Contact — North Peak Construction Alliance">
-<meta name="twitter:description" content="Contact North Peak Construction Alliance Inc. Phone 647 895 0939, Toronto, ON. Let's talk about your project or construction tender.">
+<meta name="twitter:title" content="North Peak Construction Alliance Inc. — Indigenous-owned construction in Canada">
+<meta name="twitter:description" content="Indigenous-owned construction company in Ontario and across Canada: project management, general contracting and on-site delivery with safety and quality.">
 
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
@@ -73,23 +73,29 @@
 <body>
 
 <!-- ═══════════════════════════════════════════
-     HEADER — BLOQUE COMPARTIDO (idéntico en las 7 páginas).
-     aria-current="page" en el enlace "Contacto".
+     HEADER — cristal flotante, con zona de logo dedicada.
+     ─────────────────────────────────────────────────────
+     BLOQUE COMPARTIDO por las 7 páginas. Al replicarlo en las
+     demás páginas, lo ÚNICO que cambia es cuál enlace del nav
+     lleva aria-current="page" (marca la página activa). El
+     resaltado visual de esa marca se define en css/header.css
+     (siguiente archivo de la Fase 1).
 ═══════════════════════════════════════════════ -->
 <header class="site-header">
   <div class="container site-header__row">
+    <!-- El logo lleva a Inicio (index.html), no a un ancla. -->
     <a href="/" class="site-header__mark" aria-label="North Peak Construction Alliance — Home">
       <img class="site-header__logo site-header__logo--dark" src="/images/logo-horizontal.webp" alt="North Peak Construction Alliance Inc.">
       <img class="site-header__logo site-header__logo--light" src="/images/logo-horizontal-light.webp" alt="" aria-hidden="true">
     </a>
     <nav class="site-nav" id="site-nav">
-      <a href="/">Home</a>
+      <a href="/" aria-current="page">Home</a>
       <a href="/about">About</a>
       <a href="/services">Services</a>
       <a href="/indigenous-procurement">Indigenous Procurement</a>
       <a href="/projects">Projects</a>
       <a href="/careers">Careers</a>
-      <a href="/contact" aria-current="page">Contact</a>
+      <a href="/contact">Contact</a>
       <a href="/contact" class="site-nav__cta btn btn--ghost btn--sm">Request a consultation</a>
     </nav>
     <div class="site-header__actions">
@@ -121,55 +127,197 @@
   </div>
 </header>
 
-<section class="page-hero grid-texture" id="contacto">
-  <div class="container">
-    <div class="page-hero__inner reveal">
-      <span class="readout">Contact</span>
-      <h1>Let's talk about your project</h1>
-      <p class="lede">Tell us about your project, bid, or Indigenous participation requirement and we'll respond with the next steps.</p>
-      <div class="page-hero__rule"></div>
-    </div>
+<!-- ═══════════════════════════════════════════
+     § HERO — Inicio
+     El marco (.hero__frame) tiene aspect-ratio: 1600/667 —
+     la proporción EXACTA de hero-bg.webp. La imagen llena el
+     marco al 100%, sin recortar ni un píxel y sin zoom.
+     El panel de texto es hermano del marco: en escritorio se
+     superpone a la izquierda (position:absolute, ver layout.css),
+     en móvil cae debajo del marco en flujo normal.
+     NOTA: imágenes del hero SIN TOCAR (pendiente confirmar con el
+     cliente si son definitivas o placeholder).
+═══════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════
+     § HERO — el mensaje, no el logotipo.
+     El logo vive en el header. Aquí va lo único que convierte a un
+     visitante en cliente: qué hacemos, para quién, y qué hacer ahora.
+     El texto se apoya sobre un scrim inferior (ver layout.css) que
+     deja intactos el cielo, la Torre CN, la bandera y las grúas.
+═══════════════════════════════════════════════ -->
+<section class="hero" id="top">
+  <div class="hero__frame">
+    <img class="hero__frame-img hero__frame-img--dark" src="/images/hero-bg.webp" alt="Tower cranes and a building under construction over the Toronto skyline" loading="eager">
+    <img class="hero__frame-img hero__frame-img--light" src="/images/hero-bg-light.webp" alt="" aria-hidden="true" loading="eager">
+    <div class="hero__frame-overlay"></div>
   </div>
-</section>
 
-<section class="section" id="formulario-contacto" style="background:var(--void-soft);">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="readout">Write to us</span>
-      <h2>Contact form</h2>
-    </div>
-    <!-- ═══════════════════════════════════════════
-         FORMULARIO DE CONTACTO — Web3Forms
-         Envía directo a admin@northalliancegroup.ca sin servidor.
-         La access_key NO es secreta: Web3Forms la publica en su propia
-         documentación y puede ir en el HTML sin riesgo.
-         Clave de Web3Forms ya instalada. Envía a admin@northalliancegroup.ca.
-    ═══════════════════════════════════════════════ -->
-    <form id="contactForm" action="https://api.web3forms.com/submit" method="POST"
-          class="glass-panel reveal" style="max-width:640px; margin:0 auto;">
-
-      <input type="hidden" name="access_key" value="50ceecdb-5b1e-432e-8954-225883a79ba4">
-      <input type="hidden" name="subject" value="New contact enquiry — northalliancegroup.ca">
-      <input type="hidden" name="from_name" value="North Peak Website">
-      <!-- Trampa antispam: los bots la rellenan, las personas no la ven -->
-      <input type="checkbox" name="botcheck" class="hidden" style="display:none">
-
-      <div class="form-grid">
-      <div class="field"><label for="nombre">Name</label><input type="text" id="nombre" name="name" required placeholder="Your full name"></div>
-      <div class="field"><label for="email">Email</label><input type="email" id="email" name="email" required placeholder="you@company.com"></div>
-      <div class="field"><label for="telefono">Phone</label><input type="tel" id="telefono" name="phone" placeholder="Your contact number"></div>
-      <div class="field"><label for="empresa">Company</label><input type="text" id="empresa" name="company" placeholder="Your company name (optional)"></div>
-      <div class="field field--full"><label for="mensaje">Message</label><textarea id="mensaje" name="message" rows="4" required placeholder="Tell us about your project"></textarea></div>
+  <div class="hero__panel-wrap">
+    <div class="container">
+      <div class="hero__content reveal reveal-left">
+        <h1 class="hero__title">
+          <span class="hero__title-line">Real construction capability.</span>
+          <span class="hero__title-line">Authentic Indigenous partnership.</span>
+        </h1>
+        <p class="hero__lede">We deliver projects across Ontario and Canada, helping general contractors, public bodies and private clients meet their Indigenous procurement goals without compromising on safety, quality or schedule.</p>
+        <div class="hero__actions">
+          <a href="/contact" class="btn btn--primary">Request a consultation</a>
+          <a href="/services" class="btn btn--ghost">Explore our services</a>
+        </div>
       </div>
-
-      <button type="submit" class="btn btn--primary" id="contactSubmit">Send</button>
-      <p class="form-status" id="contactStatus" role="status" aria-live="polite"></p>
-    </form>
+    </div>
   </div>
 </section>
 
 <!-- ═══════════════════════════════════════════
-     FOOTER — BLOQUE COMPARTIDO (idéntico en las 7 páginas).
+     § BARRA DE CREDENCIALES
+     Los cuatro datos que un oficial de compras públicas busca en los
+     primeros diez segundos. Todos verificables — nada inventado.
+     Además, absorbe la transición entre la foto y la página.
+═══════════════════════════════════════════════ -->
+<section class="trust-bar">
+  <div class="container">
+    <div class="trust-bar__grid">
+      <div class="trust-bar__item">
+        <span class="trust-bar__label">Ownership</span>
+        <span class="trust-bar__value"><em>Indigenous-owned</em></span>
+      </div>
+      <div class="trust-bar__item">
+        <span class="trust-bar__label">Service areas</span>
+        <span class="trust-bar__value">10 disciplines</span>
+      </div>
+      <div class="trust-bar__item">
+        <span class="trust-bar__label">Coverage</span>
+        <span class="trust-bar__value">Ontario &amp; Canada-wide</span>
+      </div>
+      <div class="trust-bar__item">
+        <span class="trust-bar__label">Incorporation</span>
+        <span class="trust-bar__value">Federal &middot; No.&nbsp;1521162-0</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     § POR QUÉ NORTH PEAK — ventajas competitivas.
+     El h1 y la presentación se movieron al hero, que es su sitio.
+     Esta sección ahora abre con h2 y va directo al valor.
+═══════════════════════════════════════════════ -->
+<section class="section grid-texture" id="presentacion" style="background:var(--void);">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="readout">Why North Peak</span>
+      <h2>A partner that delivers on both fronts</h2>
+      <p class="lede">Indigenous participation is not a box we tick. It is who we are, and it comes with the technical capability to build.</p>
+    </div>
+
+    <div class="service-grid reveal-stagger" style="margin-top:var(--space-3);">
+      <article class="service-card reveal reveal-left" style="--i:0;">
+        <span class="readout">Advantage / 01</span>
+        <h3>Authentic Indigenous participation</h3>
+        <p>An Indigenous-owned structure that helps clients and public bodies meet their Indigenous procurement and purchasing goals.</p>
+      </article>
+      <article class="service-card reveal reveal-right" style="--i:1;">
+        <span class="readout">Advantage / 02</span>
+        <h3>Coverage across Canada</h3>
+        <p>Capacity to support projects in Ontario and nationwide, with a single technical and safety standard.</p>
+      </article>
+      <article class="service-card reveal reveal-left" style="--i:2;">
+        <span class="readout">Advantage / 03</span>
+        <h3>End-to-end project management</h3>
+        <p>From planning and general contracting to on-site execution, with control of progress, quality and compliance.</p>
+      </article>
+      <article class="service-card reveal reveal-right" style="--i:3;">
+        <span class="readout">Advantage / 04</span>
+        <h3>Safety and operational excellence</h3>
+        <p>Safety, quality and reliable delivery are the foundation of every commitment we make to our clients.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     § RESUMEN DE SERVICIOS + CTA
+     ─────────────────────────────────────────────────────
+     ESQUELETO (Fase 1). El contenido real entra en la FASE 3:
+       · Resumen de los 10 servicios, cada uno enlazando a
+         servicios.html
+       · Llamado a la acción (CTA) hacia contacto.html
+     La grilla completa de servicios vive en servicios.html
+     (Fase 5), no aquí.
+═══════════════════════════════════════════════ -->
+<section class="section grid-texture" id="resumen-servicios" style="background:var(--void-soft);">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="readout">Services</span>
+      <h2>Construction solutions from start to finish</h2>
+      <p class="lede">Ten service areas covering the full project cycle, from management and general contracting to specialized on-site execution.</p>
+    </div>
+
+    <div class="service-grid reveal-stagger">
+      <a class="service-card reveal reveal-left" href="/services" style="--i:0; text-decoration:none;">
+        <span class="readout">Service / 01</span>
+        <h3>Project Management</h3>
+        <p>Planning, coordination and control of the project from start to finish.</p>
+      </a>
+      <a class="service-card reveal reveal-right" href="/services" style="--i:1; text-decoration:none;">
+        <span class="readout">Service / 02</span>
+        <h3>General Contracting</h3>
+        <p>Full delivery of works as general contractor, managing subcontractors and suppliers.</p>
+      </a>
+      <a class="service-card reveal reveal-left" href="/services" style="--i:2; text-decoration:none;">
+        <span class="readout">Service / 03</span>
+        <h3>Skilled Labour Supply</h3>
+        <p>Skilled technical and trades personnel for the various stages of the work.</p>
+      </a>
+      <a class="service-card reveal reveal-right" href="/services" style="--i:3; text-decoration:none;">
+        <span class="readout">Service / 04</span>
+        <h3>Commercial Construction</h3>
+        <p>Commercial and mixed-use spaces, new build or renovation.</p>
+      </a>
+      <a class="service-card reveal reveal-left" href="/services" style="--i:4; text-decoration:none;">
+        <span class="readout">Service / 05</span>
+        <h3>Institutional Construction</h3>
+        <p>Buildings for the public and institutional sector.</p>
+      </a>
+      <a class="service-card reveal reveal-right" href="/services" style="--i:5; text-decoration:none;">
+        <span class="readout">Service / 06</span>
+        <h3>Infrastructure Services</h3>
+        <p>Civil works and infrastructure supporting the project.</p>
+      </a>
+      <a class="service-card reveal reveal-left" href="/services" style="--i:0; text-decoration:none;">
+        <span class="readout">Service / 07</span>
+        <h3>Restoration & Rehabilitation</h3>
+        <p>Recovery and upgrading of existing buildings.</p>
+      </a>
+      <a class="service-card reveal reveal-right" href="/services" style="--i:1; text-decoration:none;">
+        <span class="readout">Service / 08</span>
+        <h3>Masonry & Bricklaying</h3>
+        <p>Masonry and bricklaying with technical finish.</p>
+      </a>
+      <a class="service-card reveal reveal-left" href="/services" style="--i:2; text-decoration:none;">
+        <span class="readout">Service / 09</span>
+        <h3>Concrete & Concrete Repair</h3>
+        <p>Execution and repair of concrete elements.</p>
+      </a>
+      <a class="service-card reveal reveal-right" href="/services" style="--i:3; text-decoration:none;">
+        <span class="readout">Service / 10</span>
+        <h3>Specialized Construction Services</h3>
+        <p>Specific solutions based on the project's technical requirements.</p>
+      </a>
+    </div>
+
+    <div class="reveal" style="text-align:center; margin-top:var(--space-4);">
+      <a href="/services" class="btn btn--ghost">View all services</a>
+      <a href="/contact" class="btn btn--primary" style="margin-left:1rem;">Request a consultation</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER — BLOQUE COMPARTIDO por las 7 páginas.
+     Se replica idéntico en cada página. Los enlaces de
+     navegación apuntan a las páginas reales (no anclas).
 ═══════════════════════════════════════════════ -->
 <footer class="site-footer grid-texture">
   <div class="container site-footer__top">
@@ -223,8 +371,9 @@
   </div>
 </footer>
 
-<!-- CTA flotante — en la propia página de contacto se oculta
-     (redundante). La lógica vive en js/main.js. -->
+<!-- CTA flotante — píldora de cristal discreta. Aparece al salir
+     del hero, se oculta cerca del contenido de contacto.
+     Ahora enlaza a la página de contacto (no a un ancla). -->
 <div class="float-cta">
   <span class="float-cta__text">Need advice?</span>
   <a href="/contact" class="btn btn--primary btn--sm">Book a consultation</a>
