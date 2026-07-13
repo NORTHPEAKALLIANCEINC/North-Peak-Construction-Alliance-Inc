@@ -364,18 +364,29 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
   line-height: 0;
 }
 
+/* max-width: none — la regla global img{max-width:100%} combinada con
+   una altura fija APLASTABA el logo cuando la columna se estrechaba.
+   flex-shrink: 0 por la misma razón dentro del flex del enlace. */
 .site-header__logo,
 .site-footer__logo {
   display: block;
   width: auto;
+  max-width: none;
+  flex-shrink: 0;
   transition: opacity var(--dur-base) var(--ease-out);
 }
 
 .site-header__logo { height: 38px; }
-.site-footer__logo { height: 64px; }
+.site-footer__logo { height: 60px; }
 
 @media (max-width: 560px) {
-  .site-footer__logo { height: 52px; }
+  .site-footer__logo { height: 50px; }
+}
+
+/* Pantallas muy estrechas: el logo del header ya no se encoge solo
+   (max-width:none), así que se baja su altura a mano. */
+@media (max-width: 400px) {
+  .site-header__logo { height: 32px; }
 }
 
 /* La 2ª imagen se apila exactamente sobre la 1ª */
