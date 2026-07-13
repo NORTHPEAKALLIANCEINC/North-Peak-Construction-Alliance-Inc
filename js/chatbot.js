@@ -61,9 +61,26 @@
      1. TEXTO
   ════════════════════════════════════════════════════════ */
 
+  /* Contracciones: la gente escribe "dont", "im", "whats". Sin esto,
+     "I dont know where to start" no casaba con "i do not know…".
+     Fallo real detectado en pruebas. */
+  var CONTRACTIONS = [
+    [/\bdont\b|\bdon't\b/g, 'do not'],
+    [/\bcant\b|\bcan't\b/g, 'can not'],
+    [/\bwont\b|\bwon't\b/g, 'will not'],
+    [/\bim\b|\bi'm\b/g,     'i am'],
+    [/\bive\b|\bi've\b/g,   'i have'],
+    [/\bwhats\b|\bwhat's\b/g, 'what is'],
+    [/\bhows\b|\bhow's\b/g, 'how is'],
+    [/\byoure\b|\byou're\b/g, 'you are'],
+    [/\bdoesnt\b|\bdoesn't\b/g, 'does not'],
+    [/\bisnt\b|\bisn't\b/g, 'is not']
+  ];
+
   function normalize(str) {
-    return String(str || '')
-      .toLowerCase()
+    var s = String(str || '').toLowerCase();
+    CONTRACTIONS.forEach(function (c) { s = s.replace(c[0], c[1]); });
+    return s
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')   // acentos
       .replace(/[^\w\s?]/g, ' ')
       .replace(/\s+/g, ' ')
@@ -92,6 +109,9 @@
        aquí ensuciaba la palabra ("insured?" no casaba con "insured").
        Fallo real detectado en pruebas. */
     return normalize(text).replace(/\?/g, '').split(' ').filter(function (w) {
+      /* Los números cuentan aunque sean cortos: "5" en "my 5% target"
+         es justo la palabra que importa. */
+      if (/\d/.test(w)) return true;
       return w.length > 2 && STOPWORDS.indexOf(w) === -1;
     });
   }
@@ -188,8 +208,23 @@
     wrap.className = 'np-chat-root';
     wrap.innerHTML =
       '<button class="np-chat-fab" id="npFab" aria-label="Open chat">' +
-        '<img src="' + BOT.avatar + '" alt="" width="34" height="34">' +
-        '<span class="np-chat-fab__pulse"></span>' +
+        /* Oleadas: dos anillos desfasados que salen del botón. */
+        '<span class="np-chat-fab__wave"></span>' +
+        '<span class="np-chat-fab__wave np-chat-fab__wave--2"></span>' +
+        /* Globo de conversación: se lee como chat al instante. */
+        '<svg class="np-chat-fab__ico" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">' +
+          '<path d="M20 2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4v3.2a.8.8 0 0 0 1.3.62L13.5 18H20a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" ' +
+                'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>' +
+          '<circle cx="8"  cy="10" r="1.15" fill="currentColor"/>' +
+          '<circle cx="12" cy="10" r="1.15" fill="currentColor"/>' +
+          '<circle cx="16" cy="10" r="1.15" fill="currentColor"/>' +
+        '</svg>' +
+        '<svg class="np-chat-fab__ico np-chat-fab__ico--x" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">' +
+          '<line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>' +
+          '<line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>' +
+        '</svg>' +
+        /* Punto rojo: hay un mensaje esperando. Desaparece al abrir. */
+        '<span class="np-chat-fab__dot" id="npDot"></span>' +
       '</button>' +
       '<section class="np-chat" id="npChat" role="dialog" aria-label="' + BOT.name + ' assistant" aria-hidden="true">' +
         '<header class="np-chat__head">' +
@@ -386,6 +421,10 @@
   /* ── Abrir / cerrar ───────────────────────────────────── */
 
   function open() {
+    var dot = document.getElementById('npDot');
+    if (dot) dot.remove();
+    try { sessionStorage.setItem('np-chat-seen', '1'); } catch (e) {}
+    elFab.classList.remove('np-chat-fab--call');
     elChat.classList.add('is-open');
     elChat.setAttribute('aria-hidden', 'false');
     elFab.classList.add('is-open');
@@ -408,9 +447,28 @@
   function init() {
     build();
     restore();
-    var wasOpen = false;
-    try { wasOpen = sessionStorage.getItem(OPEN) === '1'; } catch (e) {}
-    if (wasOpen) open();      // el visitante venía hablando: seguimos
+
+    var wasOpen = false, seen = false;
+    try {
+      wasOpen = sessionStorage.getItem(OPEN) === '1';
+      seen    = sessionStorage.getItem('np-chat-seen') === '1';
+    } catch (e) {}
+
+    if (wasOpen) { open(); return; }
+
+    if (seen) {
+      var dot = document.getElementById('npDot');
+      if (dot) dot.remove();
+      return;
+    }
+
+    /* Primera visita: a los 2 s el icono se hace notar una vez. No es un
+       parpadeo eterno; es un golpecito en el hombro y se calla. */
+    setTimeout(function () {
+      if (!elChat.classList.contains('is-open')) {
+        elFab.classList.add('np-chat-fab--call');
+      }
+    }, 2000);
   }
 
   if (document.readyState === 'loading') {

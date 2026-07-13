@@ -5,56 +5,56 @@
    ESTE ES EL ÚNICO ARCHIVO QUE HAY QUE EDITAR PARA CAMBIAR LO QUE
    EL ASISTENTE SABE O DICE. El motor (js/chatbot.js) no se toca.
 
-   REGLA DE ORO: el asistente NO inventa. Si un dato no está aquí,
-   responde que no lo tiene y ofrece pasar con una persona. En una
-   empresa que licita con organismos públicos, una respuesta
-   inventada es un problema real, no una anécdota.
+   ── LAS TRES REGLAS DEL TONO ─────────────────────────────────
+   1. CORTO. Dos o tres frases. Nadie quiere una enciclopedia por
+      preguntar "¿qué hacéis?". Si hay más que contar, se ofrece,
+      no se suelta.
+   2. DEVOLVER LA PELOTA. Casi toda respuesta termina en una
+      pregunta. Así el visitante no se queda mirando la pantalla
+      sin saber qué hacer: es una conversación, no un folleto.
+   3. NUNCA DEJAR SIN SALIDA. Si no lo sabe, lo dice y ofrece una
+      persona. No inventa jamás: ni precios, ni certificaciones,
+      ni proyectos.
 
    ── Cómo se escribe una entrada ──────────────────────────────
    {
-     keys:    ['palabra', 'frase que el visitante podría escribir', ...],
-     answer:  ['Respuesta.', 'Variante 2.'],   // elige una al azar
-     nav:     { label: 'View services', href: '/services' }   // opcional
+     keys:   ['todas las formas de preguntar lo mismo'],
+     answer: ['Respuesta.', 'Variante 2.'],       // elige una al azar
+     nav:    { label: 'View services', href: '/services' },  // opcional
+     contactCard: true                             // opcional
    }
+   El texto admite **negrita**, listas con "- " y saltos con \n.
 
-   · keys   → todas las formas de preguntar lo mismo. Cuantas más,
-              mejor reconoce. Se comparan en minúsculas y sin acentos.
-   · answer → una o varias variantes; evita que suene a robot.
-              Admite **negrita**, listas con "- " y saltos con \n.
-   · nav    → añade un botón que lleva al visitante a la página
-              correcta. Es lo que convierte al bot en un guía.
-
-   MARCADO ⚠️ PENDIENTE: respuestas que esperan datos del cliente.
-   Están redactadas con honestidad (no mienten), pero deben
-   sustituirse en cuanto lleguen.
+   ⚠️ PENDIENTE = respuesta que espera datos del cliente. No miente,
+   pero hay que sustituirla en cuanto lleguen.
 ================================================================ */
 
 window.NP_BOT_KB = {
 
-  /* ── Identidad del asistente ────────────────────────────── */
   bot: {
     name:   'Kodiak',
     role:   'Virtual Assistant',
     avatar: '/images/bot-avatar.webp',
-    /* Primer mensaje. Cálido, sin jerga, y siempre con una salida. */
+
     greeting: [
-      'Hello. I am **Kodiak**, the virtual assistant for North Peak Construction Alliance.\n\nI can explain what we do, where we work, and how to get in touch. Ask me anything in plain words — or pick one of the buttons below.',
-      'Welcome to **North Peak Construction Alliance**. I am Kodiak.\n\nTell me what you need and I will point you in the right direction. If you would rather speak to a person, just say so.'
+      'Hi, I am **Kodiak**. I help visitors find their way around North Peak.\n\nWhat brings you here today?',
+      'Hello. I am **Kodiak**, from North Peak Construction Alliance.\n\nTell me what you are looking for and I will take you there. What do you need?'
     ],
-    /* Cuando no entiende. Nunca deja al visitante en un callejón. */
+
     fallback: [
-      'I am not sure I have that answer, and I would rather not guess.\n\nThe fastest way to a reliable answer is a person:',
-      'That one is outside what I know. Rather than give you something wrong, let me put you in touch with the team:'
+      'I want to get that right rather than guess, and I do not have it.\n\nLet me put you through to someone who does:',
+      'That one is beyond me, and I would rather not invent an answer.\n\nA person will sort you out in a minute:'
     ],
-    /* Botones sugeridos bajo el chat */
+
     quick: [
-      { label: 'What you do',   q: 'What services do you offer?' },
-      { label: 'Indigenous',    q: 'What is your Indigenous participation?' },
-      { label: 'Coverage',      q: 'Where do you work?' },
-      { label: 'Get a quote',   q: 'How do I get a quote?' },
-      { label: 'Talk to a person', q: 'I want to talk to a person' }
+      { label: 'What you do',     q: 'What services do you offer?' },
+      { label: 'Indigenous',      q: 'What is your Indigenous participation?' },
+      { label: 'Where you work',  q: 'Where do you work?' },
+      { label: 'Start a project', q: 'How do I start a project with you?' },
+      { label: 'Talk to a person', q: 'I want to talk to a person' },
+      { label: 'I am lost',       q: 'I do not know where to start' }
     ],
-    /* Tarjeta de contacto: datos CONFIRMADOS */
+
     contact: {
       phone:     '647 895 0939',
       phoneHref: 'tel:+16478950939',
@@ -64,231 +64,253 @@ window.NP_BOT_KB = {
     }
   },
 
-  /* ════════════════════════════════════════════════════════
-     CONOCIMIENTO
-  ════════════════════════════════════════════════════════ */
   kb: [
 
-    /* ── Saludos y cortesía ───────────────────────────────── */
+    /* ═══ CORTESÍA ═══════════════════════════════════════════ */
     {
-      keys: ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening', 'greetings'],
+      keys: ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'],
       answer: [
-        'Hello. How can I help you today?',
-        'Hi. What would you like to know about North Peak?'
+        'Hello. What can I help you with?',
+        'Hi there. What would you like to know?'
       ]
     },
     {
-      keys: ['thank you', 'thanks', 'appreciate it', 'cheers'],
+      keys: ['thank you', 'thanks', 'appreciate it', 'cheers', 'great', 'perfect'],
       answer: [
-        'You are welcome. Anything else I can help with?',
-        'Happy to help. If you need anything else, I am here.'
+        'Glad to help. Anything else?',
+        'My pleasure. Anything else on your mind?'
       ]
     },
     {
-      keys: ['bye', 'goodbye', 'see you', 'that is all', 'nothing else'],
+      keys: ['bye', 'goodbye', 'see you', 'that is all', 'nothing else', 'no thanks'],
       answer: [
-        'Thank you for your time. When you are ready, call **647 895 0939** or write to **admin@northalliancegroup.ca**.',
-        'Good to speak with you. We are here whenever you need us.'
+        'Take care. If you need us, we are on **647 895 0939**.',
+        'Good talking to you. We are here whenever you need us.'
       ]
     },
     {
-      keys: ['who are you', 'what are you', 'are you a robot', 'are you human', 'your name', 'who am i talking to'],
+      keys: ['who are you', 'what are you', 'are you a robot', 'are you human', 'your name', 'are you a bot', 'am i talking to a person'],
       answer: [
-        'I am **Kodiak**, an automated assistant for North Peak Construction Alliance. I am not a person — I answer with information the company has confirmed.\n\nIf you want to speak to a human, say so and I will give you the direct line.'
+        'I am **Kodiak**, an assistant. Not a person — I only tell you what the company has confirmed, and I never make things up.\n\nIf you would rather talk to someone real, just say the word.'
       ]
     },
 
-    /* ── Qué es la empresa ────────────────────────────────── */
+    /* ═══ "NO SÉ POR DÓNDE EMPEZAR" — la entrada más importante ═
+       El visitante que llega perdido es el que se pierde para siempre
+       si nadie lo coge de la mano. Aquí se le coge de la mano.       */
     {
       keys: [
-        'who are you as a company', 'about the company', 'what is north peak', 'tell me about north peak',
-        'about you', 'who is north peak', 'what does the company do', 'company information', 'background'
+        'i do not know where to start', 'i am lost', 'help me', 'guide me', 'i need help',
+        'where do i start', 'how does this work', 'how do i use this', 'i do not understand',
+        'what do i do', 'confused', 'show me around', 'not sure'
       ],
       answer: [
-        '**North Peak Construction Alliance Inc.** is an Indigenous-owned construction company based in Toronto, working across Ontario and Canada.\n\nWe deliver projects for general contractors, public bodies and private clients — combining real construction capability with authentic Indigenous partnership.',
-        'We are a federally incorporated construction company (Corporation No. **1521162-0**), Indigenous-owned, based at 37 Kodiak Crescent in Toronto.\n\nWe cover the full project cycle: management, general contracting and specialized on-site execution.'
-      ],
-      nav: { label: 'About the company', href: '/about' }
+        'No problem at all. Let us keep it simple.\n\nAre you here to:\n\n- **Hire us** for a project\n- **Work with us** (job or subcontract)\n- Just **understand what we do**\n\nTell me which one, in your own words, and I will take it from there.'
+      ]
     },
 
-    /* ── Servicios (general) ──────────────────────────────── */
+    /* ═══ LA EMPRESA ═════════════════════════════════════════ */
+    {
+      keys: [
+        'about the company', 'what is north peak', 'tell me about north peak', 'about you',
+        'who is north peak', 'company information', 'background', 'your company'
+      ],
+      answer: [
+        'We are an **Indigenous-owned construction company** based in Toronto, working across Ontario and Canada.\n\nWe build for general contractors, public bodies and private clients. Would you like the detail, or is there something specific you need?',
+        'North Peak is a Toronto construction company, Indigenous-owned, working right across Canada.\n\nWhat would you like to know first — what we build, or who we build it for?'
+      ],
+      nav: { label: 'About us', href: '/about' }
+    },
+
+    /* ═══ SERVICIOS ══════════════════════════════════════════ */
     {
       keys: [
         'services', 'what do you do', 'what you do', 'what do you offer', 'offer', 'work you do',
-        'capabilities', 'what can you build', 'trades', 'lines of work', 'what type of work'
+        'capabilities', 'what can you build', 'trades', 'what type of work', 'lines of work'
       ],
       answer: [
-        'We cover ten service areas, across the whole project cycle:\n\n- **Project management**\n- **General contracting**\n- **Skilled labour supply**\n- **Commercial construction**\n- **Institutional construction**\n- **Infrastructure services**\n- **Restoration and rehabilitation**\n- **Masonry and bricklaying**\n- **Concrete and concrete repair**\n- **Specialized construction services**\n\nTell me which one interests you and I will go deeper.',
-        'From planning to execution: project management, general contracting, skilled labour, commercial and institutional builds, infrastructure, restoration, masonry, concrete work and specialized services.\n\nTen areas in total. Which one matters to you?'
+        'We cover the whole job — from managing the project to doing the work on site. Ten areas in total: project management, general contracting, labour supply, commercial and institutional builds, infrastructure, restoration, masonry, concrete and specialized work.\n\nWhich of those is closest to what you need?',
+        'In short: we can run your project, act as your general contractor, or send you the crew. Commercial, institutional and infrastructure work, plus masonry, concrete and restoration.\n\nWhat kind of project do you have?'
       ],
-      nav: { label: 'See all services', href: '/services' }
+      nav: { label: 'See all ten', href: '/services' }
     },
-
-    /* ── Servicios (individuales) ─────────────────────────── */
     {
       keys: ['project management', 'manage the project', 'do you manage projects', 'construction management'],
-      answer: ['**Project management**: planning, coordination and control of the project from start to finish. We keep the schedule, the trades and the budget under one hand.'],
+      answer: ['Yes. We plan it, coordinate the trades and keep it on schedule and on budget, from start to finish.\n\nIs it a project you already have on the table?'],
       nav: { label: 'Services', href: '/services' }
     },
     {
-      keys: ['general contracting', 'general contractor', 'are you a gc', 'act as contractor', 'main contractor'],
-      answer: ['**General contracting**: we take full delivery of the works as general contractor, managing subcontractors and suppliers, and answering for the result.'],
+      keys: ['general contracting', 'general contractor', 'are you a gc', 'main contractor', 'act as contractor'],
+      answer: ['Yes. As general contractor we take the whole delivery: subcontractors, suppliers and the result. One company answering for the job.\n\nWhat is the project?'],
       nav: { label: 'Services', href: '/services' }
     },
     {
-      keys: ['labour', 'labor', 'skilled labour', 'workers', 'crew', 'manpower', 'staff for site', 'supply workers'],
-      answer: ['**Skilled labour supply**: qualified site personnel for construction projects, when you need capacity rather than a full contract.'],
+      keys: ['labour', 'labor', 'skilled labour', 'workers', 'crew', 'manpower', 'supply workers', 'staff for site'],
+      answer: ['Yes, we supply qualified site crews when what you need is capacity, not a full contract.\n\nWhich trades are you short on?'],
       nav: { label: 'Services', href: '/services' }
     },
     {
-      keys: ['commercial construction', 'commercial building', 'office build', 'retail build', 'fit out'],
-      answer: ['**Commercial construction**: construction and fit-out of commercial buildings.'],
+      keys: ['commercial construction', 'commercial building', 'office build', 'retail', 'fit out'],
+      answer: ['Yes, commercial construction and fit-outs are one of our ten areas.\n\nWhat is the building, and where?'],
       nav: { label: 'Services', href: '/services' }
     },
     {
-      keys: ['institutional', 'public building', 'school', 'hospital', 'government building'],
-      answer: ['**Institutional construction**: works for public and institutional facilities.'],
+      keys: ['institutional', 'public building', 'school', 'hospital', 'government building', 'municipal'],
+      answer: ['Yes. Institutional and public facilities are core work for us.\n\nIs this a tender, or a direct job?'],
       nav: { label: 'Services', href: '/services' }
     },
     {
       keys: ['infrastructure', 'civil works', 'roads', 'utilities'],
-      answer: ['**Infrastructure services**: execution of infrastructure and civil works.'],
+      answer: ['Yes, infrastructure and civil works.\n\nTell me roughly what it involves and I will point you to the right person.'],
       nav: { label: 'Services', href: '/services' }
     },
     {
-      keys: ['restoration', 'rehabilitation', 'refurbish', 'repair building', 'renovation'],
-      answer: ['**Restoration and rehabilitation**: restoration and rehabilitation of existing structures.'],
+      keys: ['restoration', 'rehabilitation', 'refurbish', 'repair building', 'renovation', 'restore'],
+      answer: ['Yes — restoration and rehabilitation of existing structures is one of our areas.\n\nWhat kind of building is it?'],
       nav: { label: 'Services', href: '/services' }
     },
     {
       keys: ['masonry', 'bricklaying', 'bricklayer', 'mason', 'brick', 'block work', 'stone work'],
-      answer: ['**Masonry and bricklaying**: masonry, brick and block work.'],
+      answer: ['Yes, masonry, brick and block work.\n\nIs it new build or repair?'],
       nav: { label: 'Services', href: '/services' }
     },
     {
       keys: ['concrete', 'concrete repair', 'formwork', 'slab', 'foundation', 'rebar', 'pour'],
-      answer: ['**Concrete and concrete repair**: execution and repair of concrete elements.'],
+      answer: ['Yes, concrete work and concrete repair.\n\nWhat does the job involve?'],
       nav: { label: 'Services', href: '/services' }
     },
     {
-      keys: ['specialized', 'special services', 'something specific', 'custom work'],
-      answer: ['**Specialized construction services**: specific solutions built around the technical requirements of your project.\n\nIf your job does not fit a standard category, tell us what it involves and we will tell you honestly whether it is for us.'],
-      nav: { label: 'Contact us', href: '/contact' }
+      keys: ['specialized', 'special services', 'something specific', 'custom work', 'unusual'],
+      answer: ['If it does not fit a standard box, tell me what it involves. We will give you an honest yes or no rather than string you along.'],
+      contactCard: true
     },
 
-    /* ── Participación indígena (el argumento más importante) ── */
+    /* ═══ PARTICIPACIÓN INDÍGENA ═════════════════════════════ */
     {
       keys: [
         'indigenous', 'indigenous participation', 'indigenous owned', 'aboriginal', 'first nations',
         'indigenous procurement', 'procurement target', 'supplier diversity', 'set aside',
-        'why indigenous', 'indigenous benefit', 'five percent', '5%', 'community participation'
+        'why indigenous', 'indigenous benefit', 'five percent', '5%', '5', 'target', 'community participation', 'diversity'
       ],
       answer: [
-        'North Peak is an **Indigenous-owned** construction company. That is not a label we added to a brochure — it is how the company is structured.\n\nFor a client, it means two things at once:\n\n- Your project is delivered by a company with **real technical capability**.\n- That same project **counts towards your Indigenous procurement and supplier-diversity goals**.\n\nMost companies make you choose between the two. Here you do not have to.',
-        'We are Indigenous-owned, and we work with general contractors, public bodies and private clients who need to meet **Indigenous procurement or community-participation requirements** without compromising on quality, safety or schedule.\n\nWe turn a requirement into an advantage for your bid.'
+        'We are **Indigenous-owned** — that is how the company is built, not a line in a brochure.\n\nFor you it means one thing: the project counts towards your Indigenous procurement goals, and it is still delivered by people who know how to build.\n\nAre you working to meet a procurement requirement?',
+        'Yes, Indigenous-owned. Most clients come to us because they need to meet an Indigenous procurement or supplier-diversity target **without** giving up quality or schedule.\n\nIs that your situation? I can go deeper if it helps.'
       ],
-      nav: { label: 'Indigenous procurement', href: '/indigenous-procurement' }
+      nav: { label: 'How it works', href: '/indigenous-procurement' }
     },
 
-    /* ── Cobertura geográfica ─────────────────────────────── */
+    /* ═══ COBERTURA ══════════════════════════════════════════ */
     {
       keys: [
         'where do you work', 'coverage', 'area', 'regions', 'do you work in', 'ontario', 'toronto',
-        'canada', 'outside ontario', 'other provinces', 'location of work', 'service area', 'gta'
+        'canada', 'outside ontario', 'other provinces', 'service area', 'gta', 'do you travel'
       ],
       answer: [
-        'We are based in **Toronto** and work across **Ontario and Canada**.\n\nIf your project is outside the Greater Toronto Area, tell us where it is and we will tell you straight whether we can take it on.'
-      ],
-      nav: { label: 'Contact us', href: '/contact' }
+        'Toronto is home, and we work across **Ontario and Canada**.\n\nWhere is your project? Tell me the city and I will be straight with you about whether we can take it.'
+      ]
     },
 
-    /* ── Contacto ─────────────────────────────────────────── */
+    /* ═══ CONTACTO ═══════════════════════════════════════════ */
     {
       keys: [
         'contact', 'phone', 'call', 'telephone', 'email', 'reach you', 'get in touch',
-        'talk to a person', 'talk to someone', 'human', 'speak to someone', 'advisor', 'representative',
-        'whatsapp', 'address', 'where are you', 'office', 'location'
+        'talk to a person', 'talk to someone', 'human', 'speak to someone', 'advisor',
+        'representative', 'whatsapp', 'address', 'where are you', 'office', 'your location'
       ],
       answer: [
-        'Here is how to reach a person directly:\n\n- **Phone:** 647 895 0939\n- **Email:** admin@northalliancegroup.ca\n- **Office:** 37 Kodiak Crescent, Unit 11, Toronto, ON M3J 3G5\n\nYou can also send us your project through the contact form and we will come back to you.'
-      ],
-      contactCard: true,
-      nav: { label: 'Contact page', href: '/contact' }
-    },
-
-    /* ── Cómo empezar / presupuesto ───────────────────────── */
-    {
-      keys: [
-        'quote', 'quotation', 'estimate', 'proposal', 'how do i hire', 'how do we start',
-        'next step', 'how does it work', 'what do i do', 'i want to hire you', 'tender', 'bid',
-        'how much', 'price', 'cost', 'rates', 'budget'
-      ],
-      answer: [
-        'The simplest path, and you do not need to know anything technical:\n\n1. Tell us **what the project is** and **where** it is.\n2. Tell us **when** you need it.\n3. We come back to you with the next steps.\n\nYou can call **647 895 0939**, write to **admin@northalliancegroup.ca**, or send it through the form.\n\nOn price: I do not give estimates — construction pricing depends on scope, site and schedule, and a number invented by an assistant helps nobody. A person will give you a real one.'
-      ],
-      contactCard: true,
-      nav: { label: 'Send us your project', href: '/contact' }
-    },
-
-    /* ── Proyectos — respuesta honesta mientras no haya casos ── */
-    {
-      keys: [
-        'projects', 'portfolio', 'case studies', 'past work', 'references', 'examples of work',
-        'what have you built', 'previous projects', 'experience'
-      ],
-      /* ⚠️ PENDIENTE: sustituir cuando el cliente entregue casos reales. */
-      answer: [
-        'Our project pages are being prepared with real, verified cases — and we would rather show you nothing than show you something that is not ours.\n\nIf you want examples relevant to your type of work, ask us directly and we will walk you through what we have delivered.'
+        'Of course. Here is the team — pick whichever suits you:',
+        'Here you go. Any of these reaches a person:'
       ],
       contactCard: true
     },
 
-    /* ── Empleo y subcontratistas ─────────────────────────── */
+    /* ═══ EMPEZAR UN PROYECTO / PRESUPUESTO ══════════════════ */
+    {
+      keys: [
+        'quote', 'quotation', 'estimate', 'proposal', 'how do i hire', 'how do we start',
+        'how do i start a project', 'next step', 'i want to hire you', 'tender', 'bid',
+        'how much', 'price', 'cost', 'rates', 'budget', 'expensive'
+      ],
+      answer: [
+        'Easier than you think. Three things: **what** the project is, **where** it is, and **when** you need it. That is enough for us to come back to you.\n\nYou can tell a person directly, or send it through the form — whichever you prefer.\n\nOn price: I do not give numbers. A figure invented by an assistant helps nobody. A person will give you a real one.'
+      ],
+      contactCard: true,
+      nav: { label: 'Send us your project', href: '/contact' }
+    },
+    /* Guía paso a paso del formulario, para quien nunca ha usado uno. */
+    {
+      keys: [
+        'how do i use the form', 'how does the form work', 'fill the form', 'contact form',
+        'what do i write', 'what do i put', 'how do i send'
+      ],
+      answer: [
+        'It is short, I promise. The form asks for your **name**, your **email or phone**, and a few lines about the project — in plain words, no technical language needed.\n\nYou press send, and it lands in the office inbox. Someone comes back to you.\n\nShall I take you there?'
+      ],
+      nav: { label: 'Take me to the form', href: '/contact' }
+    },
+
+    /* ═══ PROYECTOS — honesto mientras no haya casos reales ══ */
+    {
+      keys: [
+        'projects', 'portfolio', 'case studies', 'past work', 'references', 'examples',
+        'what have you built', 'previous projects', 'experience'
+      ],
+      /* ⚠️ PENDIENTE: sustituir en cuanto lleguen casos verificados. */
+      answer: [
+        'Our project pages are being finished with real, verified cases. We would rather show you nothing than show you something that is not ours.\n\nIf you tell me your line of work, someone can walk you through what we have delivered in it.'
+      ],
+      contactCard: true
+    },
+
+    /* ═══ EMPLEO Y SUBCONTRATAS ══════════════════════════════ */
     {
       keys: [
         'job', 'jobs', 'careers', 'work with you', 'hiring', 'vacancy', 'apply', 'employment',
-        'send my resume', 'cv', 'looking for work'
+        'send my resume', 'cv', 'looking for work', 'i need a job'
       ],
       answer: [
-        'We are always interested in good people — site and trades personnel, and technical and management roles.\n\nYou can apply through the Careers page. Tell us your trade and your experience.'
+        'Good. We take on site and trades people, and technical and management roles.\n\nTell us your trade and your experience through the Careers page — it takes two minutes.'
       ],
       nav: { label: 'Careers', href: '/careers' }
     },
     {
       keys: ['subcontractor', 'subcontract', 'supplier', 'vendor', 'register as supplier', 'work as a sub'],
       answer: [
-        'We register subcontractors and suppliers. Send us your trade, your coverage area and your credentials through the Careers page and we will keep you on file for upcoming work.'
+        'Yes, we register subcontractors and suppliers. Send your trade, your area and your credentials and we keep you on file for upcoming work.'
       ],
-      nav: { label: 'Subcontractor registration', href: '/careers' }
+      nav: { label: 'Register', href: '/careers' }
     },
 
-    /* ── Seguridad y cumplimiento ─────────────────────────── */
+    /* ═══ SEGURIDAD Y SEGUROS ════════════════════════════════ */
     {
-      keys: ['safety', 'health and safety', 'accidents', 'safe', 'wsib', 'wsib coverage', 'insurance', 'insurance coverage', 'insured', 'certified', 'certification', 'licence', 'license', 'liability', 'bonded'],
-      /* ⚠️ PENDIENTE: certificaciones, WSIB y seguros — el cliente aún no
-         los ha facilitado. NO afirmar nada hasta que los confirme. */
+      keys: [
+        'safety', 'health and safety', 'accidents', 'safe', 'wsib', 'wsib coverage', 'insurance',
+        'insurance coverage', 'insured', 'certified', 'certification', 'licence', 'license',
+        'liability', 'bonded'
+      ],
+      /* ⚠️ PENDIENTE: seguros, WSIB y certificaciones. No afirmar nada. */
       answer: [
-        'Safety and quality are not negotiable for us — we deliver without compromising either.\n\nFor the specific documentation you need (insurance, coverage, certifications), I will not quote numbers I cannot verify. Ask the office and they will send you the current paperwork directly:'
+        'Safety is not something we trade away for a schedule.\n\nFor the actual paperwork — coverage, certificates, numbers — I will not quote anything I cannot verify. Ask the office and they will send you the current documents:'
       ],
       contactCard: true
     },
 
-    /* ── Horario ──────────────────────────────────────────── */
+    /* ═══ HORARIO ════════════════════════════════════════════ */
     {
-      keys: ['hours', 'opening hours', 'when are you open', 'business hours', 'what time'],
+      keys: ['hours', 'opening hours', 'when are you open', 'business hours', 'what time', 'are you open'],
       /* ⚠️ PENDIENTE: horario oficial. */
       answer: [
-        'Our published hours are not listed yet. The reliable way is to call **647 895 0939** — if nobody picks up, write to **admin@northalliancegroup.ca** and you will get an answer.'
+        'Our hours are not published yet, so I will not guess. Call **647 895 0939** — and if nobody picks up, write and you will get an answer.'
       ],
       contactCard: true
     },
 
-    /* ── Residencial (probable "no") ──────────────────────── */
+    /* ═══ RESIDENCIAL ════════════════════════════════════════ */
     {
       keys: ['residential', 'my house', 'home renovation', 'basement', 'kitchen', 'small job', 'handyman'],
-      /* ⚠️ PENDIENTE: confirmar con el cliente si aceptan residencial. */
+      /* ⚠️ PENDIENTE: confirmar si aceptan residencial. */
       answer: [
-        'Our work is focused on commercial, institutional and infrastructure projects, and on supporting general contractors and public bodies.\n\nIf your project is smaller or residential, ask us anyway — a person will tell you honestly whether it is a fit, rather than take you around in circles.'
+        'Our work is mostly commercial, institutional and infrastructure, and supporting general contractors.\n\nIf yours is smaller, ask anyway — you will get a straight yes or no, not a run-around.'
       ],
       contactCard: true
     }
