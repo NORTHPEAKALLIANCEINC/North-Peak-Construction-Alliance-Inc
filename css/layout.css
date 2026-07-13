@@ -66,6 +66,12 @@ body { overflow-x: clip; }
 .reveal-right { transform: translateX(64px); }
 .reveal-right.is-visible { transform: translateX(0); }
 
+/* Entrada desde abajo — para la tarjeta central de un trío, cuando las
+   laterales entran desde los costados. */
+.reveal-up { transform: translateY(48px); }
+.reveal-up.is-visible { transform: translateY(0); }
+.reveal-up.no-anim { transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .reveal, .reveal-left, .reveal-right { opacity: 1; transform: none; transition: none; }
 }
