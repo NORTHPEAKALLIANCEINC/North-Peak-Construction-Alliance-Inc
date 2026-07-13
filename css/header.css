@@ -48,6 +48,17 @@ body.is-scrolled .site-header__row {
   border-color: var(--glass-border-strong);
 }
 
+/* TEMA CLARO — al bajar (ya no estamos en la primera pantalla), el
+   header deja de ser cristal y pasa a ser SÓLIDO: si no, el texto
+   de la página se transparenta detrás del menú y se lee sucio.
+   Arriba del todo (sin .is-scrolled) sigue siendo transparente.
+   El tema oscuro no se toca. */
+html[data-theme="light"] body.is-scrolled .site-header__row {
+  background: var(--void-soft);
+  border-color: var(--glass-border-strong);
+  box-shadow: 0 10px 30px -18px rgba(15, 30, 56, 0.45);
+}
+
 /* ─── Zona de logo (antes inexistente) ───
    Monograma de cristal + wordmark. Reemplazar el <span> del
    monograma por <img> cuando exista logotipo real del cliente. */
