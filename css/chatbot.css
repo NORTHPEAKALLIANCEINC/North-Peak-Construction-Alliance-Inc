@@ -292,24 +292,43 @@
 .np-chat__card {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  margin-top: 0.7rem;
-  padding: 0.7rem 0.8rem;
+  gap: 0.15rem;
+  margin-top: 0.85rem;
+  padding: 0.45rem 0.35rem;
   border-radius: var(--radius-sm);
   background: var(--void-elevated);
   border: 1px solid var(--glass-border-strong);
 }
+/* Cada canal, una fila: icono · acción · detalle. El correo ya no se
+   escribe entero (se partía contra el borde): se etiqueta la acción y
+   el enlace abre el gestor de correo del visitante. */
 .np-chat__card a {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: var(--radius-sm);
   color: var(--text-primary);
   text-decoration: none;
-  font-size: 0.8rem;
-  overflow-wrap: anywhere;   /* el correo largo ya no se corta a lo bruto */
-  transition: color var(--dur-fast) var(--ease-out);
+  transition: background var(--dur-fast) var(--ease-out);
 }
+.np-chat__card a:hover { background: var(--glass-fill-hover); }
 .np-chat__card a svg { flex-shrink: 0; color: var(--cyan); }
+.np-chat__card a span { display: flex; flex-direction: column; min-width: 0; }
+.np-chat__card a b {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  font-weight: 500;
+}
+.np-chat__card a em {
+  font-style: normal;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  overflow-wrap: anywhere;
+}
 .np-chat__card a:hover { color: var(--cyan); }
 
 /* Puntos de "escribiendo" */
