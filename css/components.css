@@ -795,10 +795,15 @@ html[data-theme="light"] .site-footer__cta {
 
 /* FILO DORADO — SOLO en el corte entre la cabecera de página y el
    contenido de abajo (el mismo sitio que en Home, donde termina la
-   franja de datos). En ningún otro lado. Escritorio únicamente: en
-   móvil el usuario lo quiere limpio. */
+   franja de datos). En ningún otro lado. Escritorio únicamente.
+
+   ::before, NO ::after: la sección lleva también .grid-texture, que ya
+   usa ::after con inset:0. Al compartir pseudo-elemento, el top:0 de
+   la retícula se mezclaba con mi height:5px y la barra dorada acababa
+   CLAVADA ARRIBA (y encima borraba la cuadrícula). Ese era el bug. */
 @media (min-width: 860px) {
-  .page-hero::after {
+  .page-hero::before {
+    top: auto;
     content: "";
     position: absolute;
     z-index: 3;
@@ -820,7 +825,7 @@ html[data-theme="light"] .site-footer__cta {
     box-shadow: 0 -3px 16px rgba(217, 184, 99, 0.22);
   }
 
-  html[data-theme="dark"] .page-hero::after {
+  html[data-theme="dark"] .page-hero::before {
     background: linear-gradient(180deg,
                 rgba(255, 244, 214, 0.85) 0%,
                 #DCB86A 40%,
