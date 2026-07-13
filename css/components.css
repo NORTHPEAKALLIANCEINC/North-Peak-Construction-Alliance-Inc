@@ -524,10 +524,58 @@ form .btn--primary[type="submit"] {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: 1.3fr 1fr 1fr 1.15fr;
+  grid-template-columns: 1.25fr 0.85fr 0.8fr 1.15fr 1fr;
+  align-items: start;
   gap: var(--space-4);
   padding-bottom: var(--space-5);
 }
+
+/* Reglas verticales: una tras la marca y otra antes de la tarjeta CTA
+   (las dos únicas del diseño). */
+.site-footer__top > .site-footer__col:first-of-type,
+.site-footer__cta {
+  border-left: 1px solid var(--rule);
+  padding-left: var(--space-3);
+}
+
+/* TARJETA CTA — el antiguo botón flotante, ahora fijo aquí.
+   El botón conserva intacto su acabado de cristal y su luz: es el
+   mismo .btn--primary. Lo único nuevo es la caja que lo sostiene. */
+.site-footer__cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.9rem;
+  align-self: center;
+  margin-left: var(--space-2);
+  padding: 1.35rem 1.4rem;
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--glass-fill);
+  backdrop-filter: blur(var(--glass-blur-sm));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+}
+
+/* Tema claro: tarjeta blanca con sombra, como en el diseño. */
+html[data-theme="light"] .site-footer__cta {
+  background: #FFFFFF;
+  border-color: rgba(15, 30, 56, 0.10);
+  box-shadow: 0 22px 45px -26px rgba(15, 30, 56, 0.55);
+}
+
+.site-footer__cta-text {
+  font-size: 0.92rem;
+  color: var(--text-primary);
+}
+
+.site-footer__cta .btn { width: 100%; justify-content: space-between; }
+
+.btn__arrow {
+  margin-left: 0.9rem;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.btn:hover .btn__arrow { transform: translateX(3px); }
 
 .site-footer__brand {
   display: flex;
@@ -665,13 +713,33 @@ form .btn--primary[type="submit"] {
 
 .site-footer__top-link:hover { color: var(--cyan); }
 
+@media (max-width: 1080px) {
+  .site-footer__top { grid-template-columns: 1.2fr 0.9fr 0.9fr 1.2fr; }
+  .site-footer__cta {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-left: none;
+    padding-left: 1.4rem;
+    margin-left: 0;
+  }
+  .site-footer__cta .btn { width: auto; }
+}
+
 @media (max-width: 860px) {
   .site-footer__top { grid-template-columns: 1fr 1fr; }
   .site-footer__brand { grid-column: 1 / -1; }
+  .site-footer__top > .site-footer__col:first-of-type {
+    border-left: none;
+    padding-left: 0;
+  }
 }
 
 @media (max-width: 560px) {
   .site-footer__top { grid-template-columns: 1fr; }
+  .site-footer__cta { flex-direction: column; align-items: stretch; }
+  .site-footer__cta .btn { width: 100%; }
 }
 
 /* ═══════════════════════════════════════════════

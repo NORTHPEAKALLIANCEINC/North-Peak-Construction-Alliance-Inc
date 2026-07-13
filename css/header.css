@@ -372,7 +372,11 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
 }
 
 .site-header__logo { height: 38px; }
-.site-footer__logo { height: 48px; }
+.site-footer__logo { height: 64px; }
+
+@media (max-width: 560px) {
+  .site-footer__logo { height: 52px; }
+}
 
 /* La 2ª imagen se apila exactamente sobre la 1ª */
 .site-header__logo--light,
