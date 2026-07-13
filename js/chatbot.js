@@ -574,15 +574,29 @@
 
   /* Validación. Amable, pero no deja pasar un teléfono que no es un
      teléfono: un contacto que no se puede contactar no vale nada. */
+  function looksLikeContact(v) {
+    var email = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(v);
+    var phone = (v.replace(/\D/g, '').length >= 7);
+    return email || phone;
+  }
+
   function validate(step, value) {
     var v = value.trim();
     if (step.type === 'contact') {
-      var email = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(v);
-      var phone = (v.replace(/\D/g, '').length >= 7);
-      return (email || phone) ? null : 'invalidContact';
+      return looksLikeContact(v) ? null : 'invalidContact';
     }
-    if (step.type === 'name')  return v.length >= 2 ? null : 'tooShort';
-    if (step.type === 'text')  return v.length >= 3 ? null : 'tooShort';
+    if (step.type === 'name') {
+      /* Un correo tampoco es un nombre. */
+      if (looksLikeContact(v)) return 'looksLikeContact';
+      return v.length >= 2 ? null : 'tooShort';
+    }
+    if (step.type === 'text') {
+      /* [MEJORA] El visitante suelta su correo cuando se le pregunta por
+         la obra. Antes se tragaba y quedaba de descripción del proyecto.
+         Ahora se apunta como contacto y se le vuelve a preguntar. */
+      if (looksLikeContact(v) && v.split(' ').length <= 3) return 'looksLikeContact';
+      return v.length >= 3 ? null : 'tooShort';
+    }
     return null;
   }
 
@@ -667,30 +681,64 @@
 
     /* Está respondiendo a un paso. */
     var step = def.steps[flow.step];
-    var err  = validate(step, text);
+
+    /* Paso de contacto y ya teníamos uno apuntado: se ofrece reutilizarlo. */
+    if (step.type === 'contact' && flow.saved && AFFIRM.test(n)) {
+      flow.data[step.id] = flow.saved;
+      advance(done);
+      return;
+    }
+
+    var err = validate(step, text);
     if (err) {
+      if (err === 'looksLikeContact') {
+        flow.saved = text.trim();     // se apunta para el final
+        saveFlow();
+      }
       speak(pickVariant(DATA.flowTalk[err], err), null, done);
       return;
     }
 
     flow.data[step.id] = text.trim();
 
+    advance(done);
+  }
+
+  /* Avanza al paso siguiente, o cierra pidiendo confirmación. */
+  function advance(done) {
+    var def = flowDef();
+
     /* Corrigiendo un dato suelto: vuelve directo a la confirmación. */
     if (flow.stage === 'fixing') {
       flow.stage = 'confirm';
       saveFlow();
-      speak(pickVariant(def.confirm, flow.id + '#confirm') + '\n\n' + summary() +
-            '\n\n' + pickVariant(def.confirmAsk, flow.id + '#confirmAsk'), null, done);
+      askConfirm(done);
       return;
     }
 
     flow.step++;
 
-    if (flow.step < def.steps.length) { askStep(done); return; }
+    if (flow.step < def.steps.length) {
+      var next = def.steps[flow.step];
+      /* Si ya nos dio un contacto sin querer, no se lo pedimos como si
+         no hubiéramos escuchado: se lo recordamos. */
+      if (next.type === 'contact' && flow.saved) {
+        saveFlow();
+        speak(pickVariant(DATA.flowTalk.useSaved, 'useSaved')
+                .replace('{contact}', flow.saved), null, done);
+        return;
+      }
+      askStep(done);
+      return;
+    }
 
-    /* Todos los datos: se leen de vuelta antes de mandar nada. */
     flow.stage = 'confirm';
     saveFlow();
+    askConfirm(done);
+  }
+
+  function askConfirm(done) {
+    var def = flowDef();
     speak(pickVariant(def.confirm, flow.id + '#confirm') + '\n\n' + summary() +
           '\n\n' + pickVariant(def.confirmAsk, flow.id + '#confirmAsk'), null, done);
   }

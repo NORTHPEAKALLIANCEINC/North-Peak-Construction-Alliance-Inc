@@ -291,6 +291,16 @@ window.NP_BOT_KB = {
       'That does not look like a phone number or an email. Could you write it again?',
       'I need something a person can actually reach you on — a phone number or an email address.'
     ],
+    /* El visitante suelta su correo o su teléfono cuando se le pregunta
+       otra cosa. Un humano no lo tragaría: lo apuntaría y seguiría. */
+    looksLikeContact: [
+      'That looks like how to reach you — I have made a note of it, and I will use it at the end.\n\nFor now: what is the work?',
+      'I will hold on to that as your contact, and come back to it.\n\nFirst, tell me what needs doing.'
+    ],
+    useSaved: [
+      'Earlier you gave me **{contact}**. Shall I use that? Say **yes**, or give me another.',
+      'I still have **{contact}** from before. Use it? **Yes**, or write a different one.'
+    ],
     tooShort: [
       'A little more than that, if you can. Even one sentence helps.',
       'Give me a bit more to work with — a few words.'
