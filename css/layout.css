@@ -455,9 +455,53 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
       de corporación federal real. Nada inventado.
 ═══════════════════════════════════════════════════════════ */
 .trust-bar {
+  position: relative;
+  z-index: 3;   /* por encima de la sección siguiente: si no, ésta,
+                   que es position:relative, taparía el filo. */
   background: #070C16;
   border-top: 1px solid rgba(150, 180, 235, 0.10);
   border-bottom: 1px solid rgba(150, 180, 235, 0.10);
+}
+
+/* FILO DORADO — el corte entre la franja oscura y la sección clara.
+   Cinta con volumen (luz arriba, sombra abajo, como el borde de los
+   botones), GRUESA EN EL CENTRO y afilada hacia los lados: la máscara
+   elíptica es la que la va adelgazando. */
+.trust-bar::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(180deg,
+              rgba(255, 248, 230, 0.98) 0%,
+              #EBCB80 38%,
+              #C89B35 70%,
+              rgba(120, 90, 22, 0.92) 100%);
+  -webkit-mask-image: radial-gradient(ellipse 56% 100% at 50% 50%,
+                      #000 42%, rgba(0, 0, 0, 0.4) 70%, transparent 100%);
+  mask-image: radial-gradient(ellipse 56% 100% at 50% 50%,
+              #000 42%, rgba(0, 0, 0, 0.4) 70%, transparent 100%);
+}
+
+/* Resplandor que le da el aire tridimensional: la luz que la cinta
+   derrama sobre las dos superficies. */
+.trust-bar::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  left: 0;
+  right: 0;
+  bottom: -12px;
+  height: 26px;
+  background: radial-gradient(ellipse 42% 100% at 50% 50%,
+              rgba(217, 184, 99, 0.42), transparent 72%);
+  filter: blur(7px);
 }
 
 /* minmax(0, 1fr) — sin esto, las celdas de grid tienen min-width:auto
