@@ -34,6 +34,7 @@ body.is-header-hidden .site-header {
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
+  max-width: 100%;
   padding: 0.65rem 0.75rem 0.65rem 1.1rem;
   background: rgba(var(--surface-rgb), 0.45);
   border: 1px solid var(--glass-border);
@@ -362,17 +363,23 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
   position: relative;
   display: block;
   line-height: 0;
+  min-width: 0;   /* puede encogerse: sin esto la fila desborda */
 }
 
-/* max-width: none — la regla global img{max-width:100%} combinada con
-   una altura fija APLASTABA el logo cuando la columna se estrechaba.
-   flex-shrink: 0 por la misma razón dentro del flex del enlace. */
+/* object-fit: contain es la clave. La regla global img{max-width:100%}
+   con una altura fija APLASTABA el logo al estrecharse su caja; y con
+   max-width:none + flex-shrink:0 dejaba de aplastarse pero DESBORDABA
+   la barra en móvil y echaba el botón del menú fuera de la pantalla
+   (por eso "el menú no salía"). Con contain, si la caja se estrecha,
+   la imagen se reduce manteniendo su proporción: ni se aplasta ni
+   desborda. */
 .site-header__logo,
 .site-footer__logo {
   display: block;
   width: auto;
-  max-width: none;
-  flex-shrink: 0;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
   transition: opacity var(--dur-base) var(--ease-out);
 }
 
@@ -380,13 +387,16 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
 .site-footer__logo { height: 60px; }
 
 @media (max-width: 560px) {
+  .site-header__logo { height: 34px; }
   .site-footer__logo { height: 50px; }
+  .site-header__row {
+    gap: 0.6rem;
+    padding: 0.55rem 0.6rem 0.55rem 0.85rem;
+  }
 }
 
-/* Pantallas muy estrechas: el logo del header ya no se encoge solo
-   (max-width:none), así que se baja su altura a mano. */
 @media (max-width: 400px) {
-  .site-header__logo { height: 32px; }
+  .site-header__logo { height: 30px; }
 }
 
 /* La 2ª imagen se apila exactamente sobre la 1ª */
