@@ -211,8 +211,10 @@ function initTraitFlip() {
    no lo maneja JS: son dos <img> superpuestas por CSS que hacen
    crossfade solo con el atributo data-theme, sin depender de red. */
 function initThemeToggle() {
-  const toggle = document.getElementById('theme-toggle');
-  if (!toggle) return;
+  /* Hay DOS interruptores: el de la barra (escritorio) y el que vive
+     dentro del panel del menú (móvil). Ambos comparten estado. */
+  const toggles = Array.from(document.querySelectorAll('.theme-toggle'));
+  if (!toggles.length) return;
 
   const root = document.documentElement;
   const order = ['light', 'dark'];
@@ -228,7 +230,7 @@ function initThemeToggle() {
 
   const applyTheme = (theme, persist) => {
     root.setAttribute('data-theme', theme);
-    toggle.setAttribute('aria-label', labels[theme] || labels.light);
+    toggles.forEach(btn => btn.setAttribute('aria-label', labels[theme] || labels.light));
     if (persist) {
       try { localStorage.setItem('etexca-theme', theme); } catch (e) { /* almacenamiento no disponible */ }
     }
@@ -237,10 +239,10 @@ function initThemeToggle() {
   // Sincroniza la etiqueta con el tema que ya aplicó el script del <head>.
   applyTheme(current(), false);
 
-  toggle.addEventListener('click', () => {
+  toggles.forEach(btn => btn.addEventListener('click', () => {
     const i = order.indexOf(current());
     applyTheme(order[(i + 1) % order.length], true);
-  });
+  }));
 }
 
 /* ═══════════════════════════════════════════════════════════
