@@ -49,6 +49,18 @@
   /* Memoria de conversación: el último tema, para las preguntas que
      dependen de lo anterior. */
   var lastEntry = null;
+  /* ── CONVERSACIÓN GUIADA (Fase 1) ──────────────────────────
+     Estado de la toma de datos. Mientras esto no sea null, el motor
+     NO puntúa temas: conduce. Sobrevive a la navegación entre páginas,
+     porque perder los datos de alguien a mitad de camino es imperdonable. */
+  var flow = null;          // { id, step, data, stage }
+  var pendingFlow = null;   // flujo ofrecido, esperando un "sí"
+
+  /* Clave de Web3Forms: la MISMA que ya usan los formularios del sitio.
+     Sin servidor, sin coste, 250 envíos al mes. La tubería ya estaba
+     puesta; simplemente no la estábamos usando. */
+  var W3F_KEY = '50ceecdb-5b1e-432e-8954-225883a79ba4';
+
   /* Fallos seguidos. Un bot que no entiende y sigue insistiendo es una
      pared. A la primera pide que se lo expliquen mejor; a la segunda
      ofrece una persona; a la tercera deja de marear y manda a WhatsApp
@@ -484,6 +496,182 @@
     }, pause(text));
   }
 
+  /* ════════════════════════════════════════════════════════
+     3-BIS. CONVERSACIÓN GUIADA
+     El bot deja de contestar y empieza a CONDUCIR: pregunta, valida,
+     lee de vuelta, y envía al correo de la empresa.
+  ════════════════════════════════════════════════════════ */
+
+  var AFFIRM = /^(yes|yeah|yep|yes please|sure|ok|okay|go ahead|please do|do it|lets do it|let us do it|alright|fine|sounds good|correct|right|send it|send)/;
+  var NEGATE = /^(no|nope|not now|later|cancel|stop|forget it|never mind|nevermind|quit|exit)/;
+
+  function saveFlow() {
+    try { sessionStorage.setItem('np-chat-flow', JSON.stringify(flow)); } catch (e) {}
+  }
+  function loadFlow() {
+    try { flow = JSON.parse(sessionStorage.getItem('np-chat-flow') || 'null'); } catch (e) { flow = null; }
+  }
+  function clearFlow() {
+    flow = null;
+    try { sessionStorage.removeItem('np-chat-flow'); } catch (e) {}
+  }
+
+  function flowDef() { return flow && DATA.flows[flow.id]; }
+
+  function startFlow(id, done) {
+    var def = DATA.flows[id];
+    if (!def) { if (done) done(); return; }
+    flow = { id: id, step: 0, data: {}, stage: 'asking' };
+    pendingFlow = null;
+    saveFlow();
+    speak(pickVariant(def.start, id + '#start'), null, function () {
+      askStep(done);
+    });
+  }
+
+  function askStep(done) {
+    var def = flowDef();
+    if (!def) { if (done) done(); return; }
+    var step = def.steps[flow.step];
+    saveFlow();
+    speak(pickVariant(step.ask, flow.id + '#' + step.id), null, done);
+  }
+
+  /* Validación. Amable, pero no deja pasar un teléfono que no es un
+     teléfono: un contacto que no se puede contactar no vale nada. */
+  function validate(step, value) {
+    var v = value.trim();
+    if (step.type === 'contact') {
+      var email = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(v);
+      var phone = (v.replace(/\D/g, '').length >= 7);
+      return (email || phone) ? null : 'invalidContact';
+    }
+    if (step.type === 'name')  return v.length >= 2 ? null : 'tooShort';
+    if (step.type === 'text')  return v.length >= 3 ? null : 'tooShort';
+    return null;
+  }
+
+  function summary() {
+    var def = flowDef();
+    var lines = def.steps.map(function (s) {
+      var label = s.id.charAt(0).toUpperCase() + s.id.slice(1);
+      return '- **' + label + ':** ' + (flow.data[s.id] || '—');
+    });
+    return lines.join('\n');
+  }
+
+  /* Envío real. Si falla, el visitante SE ENTERA: nada de fingir que
+     salió cuando no salió. */
+  function submitLead(done) {
+    var def = flowDef();
+    var payload = {
+      access_key: W3F_KEY,
+      subject: def.subject,
+      from_name: 'Kodiak — website assistant',
+      botcheck: false,
+      source: 'Kodiak assistant (' + window.location.pathname + ')'
+    };
+    def.steps.forEach(function (s) { payload[s.id] = flow.data[s.id]; });
+
+    showTyping();
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      hideTyping();
+      if (res && res.success) {
+        addBot(pickVariant(def.success, flow.id + '#ok'), null, true);
+        clearFlow();
+      } else { throw new Error('web3forms'); }
+      if (done) done();
+    })
+    .catch(function () {
+      hideTyping();
+      addBot(pickVariant(def.failure, flow.id + '#fail'), { contactCard: true }, true);
+      clearFlow();
+      if (done) done();
+    });
+  }
+
+  /* Cada mensaje del visitante mientras el flujo está vivo. */
+  function handleFlow(text, done) {
+    var def = flowDef();
+    var n = normalize(text);
+
+    if (NEGATE.test(n) && flow.stage === 'asking') {
+      clearFlow();
+      speak(pickVariant(DATA.flowTalk.cancelled, 'cancel'), null, done);
+      return;
+    }
+
+    /* Está esperando confirmación final. */
+    if (flow.stage === 'confirm') {
+      if (AFFIRM.test(n)) { submitLead(done); return; }
+      if (NEGATE.test(n)) {
+        clearFlow();
+        speak(pickVariant(DATA.flowTalk.cancelled, 'cancel'), null, done);
+        return;
+      }
+      /* "cambia el teléfono", "el nombre está mal"… */
+      var target = null;
+      def.steps.forEach(function (s, i) {
+        if (n.indexOf(s.id) !== -1) target = i;
+      });
+      if (target === null) {
+        speak(pickVariant(DATA.flowTalk.whatToChange, 'change'), null, done);
+        return;
+      }
+      flow.step = target;
+      flow.stage = 'fixing';
+      askStep(done);
+      return;
+    }
+
+    /* Está respondiendo a un paso. */
+    var step = def.steps[flow.step];
+    var err  = validate(step, text);
+    if (err) {
+      speak(pickVariant(DATA.flowTalk[err], err), null, done);
+      return;
+    }
+
+    flow.data[step.id] = text.trim();
+
+    /* Corrigiendo un dato suelto: vuelve directo a la confirmación. */
+    if (flow.stage === 'fixing') {
+      flow.stage = 'confirm';
+      saveFlow();
+      speak(pickVariant(def.confirm, flow.id + '#confirm') + '\n\n' + summary() +
+            '\n\n' + pickVariant(def.confirmAsk, flow.id + '#confirmAsk'), null, done);
+      return;
+    }
+
+    flow.step++;
+
+    if (flow.step < def.steps.length) { askStep(done); return; }
+
+    /* Todos los datos: se leen de vuelta antes de mandar nada. */
+    flow.stage = 'confirm';
+    saveFlow();
+    speak(pickVariant(def.confirm, flow.id + '#confirm') + '\n\n' + summary() +
+          '\n\n' + pickVariant(def.confirmAsk, flow.id + '#confirmAsk'), null, done);
+  }
+
+  /* ¿El mensaje arranca un flujo por sí solo? */
+  function flowTrigger(text) {
+    var n = normalize(text);
+    var found = null;
+    Object.keys(DATA.flows).forEach(function (id) {
+      (DATA.flows[id].trigger || []).forEach(function (t) {
+        if (n.indexOf(normalize(t)) !== -1) found = id;
+      });
+    });
+    return found;
+  }
+
   function send(raw) {
     var text = String(raw || '').trim();
     if (!text || busy) return;
@@ -493,6 +681,27 @@
     elInput.value = '';
     elInput.style.height = 'auto';
     closeMenu();
+
+    var release = function () { busy = false; };
+
+    /* 1. ¿Hay una toma de datos en marcha? Entonces se conduce. */
+    if (flow) { handleFlow(text, release); return; }
+
+    /* 2. ¿Se ofreció una y el visitante ha dicho que sí? */
+    if (pendingFlow) {
+      var n0 = normalize(text);
+      if (AFFIRM.test(n0)) { startFlow(pendingFlow, release); return; }
+      if (NEGATE.test(n0)) {
+        pendingFlow = null;
+        speak(pickVariant(DATA.flowTalk.cancelled, 'cancel'), null, release);
+        return;
+      }
+      pendingFlow = null;   // ha cambiado de tema: se sigue como siempre
+    }
+
+    /* 3. ¿Lo pide directamente? ("send my project") */
+    var direct = flowTrigger(text);
+    if (direct) { startFlow(direct, release); return; }
 
     /* Continuación de lo anterior: "yes", "tell me more", "go on". */
     if (isFollowUp(text) && lastEntry) {
@@ -555,7 +764,20 @@
       }
 
       i++;
-      speak(out, entry, next);
+
+      /* Al terminar de responder, si esa entrada lo merece, el bot se
+         OFRECE a tomar los datos. Es el paso que convierte una charla
+         agradable en un cliente en el buzón de la empresa. */
+      var isLast = (i >= topics.length);
+      speak(out, entry, function () {
+        if (isLast && entry.offerFlow && DATA.flows[entry.offerFlow]) {
+          pendingFlow = entry.offerFlow;
+          speak(pickVariant(DATA.flows[entry.offerFlow].offer, entry.offerFlow + '#offer'),
+                null, next);
+          return;
+        }
+        next();
+      });
     })();
   }
 
@@ -612,6 +834,7 @@
 
   function init() {
     build();
+    loadFlow();      // una toma de datos a medias sobrevive al cambio de página
     restore();
 
     var wasOpen = false, seen = false;

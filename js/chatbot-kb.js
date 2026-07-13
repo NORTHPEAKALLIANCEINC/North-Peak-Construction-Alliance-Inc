@@ -100,6 +100,7 @@ window.NP_BOT_KB = {
       { label: 'Where you work',   q: 'Where do you work?' },
       { label: 'Start a project',  q: 'How do I start a project with you?' },
       { label: 'Careers',          q: 'Are you hiring?' },
+      { label: 'Send my project', q: 'send my project to the team' },
       { label: 'Talk to a person', q: 'I want to talk to a person' },
       { label: 'I am lost',        q: 'I do not know where to start' }
     ],
@@ -111,6 +112,197 @@ window.NP_BOT_KB = {
       whatsapp:  'https://wa.me/16478950939',
       page:      '/contact'
     }
+  },
+
+
+  /* ════════════════════════════════════════════════════════════
+     CONVERSACIONES GUIADAS  (Fase 1)
+
+     Aquí es donde el bot deja de ser un folleto y pasa a trabajar.
+     En lugar de contestar y despedirse, TOMA LOS DATOS y los envía al
+     correo de la empresa por Web3Forms — la misma tubería que ya usan
+     los formularios de la web, sin servidor y sin coste.
+
+     Cada paso: una pregunta (con variantes), un tipo de validación y
+     si es obligatorio. El motor conduce; aquí solo vive el texto.
+
+     Tipos de validación: 'text' | 'name' | 'contact' | 'any'
+  ════════════════════════════════════════════════════════════ */
+  flows: {
+
+    project: {
+      id: 'project',
+      subject: 'New project enquiry from the website assistant',
+      /* Frases con las que el visitante puede arrancarlo directamente */
+      trigger: [
+        'send my project', 'take my details', 'take my information',
+        'i want to send my project', 'submit my project', 'pass it to the team',
+        'send it to the team', 'contact me'
+      ],
+      /* Lo que dice el bot al ofrecerlo */
+      offer: [
+        'I can take the details right now and send them straight to the team — it takes a minute, and someone comes back to you.\n\nShall we?',
+        'If you like, I will take a few details and put them in front of a person today. Four short questions.\n\nWant to?',
+        'Rather than send you off to a form, I can take it from here myself and pass it to the team.\n\nShall I?'
+      ],
+      start: [
+        'Good. Four questions, plain words, no technical language needed.',
+        'Right. Four quick things and I will pass it on.',
+        'Let us do it. Four questions, and you can stop at any point.'
+      ],
+      steps: [
+        {
+          id: 'what',
+          type: 'text',
+          ask: [
+            'First — what needs building, repairing or managing?',
+            'What is the work? Describe it however you would to a neighbour.',
+            'Tell me what the project involves. No need for technical terms.'
+          ]
+        },
+        {
+          id: 'where',
+          type: 'text',
+          ask: [
+            'Where is it? The city is enough.',
+            'And whereabouts? City or town will do.',
+            'Which city is the project in?'
+          ]
+        },
+        {
+          id: 'when',
+          type: 'text',
+          ask: [
+            'When do you need it? A rough idea is fine — "this spring" works.',
+            'And the timing? Even "as soon as possible" is a useful answer.',
+            'When would you want this done? Approximate is fine.'
+          ]
+        },
+        {
+          id: 'name',
+          type: 'name',
+          ask: [
+            'Almost there. What is your name?',
+            'And your name?',
+            'Who should the team ask for?'
+          ]
+        },
+        {
+          id: 'contact',
+          type: 'contact',
+          ask: [
+            'Last one — the best way to reach you. A phone number or an email.',
+            'And how do we reach you? Phone or email, whichever you prefer.',
+            'Finally: your phone or your email, so a person can come back to you.'
+          ]
+        }
+      ],
+      /* Antes de enviar, se lee de vuelta. Nadie manda datos a ciegas. */
+      confirm: [
+        'Here is what I have. Have a look:',
+        'Let me read that back before it goes anywhere:',
+        'This is what I would send to the team:'
+      ],
+      confirmAsk: [
+        'Send it? Say **yes**, or tell me what to change ("change the phone").',
+        'Shall I send it? **Yes** to go ahead, or name what needs fixing.',
+        'Happy with that? **Yes** and it goes. Or tell me what to correct.'
+      ],
+      success: [
+        'Sent. It is in the office inbox now, and someone will come back to you.\n\nIf it is urgent, call **647 895 0939** and mention you spoke to me.',
+        'Done — that is with the team. Expect a reply from a person.\n\nIn a hurry? Call **647 895 0939**.',
+        'Off it goes. A person will pick that up and get in touch.\n\nAnything else I can do?'
+      ],
+      /* Si el envío falla (sin red, servicio caído): NO se pierde nada */
+      failure: [
+        'Something went wrong on my side and I could not send it. That is my fault, not yours — and I am not going to pretend otherwise.\n\nCopy what you told me into an email, or just call. It will get there:',
+        'The message did not go through. Rather than leave you thinking it did, here is the direct route:'
+      ]
+    },
+
+    job: {
+      id: 'job',
+      subject: 'New candidate enquiry from the website assistant',
+      trigger: ['send my application', 'apply through you', 'take my details for a job'],
+      offer: [
+        'I can pass your details to the team right now — three questions.\n\nWant me to?',
+        'If you like, I will take your trade and your contact and put it in front of the right person.\n\nShall we?'
+      ],
+      start: [
+        'Good. Three quick questions.',
+        'Right — three things and I will pass it on.'
+      ],
+      steps: [
+        {
+          id: 'trade',
+          type: 'text',
+          ask: [
+            'What is your trade, or the role you are after?',
+            'What do you do — trade or position?'
+          ]
+        },
+        {
+          id: 'experience',
+          type: 'text',
+          ask: [
+            'Roughly how much experience do you have in it?',
+            'And how long have you been doing it?'
+          ]
+        },
+        {
+          id: 'name',
+          type: 'name',
+          ask: ['Your name?', 'And what is your name?']
+        },
+        {
+          id: 'contact',
+          type: 'contact',
+          ask: [
+            'Best way to reach you — phone or email.',
+            'And your phone or email, so they can come back to you.'
+          ]
+        }
+      ],
+      confirm: [
+        'Here is what I have:',
+        'Let me read it back:'
+      ],
+      confirmAsk: [
+        'Send it? **Yes**, or tell me what to change.',
+        'Shall I pass this on? **Yes** to go ahead.'
+      ],
+      success: [
+        'Sent. Your details are with the team.\n\nIf you also want to send a résumé, use the Careers page — the form there takes a file.',
+        'Done. That is in the office inbox.\n\nTo attach a résumé, the Careers page has a form that takes one.'
+      ],
+      failure: [
+        'It did not go through, and I will not pretend it did. Use the Careers page or write directly:'
+      ]
+    }
+  },
+
+  /* Respuestas del motor durante una conversación guiada */
+  flowTalk: {
+    cancelled: [
+      'No problem — stopped. Nothing was sent.\n\nAnything else I can help with?',
+      'Dropped it. Nothing has gone anywhere.\n\nWhat else can I do?'
+    ],
+    invalidContact: [
+      'That does not look like a phone number or an email. Could you write it again?',
+      'I need something a person can actually reach you on — a phone number or an email address.'
+    ],
+    tooShort: [
+      'A little more than that, if you can. Even one sentence helps.',
+      'Give me a bit more to work with — a few words.'
+    ],
+    sending: [
+      'Sending it now…',
+      'One moment — passing it to the team…'
+    ],
+    whatToChange: [
+      'Which part? Say **what**, **where**, **when**, **name** or **contact**.',
+      'Tell me which one to fix: **what**, **where**, **when**, **name** or **contact**.'
+    ]
   },
 
   kb: [
@@ -370,6 +562,7 @@ window.NP_BOT_KB = {
     /* ══ EMPEZAR / PRESUPUESTO ══════════════════════════════ */
     {
       topic: 'starting a project',
+      offerFlow: 'project',
       keys: [
         'quote', 'quotation', 'estimate', 'proposal', 'how do i hire', 'how do we start',
         'how do i start a project', 'next step', 'i want to hire you', 'tender', 'bid',
@@ -418,6 +611,7 @@ window.NP_BOT_KB = {
     /* ══ EMPLEO Y SUBCONTRATAS ══════════════════════════════ */
     {
       topic: 'careers',
+      offerFlow: 'job',
       keys: [
         'job', 'jobs', 'careers', 'work with you', 'hiring', 'vacancy', 'apply', 'employment',
         'send my resume', 'resume', 'looking for work', 'i need a job', 'position', 'recruiting'
@@ -664,6 +858,7 @@ window.NP_BOT_KB = {
     /* ── COMPRADOR PÚBLICO / CONTRATISTA GENERAL ── */
     {
       topic: 'meeting a procurement requirement',
+      offerFlow: 'project',
       keys: [
         'we need an indigenous subcontractor', 'need an indigenous partner', 'our bid requires',
         'meet our target', 'procurement requirement', 'indigenous content', 'ibp',
