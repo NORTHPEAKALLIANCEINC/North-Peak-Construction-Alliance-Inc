@@ -37,13 +37,19 @@
 <meta property="og:title" content="Services — North Peak Construction Alliance">
 <meta property="og:description" content="Ten service areas: project management, general contracting, skilled labour, commercial and institutional construction, infrastructure and more.">
 <meta property="og:locale" content="en_CA">
-<!-- ASUNCIÓN: og:image pendiente — no hay logo/foto de portada todavía (README §3.2) -->
-<!-- <meta property="og:image" content="https://northalliancegroup.ca/og-image.jpg"> -->
+<meta property="og:image" content="https://northalliancegroup.ca/images/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="North Peak Construction Alliance Inc. — Indigenous-owned construction, Ontario and Canada-wide">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Services — North Peak Construction Alliance">
+<meta name="twitter:image" content="https://northalliancegroup.ca/images/og-image.jpg">
 <meta name="twitter:description" content="Ten service areas: project management, general contracting, skilled labour, commercial and institutional construction, infrastructure and more.">
 
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="theme-color" content="#EDF1F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#070C16" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
 <!-- Tipografías del sistema de diseño v2 (Space Grotesk / Inter / IBM Plex Mono) -->
@@ -51,11 +57,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/css/tokens.css?v=61">
-<link rel="stylesheet" href="/css/style.css?v=61">
-<link rel="stylesheet" href="/css/layout.css?v=61">
-<link rel="stylesheet" href="/css/header.css?v=61">
-<link rel="stylesheet" href="/css/components.css?v=61">
+<link rel="stylesheet" href="/css/tokens.css?v=62">
+<link rel="stylesheet" href="/css/style.css?v=62">
+<link rel="stylesheet" href="/css/layout.css?v=62">
+<link rel="stylesheet" href="/css/header.css?v=62">
+<link rel="stylesheet" href="/css/components.css?v=62">
 
 <!-- ═══ Google Search Console: pega tu código de verificación (método "etiqueta HTML") ═══ -->
 <meta name="google-site-verification" content="xJvoHJ7ZN1tag7xE8sJ88pCRUm-I1h6pEgs8XWe0L8o">
@@ -69,6 +75,287 @@
   gtag('config', 'G-XXXXXXXXXX');
 </script>
 
+<!-- Datos estructurados (Schema.org) — así entiende Google qué es la
+     empresa, dónde está y qué ofrece. Habilita resultados enriquecidos. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://northalliancegroup.ca/services#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://northalliancegroup.ca/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Services",
+          "item": "https://northalliancegroup.ca/services"
+        }
+      ]
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://northalliancegroup.ca/services#webpage",
+      "url": "https://northalliancegroup.ca/services",
+      "name": "Services — North Peak Construction Alliance",
+      "description": "Ten service areas: project management, general contracting, skilled labour, commercial and institutional construction, infrastructure and more.",
+      "isPartOf": {
+        "@id": "https://northalliancegroup.ca/#website"
+      },
+      "about": {
+        "@id": "https://northalliancegroup.ca/#organization"
+      },
+      "inLanguage": "en-CA",
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://northalliancegroup.ca/images/og-image.jpg"
+      },
+      "breadcrumb": {
+        "@id": "https://northalliancegroup.ca/services#breadcrumb"
+      }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://northalliancegroup.ca/#organization",
+      "name": "North Peak Construction Alliance Inc.",
+      "url": "https://northalliancegroup.ca/"
+    },
+    {
+      "@type": "OfferCatalog",
+      "@id": "https://northalliancegroup.ca/services#catalog",
+      "name": "Construction services",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Project Management",
+            "description": "Planning, coordination and control of the project from start to finish.",
+            "serviceType": "Project Management",
+            "provider": {
+              "@id": "https://northalliancegroup.ca/#organization"
+            },
+            "areaServed": [
+              {
+                "@type": "AdministrativeArea",
+                "name": "Ontario"
+              },
+              {
+                "@type": "Country",
+                "name": "Canada"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "General Contracting",
+            "description": "Full delivery of works as general contractor, managing subcontractors and suppliers.",
+            "serviceType": "General Contracting",
+            "provider": {
+              "@id": "https://northalliancegroup.ca/#organization"
+            },
+            "areaServed": [
+              {
+                "@type": "AdministrativeArea",
+                "name": "Ontario"
+              },
+              {
+                "@type": "Country",
+                "name": "Canada"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Skilled Labour Supply",
+            "description": "Qualified site personnel for construction projects.",
+            "serviceType": "Skilled Labour Supply",
+            "provider": {
+              "@id": "https://northalliancegroup.ca/#organization"
+            },
+            "areaServed": [
+              {
+                "@type": "AdministrativeArea",
+                "name": "Ontario"
+              },
+              {
+                "@type": "Country",
+                "name": "Canada"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Commercial Construction",
+            "description": "Construction and fit-out of commercial buildings.",
+            "serviceType": "Commercial Construction",
+            "provider": {
+              "@id": "https://northalliancegroup.ca/#organization"
+            },
+            "areaServed": [
+              {
+                "@type": "AdministrativeArea",
+                "name": "Ontario"
+              },
+              {
+                "@type": "Country",
+                "name": "Canada"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Institutional Construction",
+            "description": "Works for public and institutional facilities.",
+            "serviceType": "Institutional Construction",
+            "provider": {
+              "@id": "https://northalliancegroup.ca/#organization"
+            },
+            "areaServed": [
+              {
+                "@type": "AdministrativeArea",
+                "name": "Ontario"
+              },
+              {
+                "@type": "Country",
+                "name": "Canada"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Infrastructure Services",
+            "description": "Execution of infrastructure and civil works.",
+            "serviceType": "Infrastructure Services",
+            "provider": {
+              "@id": "https://northalliancegroup.ca/#organization"
+            },
+            "areaServed": [
+              {
+                "@type": "AdministrativeArea",
+                "name": "Ontario"
+              },
+              {
+                "@type": "Country",
+                "name": "Canada"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Restoration & Rehabilitation",
+            "description": "Restoration and rehabilitation of existing structures.",
+            "serviceType": "Restoration & Rehabilitation",
+            "provider": {
+              "@id": "https://northalliancegroup.ca/#organization"
+            },
+            "areaServed": [
+              {
+                "@type": "AdministrativeArea",
+                "name": "Ontario"
+              },
+              {
+                "@type": "Country",
+                "name": "Canada"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Masonry & Bricklaying",
+            "description": "Masonry, brick and block work.",
+            "serviceType": "Masonry & Bricklaying",
+            "provider": {
+              "@id": "https://northalliancegroup.ca/#organization"
+            },
+            "areaServed": [
+              {
+                "@type": "AdministrativeArea",
+                "name": "Ontario"
+              },
+              {
+                "@type": "Country",
+                "name": "Canada"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Concrete & Concrete Repair",
+            "description": "Execution and repair of concrete elements.",
+            "serviceType": "Concrete & Concrete Repair",
+            "provider": {
+              "@id": "https://northalliancegroup.ca/#organization"
+            },
+            "areaServed": [
+              {
+                "@type": "AdministrativeArea",
+                "name": "Ontario"
+              },
+              {
+                "@type": "Country",
+                "name": "Canada"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Specialized Construction Services",
+            "description": "Specific solutions based on the project's technical requirements.",
+            "serviceType": "Specialized Construction Services",
+            "provider": {
+              "@id": "https://northalliancegroup.ca/#organization"
+            },
+            "areaServed": [
+              {
+                "@type": "AdministrativeArea",
+                "name": "Ontario"
+              },
+              {
+                "@type": "Country",
+                "name": "Canada"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -171,8 +458,8 @@
 <!-- OPCIÓN CON IMAGEN (reactivar borrando la <section> de arriba):
 <section class="hero hero--band" id="servicios">
   <div class="hero__frame">
-    <img class="hero__frame-img hero__frame-img--dark" src="/images/servicios-bg.webp" alt="Casco de obra, planos técnicos y modelo digital de edificio sobre una mesa de trabajo" loading="eager">
-    <img class="hero__frame-img hero__frame-img--light" src="/images/servicios-bg-light.webp" alt="" aria-hidden="true" loading="eager">
+    <img fetchpriority="high" decoding="async" class="hero__frame-img hero__frame-img--dark" src="/images/servicios-bg.webp" alt="Casco de obra, planos técnicos y modelo digital de edificio sobre una mesa de trabajo" loading="eager">
+    <img fetchpriority="high" decoding="async" class="hero__frame-img hero__frame-img--light" src="/images/servicios-bg-light.webp" alt="" aria-hidden="true" loading="eager">
     <div class="hero__frame-overlay"></div>
   </div>
   <div class="hero__panel-wrap"><div class="container">
@@ -226,8 +513,8 @@
   <div class="container site-footer__top">
     <div class="site-footer__brand">
       <a href="/" class="site-footer__mark" aria-label="North Peak Construction Alliance — Home">
-        <img class="site-footer__logo site-footer__logo--dark" src="/images/logo-footer-light.webp" alt="North Peak Construction Alliance Inc.">
-        <img class="site-footer__logo site-footer__logo--light" src="/images/logo-horizontal-light.webp" alt="" aria-hidden="true">
+        <img loading="lazy" decoding="async" class="site-footer__logo site-footer__logo--dark" src="/images/logo-footer-light.webp" alt="North Peak Construction Alliance Inc.">
+        <img loading="lazy" decoding="async" class="site-footer__logo site-footer__logo--light" src="/images/logo-horizontal-light.webp" alt="" aria-hidden="true">
       </a>
       <p class="site-footer__tagline">Indigenous-owned construction company. Safe, high-quality construction solutions across Ontario and Canada.</p>
       <!-- FASE 11 → reemplazar href="#" con los perfiles reales cuando existan. -->
