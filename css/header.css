@@ -344,7 +344,7 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
     display: flex;
     align-items: stretch;
     gap: 0.6rem;
-    margin: 0.9rem 0.75rem 0.25rem;
+    margin: 0.9rem 0 0.25rem;   /* mismo borde que los enlaces */
   }
   /* WhatsApp ocupa todo el ancho libre: así queda alineado con los
      enlaces de arriba y no como un botoncito suelto en la esquina. */
@@ -354,17 +354,13 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
     justify-content: center;
     height: 48px;
   }
-  /* No es un enlace de navegación: fuera el numerito (01, 02…) que el
-     contador del menú le estaba pintando delante. */
-  .site-nav a.wa-btn { counter-increment: none; }
-  .site-nav a.wa-btn::before { content: none; }
   .theme-toggle--nav {
     display: grid;
     flex: 0 0 48px;
     width: 48px;
     height: 48px;
   }
-  .site-nav a {
+  .site-nav a:not(.wa-btn) {
     counter-increment: navitem;
     display: flex;
     align-items: center;
@@ -376,7 +372,7 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
     -webkit-tap-highlight-color: transparent;
   }
   .site-nav a:first-child { border-top: none; }
-  .site-nav a:not(.site-nav__cta)::before {
+  .site-nav a:not(.site-nav__cta):not(.wa-btn)::before {
     content: "0" counter(navitem);
     font-family: var(--font-mono);
     font-size: 0.68rem;

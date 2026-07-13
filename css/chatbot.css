@@ -6,8 +6,8 @@
 ================================================================ */
 
 .np-chat-root {
-  --np-w: 380px;
-  --np-h: 560px;
+  --np-w: 336px;    /* antes 380: se veía gordo */
+  --np-h: 470px;    /* antes 560: se comía la pantalla */
 }
 
 /* ─── Botón flotante ─────────────────────────────────────── */
@@ -15,7 +15,7 @@
   position: fixed;
   right: var(--gutter);
   bottom: var(--gutter);
-  z-index: 90;
+  z-index: 200;     /* el header es 100: el chat va por delante */
   display: grid;
   place-items: center;
   width: 58px;
@@ -38,7 +38,62 @@
               border-color var(--dur-base) var(--ease-out);
 }
 
-.np-chat-fab img { border-radius: 50%; }
+.np-chat-fab__ico {
+  position: relative;
+  z-index: 2;
+  color: var(--btn-text);
+  transition: opacity var(--dur-fast) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
+}
+
+/* La X sustituye al globo cuando el chat está abierto. */
+.np-chat-fab__ico--x { position: absolute; opacity: 0; transform: rotate(-90deg); }
+.np-chat-fab.is-open .np-chat-fab__ico            { opacity: 0; transform: rotate(90deg); }
+.np-chat-fab.is-open .np-chat-fab__ico--x         { opacity: 1; transform: rotate(0); }
+
+/* Oleadas: dos anillos que salen del botón, desfasados. */
+.np-chat-fab__wave {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--cyan-dim);
+  opacity: 0;
+  pointer-events: none;
+  animation: npWave 3.2s var(--ease-out) infinite;
+}
+.np-chat-fab__wave--2 { animation-delay: 1.6s; }
+.np-chat-fab.is-open .np-chat-fab__wave { display: none; }
+
+@keyframes npWave {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  70%  { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* Punto rojo: hay un mensaje esperando. */
+.np-chat-fab__dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 3;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #E5484D;
+  border: 2px solid var(--void);
+  box-shadow: 0 0 10px rgba(229, 72, 77, 0.7);
+}
+
+/* Llamada de atención: un solo aleteo, no un parpadeo eterno. */
+.np-chat-fab--call { animation: npCall 1.4s var(--ease-out) 2; }
+
+@keyframes npCall {
+  0%, 100%   { transform: translateY(0) rotate(0); }
+  15%        { transform: translateY(-4px) rotate(-7deg); }
+  30%        { transform: translateY(0) rotate(6deg); }
+  45%        { transform: translateY(-2px) rotate(-4deg); }
+  60%        { transform: translateY(0) rotate(0); }
+}
 
 .np-chat-fab:hover {
   transform: translateY(-2px);
@@ -52,30 +107,12 @@
 .np-chat-fab:active { transform: translateY(0) scale(0.96); }
 
 /* Latido: discreto, una sola vez cada seis segundos. */
-.np-chat-fab__pulse {
-  position: absolute;
-  inset: -3px;
-  border-radius: 50%;
-  border: 1px solid var(--cyan-dim);
-  opacity: 0;
-  animation: npPulse 6s var(--ease-out) infinite;
-  pointer-events: none;
-}
-
-@keyframes npPulse {
-  0%   { transform: scale(1);    opacity: 0.7; }
-  18%  { transform: scale(1.35); opacity: 0; }
-  100% { transform: scale(1.35); opacity: 0; }
-}
-
-.np-chat-fab.is-open .np-chat-fab__pulse { display: none; }
-
 /* ─── Panel ──────────────────────────────────────────────── */
 .np-chat {
   position: fixed;
   right: var(--gutter);
-  bottom: calc(var(--gutter) + 72px);
-  z-index: 91;
+  bottom: calc(var(--gutter) + 74px);
+  z-index: 201;     /* por delante del header, siempre */
   display: flex;
   flex-direction: column;
   width: var(--np-w);
@@ -176,11 +213,11 @@
 }
 
 .np-msg {
-  max-width: 86%;
-  padding: 0.7rem 0.9rem;
+  max-width: 84%;
+  padding: 0.75rem 0.95rem;
   border-radius: 14px;
-  font-size: 0.9rem;
-  line-height: 1.55;
+  font-size: 0.875rem;
+  line-height: 1.6;
   word-wrap: break-word;
   animation: npIn var(--dur-base) var(--ease-out);
 }
@@ -208,6 +245,9 @@
 
 .np-msg strong { color: var(--cyan); font-weight: 600; }
 
+/* Aire entre las líneas de una lista dentro del mensaje. */
+.np-chat__li + .np-chat__li { margin-top: 0.25rem; }
+
 .np-chat__li {
   display: block;
   padding-left: 0.9rem;
@@ -223,13 +263,17 @@
 }
 
 /* Botón de navegación: el bot te lleva, no te da indicaciones. */
+/* El botón NO va pegado al texto: se separa, ocupa su propia línea
+   y queda al pie de la burbuja. */
 .np-chat__nav {
-  display: inline-block;
-  margin-top: 0.7rem;
-  padding: 0.45rem 0.85rem;
+  display: block;
+  width: fit-content;
+  margin-top: 0.9rem;
+  padding-top: 0;
+  padding: 0.5rem 0.9rem;
   border-radius: var(--radius-pill);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-decoration: none;
@@ -279,18 +323,17 @@
 }
 
 /* ─── Sugerencias ────────────────────────────────────────── */
+/* Se envuelven en varias filas. Antes iban en scroll horizontal y se
+   cortaban contra el borde: parecía un error, y lo era. */
 .np-chat__quick {
   display: flex;
-  gap: 0.4rem;
-  padding: 0 0.8rem 0.6rem;
-  overflow-x: auto;
-  scrollbar-width: none;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0 0.8rem 0.65rem;
 }
-.np-chat__quick::-webkit-scrollbar { display: none; }
 
 .np-chat__qr {
-  flex-shrink: 0;
-  padding: 0.4rem 0.75rem;
+  padding: 0.38rem 0.7rem;
   border-radius: var(--radius-pill);
   font-family: var(--font-mono);
   font-size: 0.66rem;
@@ -365,16 +408,17 @@
 }
 
 /* ─── Móvil: el chat ocupa la pantalla ───────────────────── */
+/* Móvil: un panel, no una pantalla completa. A pantalla completa el
+   visitante deja de sentir que está en la web y se pierde. */
 @media (max-width: 560px) {
   .np-chat {
-    right: 0; bottom: 0; left: 0;
-    width: 100%;
-    max-width: 100%;
-    height: 100dvh;
-    max-height: 100dvh;
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
+    right: 10px;
+    left: 10px;
+    bottom: 84px;
+    width: auto;
+    max-width: none;
+    height: min(66dvh, 460px);
+    max-height: calc(100dvh - 150px);
   }
   .np-chat-fab { width: 54px; height: 54px; }
 }
