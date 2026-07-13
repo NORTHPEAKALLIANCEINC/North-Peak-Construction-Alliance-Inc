@@ -70,6 +70,30 @@ window.NP_BOT_KB = {
       'Not something I can answer reliably. Rather than waste your time:'
     ],
 
+    /* ── No ha entendido el mensaje (mal escrito, muy corto) ──
+       No es "no lo sé": es "explícamelo mejor". La diferencia importa. */
+    clarify: [
+      'I did not quite catch that. Could you put it in a few more words?',
+      'Sorry — I am not sure what you mean. Tell me a bit more and I will help.',
+      'That one lost me. Can you say it a different way?',
+      'I want to help, but I did not understand. What are you trying to do?',
+      'Not sure I follow. Could you explain it in a sentence or two?'
+    ],
+
+    /* ── Segundo fallo seguido: dejar de insistir, ofrecer una persona ── */
+    retry: [
+      'I am still not getting it, and I do not want to waste your time.\n\nA person will understand you straight away:',
+      'Twice now I have missed your meaning — that is on me, not on you.\n\nGo straight to the team:',
+      'I am clearly not the right one for this question. Rather than guess again:'
+    ],
+
+    /* ── Tercer fallo: basta. WhatsApp o correo, sin rodeos. ── */
+    escalate: [
+      'Let us stop going in circles. Write to the team — one message on WhatsApp and someone will answer you properly:',
+      'This is a conversation for a human, and I am holding you up.\n\nWhatsApp or email, whichever you prefer:',
+      'I am not going to pretend any longer. Take it to a person — they will sort you out in a minute:'
+    ],
+
     quick: [
       { label: 'What you do',      q: 'What services do you offer?' },
       { label: 'Indigenous',       q: 'What is your Indigenous participation?' },
@@ -124,7 +148,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'the assistant',
-      keys: ['who are you', 'what are you', 'are you a robot', 'are you human', 'your name', 'are you a bot', 'am i talking to a person', 'are you real', 'ai'],
+      keys: ['who are you', 'what are you exactly', 'are you a robot', 'are you human', 'your name', 'are you a bot', 'am i talking to a person', 'are you real', 'ai'],
       answer: [
         'I am **Kodiak**, an assistant — not a person. I only tell you what the company has confirmed, and I never make things up.\n\nIf you would rather talk to someone real, say the word.',
         'Kodiak, an automated assistant. Honest about it, too: I am software, and I will not pretend otherwise.\n\nWant a human instead? Just ask.',
@@ -379,8 +403,9 @@ window.NP_BOT_KB = {
     {
       topic: 'past projects',
       keys: [
-        'projects', 'portfolio', 'case studies', 'past work', 'references', 'examples',
-        'what have you built', 'previous projects', 'experience', 'track record'
+        'your projects', 'past projects', 'previous projects', 'portfolio', 'case studies',
+        'past work', 'references', 'examples of your work', 'what have you built',
+        'track record', 'have you done'
       ],
       /* ⚠️ PENDIENTE: sustituir en cuanto lleguen casos verificados. */
       answer: [
@@ -451,6 +476,205 @@ window.NP_BOT_KB = {
         'Honest answer: it depends on the job. What I can tell you is that schedule is one of the three things we do not compromise on, alongside safety and quality.\n\nFor a real date, a person:'
       ],
       contactCard: true
+    },
+
+    /* ══════════════════════════════════════════════════════════
+       ENTRADAS NACIDAS DE LA SIMULACIÓN DE VISITANTES REALES
+    ══════════════════════════════════════════════════════════ */
+
+    /* ── LA SEÑORA MAYOR: no sabe usar esto, y no quiere aprender ── */
+    {
+      topic: 'speaking to a person',
+      keys: [
+        'can someone call me', 'call me back', 'i want someone to call', 'i do not use email',
+        'i do not use computers', 'i am not good with computers', 'this is too complicated',
+        'i do not know how to do this', 'can i just call', 'i prefer to talk', 'phone me',
+        'too technical', 'i am old'
+      ],
+      answer: [
+        'Then let us not bother with any of this. Pick up the phone and call **647 895 0939** — a person answers, and you can say it in your own words.',
+        'No need to use any of this. Call **647 895 0939** and talk to someone directly. That is the shortest path, and there is nothing wrong with taking it.',
+        'You do not have to learn anything. Ring **647 895 0939** and tell them what you need — they will take it from there.'
+      ],
+      contactCard: true
+    },
+    {
+      topic: 'is the company real',
+      boost: 1.5,
+      keys: [
+        'are you legitimate', 'are you real', 'is this a real company', 'can i trust you',
+        'are you registered', 'is this legit', 'scam', 'how do i know you are real',
+        'proof', 'verify', 'incorporated', 'corporation number', 'legal name'
+      ],
+      answer: [
+        'Fair question, and here is the answer in plain terms.\n\n**North Peak Construction Alliance Inc.** is federally incorporated in Canada, Corporation No. **1521162-0**, with a physical office at **37 Kodiak Crescent, Unit 11, Toronto**.\n\nYou can call the office and speak to a person, or come by. Nothing here is a mailbox.',
+        'You should ask that of anyone you hire.\n\nFederally incorporated, Corporation No. **1521162-0**. Real office at 37 Kodiak Crescent, Toronto. Real phone: 647 895 0939.\n\nVerify any of it — that is what it is there for.'
+      ],
+      contactCard: true
+    },
+    {
+      topic: 'visiting the office',
+      keys: [
+        'can i visit', 'come to your office', 'in person', 'meet you', 'meeting', 'drop by',
+        'where can i find you', 'face to face', 'sit down'
+      ],
+      answer: [
+        'The office is at **37 Kodiak Crescent, Unit 11, Toronto, ON M3J 3G5**.\n\nCall **647 895 0939** first so someone is expecting you — that way you are not turning up to a locked door.',
+        'Yes. 37 Kodiak Crescent, Unit 11, Toronto. Ring ahead on 647 895 0939 and they will make time for you.'
+      ],
+      contactCard: true
+    },
+    {
+      topic: 'the directors',
+      keys: [
+        'who runs the company', 'owner', 'owners', 'directors', 'director', 'management',
+        'who is in charge', 'leadership', 'founder', 'ceo', 'boss', 'principals'
+      ],
+      answer: [
+        'The company\'s directors are **Riley Birkett** and **Pavel Portelles Rivas**.\n\nIf you want to speak to leadership directly rather than through me, the office will put you through.',
+        'Two directors: **Riley Birkett** and **Pavel Portelles Rivas**. It is not a faceless outfit — you can talk to the people who run it.'
+      ],
+      contactCard: true,
+      nav: { label: 'About the company', href: '/about' }
+    },
+
+    /* ── EL JOVEN EMPRENDEDOR: "¿esto a mí en qué me sirve?" ── */
+    {
+      topic: 'how this helps your business',
+      keys: [
+        'how does this help me', 'how can you help my business', 'what is in it for me',
+        'why should i work with you', 'what do i gain', 'benefit for me', 'value',
+        'my business', 'my company', 'help my company', 'why you'
+      ],
+      answer: [
+        'Depends what you are building, so tell me that. But in general, clients come to us for one of three reasons:\n\n- They need the work **built properly**.\n- They need to hit an **Indigenous procurement target** on a bid.\n- They need **capacity** — a crew, fast.\n\nWhich of those is you?',
+        'Straight answer: we are useful to you if you have something to build, a bid to win, or a site short of hands.\n\nWhich one describes your situation?'
+      ],
+      more: [
+        'The one that surprises people: if you are bidding on public or corporate work, having a genuine Indigenous-owned partner is not a box to tick — it can be the difference between winning and coming second. And unlike a paper arrangement, we actually do the construction.'
+      ]
+    },
+    {
+      topic: 'small businesses and startups',
+      keys: [
+        'small business', 'startup', 'start up', 'small company', 'new business', 'minimum project',
+        'too small', 'small project', 'is there a minimum', 'small budget', 'just starting'
+      ],
+      answer: [
+        'We do not have a published minimum, and I am not going to invent one.\n\nTell the team what your project is — they will tell you honestly whether it makes sense for both sides. Nobody wants to take on a job they cannot do well.',
+        'Ask, rather than assume. Some small jobs are a good fit and some are not, and a person will tell you which yours is — without wasting your time.'
+      ],
+      contactCard: true
+    },
+    {
+      topic: 'partnerships and joint ventures',
+      keys: [
+        'partnership', 'partner', 'joint venture', 'jv', 'team up', 'collaborate', 'work together',
+        'alliance', 'consortium'
+      ],
+      answer: [
+        'That conversation is worth having, and it is not one for an assistant.\n\nSend an outline to the office and it goes to the directors:',
+        'Partnerships and joint ventures are a leadership conversation. Put it in writing to the office and it reaches the right desk:'
+      ],
+      contactCard: true
+    },
+    {
+      topic: 'what makes you different',
+      keys: [
+        'what makes you different', 'why you and not', 'competition', 'competitors', 'better than',
+        'compare', 'advantage', 'unique', 'differentiator', 'stand out'
+      ],
+      answer: [
+        'One thing, mainly: most clients have to choose between hiring an Indigenous-owned company and hiring one that can genuinely deliver the construction. Here it is the same company.\n\nThat is the whole proposition, and it is not a small one.',
+        'We are Indigenous-owned **and** we build. Plenty of firms offer one or the other; the combination is rarer than it should be.\n\nIf that is not what you need, we will tell you so.'
+      ],
+      nav: { label: 'The Indigenous advantage', href: '/indigenous-procurement' }
+    },
+
+    /* ── EL EJECUTIVO MINUCIOSO: riesgo, control, letra pequeña ── */
+    {
+      topic: 'delays and change orders',
+      keys: [
+        'delay', 'delays', 'late', 'behind schedule', 'change order', 'variation', 'overrun',
+        'what if something goes wrong', 'contingency', 'dispute', 'penalty'
+      ],
+      /* ⚠️ PENDIENTE: procedimiento contractual real de la empresa. */
+      answer: [
+        'That is exactly the right question to ask before signing anything, and exactly the wrong one to answer with a generic line.\n\nHow delays, changes and contingencies are handled belongs in the contract, and belongs to a person who can commit to it. Ask the team:',
+        'I am not going to give you a comfortable answer to a serious question. Delay and change-order terms are contract matters — get them from someone who can put their name to them:'
+      ],
+      contactCard: true
+    },
+    {
+      topic: 'capacity and team size',
+      keys: [
+        'how many employees', 'team size', 'how big', 'capacity', 'how many people',
+        'how many crews', 'resources', 'bandwidth', 'can you handle'
+      ],
+      /* ⚠️ PENDIENTE: plantilla y capacidad. */
+      answer: [
+        'I do not publish headcount figures I cannot verify, and you would be right not to trust a number that came from an assistant.\n\nAsk the office about capacity for your specific scope — that is the only answer worth having:',
+        'Capacity depends entirely on the job and the window. A person will tell you what can actually be put on the ground and when:'
+      ],
+      contactCard: true
+    },
+    {
+      topic: 'payment terms',
+      keys: [
+        'payment terms', 'invoice', 'deposit', 'payment schedule', 'holdback', 'billing',
+        'when do i pay', 'progress payments', 'net 30'
+      ],
+      /* ⚠️ PENDIENTE: condiciones comerciales. */
+      answer: [
+        'Commercial terms come from the contract, not from me. Ask the office and you will get them in writing:',
+        'That belongs in the contract, and I will not paraphrase a contract. The team will send you the terms:'
+      ],
+      contactCard: true
+    },
+    {
+      topic: 'prequalification documents',
+      keys: [
+        'prequalification', 'prequal', 'documents', 'paperwork', 'submission', 'due diligence',
+        'vendor form', 'compliance package', 'send me your'
+      ],
+      answer: [
+        'Send the office your prequalification package or vendor form and it will be completed and returned by a person who can sign it.\n\nThat is not something an assistant should be filling in:',
+        'Yes — send the forms to **admin@northalliancegroup.ca** and they come back completed and signed.'
+      ],
+      contactCard: true
+    },
+
+    /* ── EL ESCÉPTICO: la pregunta incómoda, respondida de frente ── */
+    {
+      topic: 'authenticity of the Indigenous participation',
+      boost: 2,        /* esta pregunta abre siempre; no la eclipsa nadie */
+      keys: [
+        'shell company', 'front', 'token', 'tokenism', 'just for the quota', 'paper company',
+        'fake indigenous', 'is it genuine', 'participation genuine', 'really indigenous', 'genuine', 'rent a native', 'box ticking',
+        'washing'
+      ],
+      answer: [
+        'You are right to ask, and the industry has earned that suspicion.\n\nThe distinction is simple: some arrangements exist so a form can be signed, and no Indigenous-owned business does any of the work. That is not this. North Peak is a construction company that builds — the participation is in the ownership and in the delivery, not in the paperwork.\n\nIf you want to test that, ask the directors directly. They will not be offended.',
+        'Fair challenge. Plenty of arrangements out there are exactly what you describe, and they damage everyone who is doing it properly.\n\nWe are a construction company first. The work is done by us, not signed over to someone else. And you are welcome to put that question to the directors:'
+      ],
+      contactCard: true,
+      nav: { label: 'Indigenous procurement', href: '/indigenous-procurement' }
+    },
+
+    /* ── COMPRADOR PÚBLICO / CONTRATISTA GENERAL ── */
+    {
+      topic: 'meeting a procurement requirement',
+      keys: [
+        'we need an indigenous subcontractor', 'need an indigenous partner', 'our bid requires',
+        'meet our target', 'procurement requirement', 'indigenous content', 'ibp',
+        'indigenous benefits plan', 'set aside contract', 'psib'
+      ],
+      answer: [
+        'That is precisely what we are for.\n\nTell us the scope, the region and the deadline, and the team will tell you straight away whether we can carry the work — not just the requirement.\n\nWhat is the project?',
+        'Good. The important part, and the part that trips people up: we do the construction. Your requirement is met **and** the work gets built.\n\nSend the scope and the timeline:'
+      ],
+      contactCard: true,
+      nav: { label: 'Indigenous procurement', href: '/indigenous-procurement' }
     },
 
     /* ══ RESIDENCIAL ════════════════════════════════════════ */

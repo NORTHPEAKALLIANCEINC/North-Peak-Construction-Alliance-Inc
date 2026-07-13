@@ -49,6 +49,11 @@
   /* Memoria de conversación: el último tema, para las preguntas que
      dependen de lo anterior. */
   var lastEntry = null;
+  /* Fallos seguidos. Un bot que no entiende y sigue insistiendo es una
+     pared. A la primera pide que se lo expliquen mejor; a la segunda
+     ofrece una persona; a la tercera deja de marear y manda a WhatsApp
+     o al correo. Se reinicia en cuanto entiende algo. */
+  var misses = 0;
 
   /* ════════════════════════════════════════════════════════
      1. LENGUA
@@ -147,6 +152,11 @@
     entry.keys.forEach(function (key) {
       var k = normalize(key);
 
+      /* El mensaje ENTERO es la clave ("hello", "thanks", "bye").
+         Sin esto, un saludo suelto se perdía: sus palabras están en la
+         lista de vacías y el mensaje se quedaba sin fichas que puntuar. */
+      if (norm === k) { s += 14; pos = 0; return; }
+
       if (k.indexOf(' ') !== -1) {                        // frase entera
         at = norm.indexOf(k);
         if (at !== -1) {
@@ -176,6 +186,13 @@
         }
       }
     });
+
+    /* Peso: algunas entradas deben ganar aunque compartan palabras con
+       otras. "¿No seréis una empresa fachada?" contiene "indigenous" y
+       "set aside", así que la entrada genérica la eclipsaba — y esa
+       pregunta merece su respuesta de frente, no un folleto. */
+    if (entry.boost) s = Math.round(s * entry.boost);
+
     return { score: s, pos: pos };
   }
 
@@ -214,6 +231,15 @@
       .sort(function (a, b) { return a.pos - b.pos; });
 
     return [top].concat(rest).slice(0, 3);
+  }
+
+  /* Mensajes que no son una pregunta: tres letras, un "asdf", un emoji
+     suelto. No merecen un "no lo sé": merecen "explícamelo mejor". */
+  function isUnintelligible(text) {
+    var words = tokens(text);
+    if (!words.length) return true;
+    var meaty = words.filter(function (w) { return w.length >= 4; });
+    return meaty.length === 0;
   }
 
   function isFollowUp(text) {
@@ -483,12 +509,31 @@
 
     if (!topics.length) {
       lastEntry = null;
-      speak(pickVariant(BOT.fallback, 'fallback'),
-            { contactCard: true, nav: { label: 'Contact page', href: BOT.contact.page } },
-            function () { busy = false; });
+      misses++;
+
+      /* Escalada en tres tiempos. */
+      var text2, extra;
+      if (misses === 1 && isUnintelligible(text)) {
+        /* No lo he entendido: no es que no lo sepa. */
+        text2 = pickVariant(BOT.clarify, 'clarify');
+        extra = null;
+      } else if (misses === 1) {
+        text2 = pickVariant(BOT.fallback, 'fallback');
+        extra = { contactCard: true, nav: { label: 'Contact page', href: BOT.contact.page } };
+      } else if (misses === 2) {
+        text2 = pickVariant(BOT.retry, 'retry');
+        extra = { contactCard: true };
+      } else {
+        /* Ya van tres. Dejar de marear a la persona es lo respetuoso. */
+        text2 = pickVariant(BOT.escalate, 'escalate');
+        extra = { contactCard: true };
+      }
+
+      speak(text2, extra, function () { busy = false; });
       return;
     }
 
+    misses = 0;                  // ha entendido: cuenta a cero
     lastEntry = topics[0].entry;
     var multi = topics.length > 1;
     var i = 0;
