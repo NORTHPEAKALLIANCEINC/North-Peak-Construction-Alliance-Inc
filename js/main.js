@@ -341,7 +341,7 @@ function initThemeToggle() {
   if (window.matchMedia('(hover: none)').matches) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  document.querySelectorAll('.service-card').forEach(card => {
+  document.querySelectorAll('.service-card, .trust-bar__item').forEach(card => {
     card.addEventListener('pointermove', e => {
       const r = card.getBoundingClientRect();
       card.style.setProperty('--mx', `${e.clientX - r.left}px`);
