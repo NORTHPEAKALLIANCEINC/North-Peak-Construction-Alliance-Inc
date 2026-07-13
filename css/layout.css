@@ -18,6 +18,11 @@
    para tapar bordes.
 ═══════════════════════════════════════════════ */
 
+/* Nada puede desbordar a lo ancho: si algo se pasa un pixel, el móvil
+   permite arrastrar la página a los lados y todo "se rompe". */
+html,
+body { overflow-x: clip; }
+
 .container {
   max-width: var(--container-max);
   margin: 0 auto;

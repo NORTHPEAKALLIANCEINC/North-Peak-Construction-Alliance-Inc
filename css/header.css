@@ -391,8 +391,33 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
 .site-header__logo { height: 38px; }
 .site-footer__logo { height: 60px; }
 
+/* ISOTIPO EN MÓVIL — en la barra no cabe el logo horizontal sin
+   comerse el sitio del menú. Debajo de 560px se usa solo la montaña:
+   marina en tema claro, plateada en tema oscuro (mismo crossfade que
+   el logo grande). */
+.site-header__logo--mark,
+.site-header__logo--mark-light { display: none; }
+
 @media (max-width: 560px) {
-  .site-header__logo { height: 40px; }
+  .site-header__logo--dark,
+  .site-header__logo--light { display: none; }
+
+  .site-header__logo--mark {
+    display: block;
+    height: 44px;
+    opacity: 1;
+  }
+  .site-header__logo--mark-light {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 44px;
+    opacity: 0;
+  }
+  html[data-theme="dark"] .site-header__logo--mark { opacity: 0; }
+  html[data-theme="dark"] .site-header__logo--mark-light { opacity: 1; }
+
   .site-footer__logo { height: 50px; }
   .site-header__row {
     gap: 0.6rem;
@@ -401,7 +426,8 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
 }
 
 @media (max-width: 400px) {
-  .site-header__logo { height: 36px; }
+  .site-header__logo--mark,
+  .site-header__logo--mark-light { height: 40px; }
 }
 
 /* La 2ª imagen se apila exactamente sobre la 1ª */
@@ -423,6 +449,6 @@ html[data-theme="dark"] .site-footer__logo--dark { opacity: 0; }
 html[data-theme="dark"] .site-header__logo--light,
 html[data-theme="dark"] .site-footer__logo--light { opacity: 1; }
 
-@media (max-width: 480px) {
-  .site-header__logo { height: 30px; }
-}
+/* (Aquí vivía un @media 480px que bajaba el logo a 30px. Estaba
+   DESPUÉS de las reglas nuevas, así que las pisaba y por eso el logo
+   seguía saliendo diminuto en el móvil. Eliminado.) */
