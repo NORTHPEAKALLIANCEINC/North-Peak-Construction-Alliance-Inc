@@ -43,13 +43,66 @@ function initNavToggle() {
   });
 }
 
-/* El header de cristal se intensifica (más opaco/blur) al bajar */
+/* El header de cristal se intensifica (más opaco/blur) al bajar y,
+   además, se retira hacia arriba en cuanto el usuario baja: el
+   contenido queda limpio. Vuelve cuando:
+     · se regresa al tope de la página,
+     · el cursor entra en la franja superior (se le va a buscar),
+     · en táctil (sin cursor), al hacer scroll hacia arriba,
+     · el menú móvil está abierto.
+   Nunca se oculta con el menú desplegado. */
 function initHeaderScrollState() {
-  const onScroll = () => {
-    document.body.classList.toggle('is-scrolled', window.scrollY > 24);
+  const nav = document.getElementById('site-nav');
+  const TOP_ZONE = 24;     // por debajo de esto se considera "arriba del todo"
+  const HOVER_ZONE = 90;   // franja superior que llama al header con el cursor
+  const canHover = window.matchMedia('(hover: hover)').matches;
+
+  let lastY = window.scrollY;
+  let called = false;      // el cursor lo está reclamando
+  let hidden = false;
+  let ticking = false;
+
+  const menuOpen = () => !!nav && nav.classList.contains('is-open');
+
+  const setHidden = (value) => {
+    if (value === hidden) return;
+    hidden = value;
+    document.body.classList.toggle('is-header-hidden', hidden);
   };
+
+  const onScroll = () => {
+    const y = window.scrollY;
+    document.body.classList.toggle('is-scrolled', y > TOP_ZONE);
+
+    if (y <= TOP_ZONE || called || menuOpen()) {
+      setHidden(false);
+    } else if (y > lastY) {
+      setHidden(true);                 // baja → se retira
+    } else if (!canHover) {
+      setHidden(false);                // táctil: subir lo devuelve
+    }
+
+    lastY = y;
+    ticking = false;
+  };
+
+  const requestUpdate = () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(onScroll);
+  };
+
   onScroll();
-  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll', requestUpdate, { passive: true });
+
+  if (canHover) {
+    window.addEventListener('pointermove', (e) => {
+      const near = e.clientY <= HOVER_ZONE;
+      if (near === called) return;
+      called = near;
+      setHidden(!near && window.scrollY > TOP_ZONE && !menuOpen());
+    }, { passive: true });
+  }
 }
 
 /* Reveal por bloque al entrar en viewport, con stagger opcional
