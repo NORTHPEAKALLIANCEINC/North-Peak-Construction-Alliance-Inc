@@ -56,6 +56,29 @@
   var flow = null;          // { id, step, data, stage }
   var pendingFlow = null;   // flujo ofrecido, esperando un "sí"
 
+  /* [FALLO CORREGIDO] pendingFlow y lastEntry vivían SOLO en memoria: al
+     recargar la página o al navegar, se perdían, y un "yes" del visitante
+     caía en la rama de "cuéntame más" repitiendo la respuesta anterior.
+     Ahora ambos sobreviven, como el resto de la conversación. */
+  function savePending() {
+    try {
+      sessionStorage.setItem('np-chat-pending', pendingFlow || '');
+      sessionStorage.setItem('np-chat-last', (lastEntry && (lastEntry.topic || lastEntry.keys[0])) || '');
+    } catch (e) {}
+  }
+
+  function loadPending() {
+    try {
+      pendingFlow = sessionStorage.getItem('np-chat-pending') || null;
+      var t = sessionStorage.getItem('np-chat-last');
+      if (t) {
+        DATA.kb.forEach(function (e) {
+          if ((e.topic || e.keys[0]) === t) lastEntry = e;
+        });
+      }
+    } catch (e) {}
+  }
+
   /* Se ofrece la toma de datos UNA vez por sesión y por tipo. Un bot que
      lo ofrece en cada respuesta es un vendedor pesado, no un asistente.
      (Si el visitante lo pide él mismo, se abre siempre: eso es otra cosa.) */
@@ -534,6 +557,7 @@
     if (!def) { if (done) done(); return; }
     flow = { id: id, step: 0, data: {}, stage: 'asking' };
     pendingFlow = null;
+    savePending();
     saveFlow();
     speak(pickVariant(def.start, id + '#start'), null, function () {
       askStep(done);
@@ -704,17 +728,28 @@
       if (AFFIRM.test(n0)) { startFlow(pendingFlow, release); return; }
       if (NEGATE.test(n0)) {
         pendingFlow = null;
+        savePending();
         speak(pickVariant(DATA.flowTalk.cancelled, 'cancel'), null, release);
         return;
       }
       pendingFlow = null;   // ha cambiado de tema: se sigue como siempre
+      savePending();
     }
 
     /* 3. ¿Lo pide directamente? ("send my project") */
     var direct = flowTrigger(text);
     if (direct) { startFlow(direct, release); return; }
 
-    /* Continuación de lo anterior: "yes", "tell me more", "go on". */
+    /* Red de seguridad: si lo último que se habló ofrecía tomar los datos
+       y el visitante dice "sí", se abre el flujo. Pase lo que pase con la
+       memoria, un "sí" nunca vuelve a repetir la respuesta anterior. */
+    if (AFFIRM.test(normalize(text)) && lastEntry && lastEntry.offerFlow &&
+        DATA.flows[lastEntry.offerFlow]) {
+      startFlow(lastEntry.offerFlow, release);
+      return;
+    }
+
+    /* Continuación de lo anterior: "tell me more", "go on". */
     if (isFollowUp(text) && lastEntry) {
       var key  = lastEntry.topic || lastEntry.keys[0];
       var more = lastEntry.more
@@ -755,6 +790,7 @@
 
     misses = 0;                  // ha entendido: cuenta a cero
     lastEntry = topics[0].entry;
+    savePending();
     var multi = topics.length > 1;
     var i = 0;
 
@@ -784,6 +820,7 @@
         if (isLast && entry.offerFlow && DATA.flows[entry.offerFlow] &&
             !alreadyOffered(entry.offerFlow)) {
           pendingFlow = entry.offerFlow;
+          savePending();
           markOffered(entry.offerFlow);
           speak(pickVariant(DATA.flows[entry.offerFlow].offer, entry.offerFlow + '#offer'),
                 null, next);
@@ -848,6 +885,7 @@
   function init() {
     build();
     loadFlow();      // una toma de datos a medias sobrevive al cambio de página
+    loadPending();   // y también el ofrecimiento en el aire
     restore();
 
     var wasOpen = false, seen = false;
