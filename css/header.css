@@ -524,10 +524,18 @@ html[data-theme="dark"] .site-footer__logo--light { opacity: 1; }
    Mismo lenguaje que los botones: vidrio, brillo interior y
    resplandor propio. El color es el de la marca, no el dorado.
    ═══════════════════════════════════════════════ */
-.site-nav__tools { display: none; }
+/* Ocultos SOLO en escritorio, con un @media de mínimo.
+   [ERROR COMETIDO] Antes esto era `display:none` a secas al final del
+   archivo: pisaba al `display:flex` de la media query de móvil, que va
+   ANTES y tiene la misma especificidad. Resultado: en móvil no salía ni
+   el WhatsApp ni el interruptor de tema. */
+@media (min-width: 1101px) {
+  .site-nav__tools { display: none; }
+  .wa-btn { display: none; }
+}
 
 .wa-btn {
-  display: none;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   height: 42px;
