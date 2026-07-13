@@ -6,8 +6,8 @@
 ================================================================ */
 
 .np-chat-root {
-  --np-w: 336px;    /* antes 380: se veía gordo */
-  --np-h: 470px;    /* antes 560: se comía la pantalla */
+  --np-w: 312px;    /* estrecho a propósito: es un chat, no un panel */
+  --np-h: 440px;
 }
 
 /* ─── Botón flotante ─────────────────────────────────────── */
@@ -152,10 +152,11 @@
 
 /* ─── Cabecera ───────────────────────────────────────────── */
 .np-chat__head {
+  position: relative;   /* ancla del menú de temas */
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.85rem 1rem;
+  gap: 0.6rem;
+  padding: 0.75rem 0.85rem;
   border-bottom: 1px solid var(--rule);
   background: var(--void-elevated);
 }
@@ -299,11 +300,16 @@
   border: 1px solid var(--glass-border-strong);
 }
 .np-chat__card a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   color: var(--text-primary);
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;   /* el correo largo ya no se corta a lo bruto */
   transition: color var(--dur-fast) var(--ease-out);
 }
+.np-chat__card a svg { flex-shrink: 0; color: var(--cyan); }
 .np-chat__card a:hover { color: var(--cyan); }
 
 /* Puntos de "escribiendo" */
@@ -323,31 +329,79 @@
 }
 
 /* ─── Sugerencias ────────────────────────────────────────── */
-/* Se envuelven en varias filas. Antes iban en scroll horizontal y se
-   cortaban contra el borde: parecía un error, y lo era. */
-.np-chat__quick {
+/* ─── Temas: botón de cristal + lista desplegable ─────────
+   Antes eran seis botones amontonados al pie del chat: se pisaban,
+   se salían y arruinaban la ventana. Ahora viven aquí, plegados. */
+.np-chat__topics {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 0.35rem;
-  padding: 0 0.8rem 0.65rem;
+  flex-shrink: 0;
+  padding: 0.4rem 0.65rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--btn-text);
+  background:
+    linear-gradient(180deg, var(--btn-sheen), transparent 55%),
+    var(--btn-glass);
+  border: 1px solid var(--btn-edge);
+  box-shadow: inset 0 1px 0 0 var(--btn-inner-light);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.np-chat__topics:hover  { border-color: var(--cyan-dim); transform: translateY(-1px); }
+.np-chat__topics:active { transform: scale(0.96); }
+
+/* La lista: sólida (nada de transparencias), y se despliega con el
+   mismo gesto que el menú de la web. */
+.np-chat__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0.85rem;
+  left: 0.85rem;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  border-radius: var(--radius-sm);
+  background: var(--void-soft);
+  border: 1px solid transparent;
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.6);
+  transition: max-height var(--dur-base) var(--ease-out),
+              opacity var(--dur-fast) var(--ease-out);
 }
 
-.np-chat__qr {
-  padding: 0.38rem 0.7rem;
-  border-radius: var(--radius-pill);
+.np-chat__menu.is-open {
+  max-height: 320px;
+  opacity: 1;
+  border-color: var(--glass-border-strong);
+}
+
+/* Filas: todas del mismo ancho y la misma altura. Uniformidad. */
+.np-chat__mi {
+  width: 100%;
+  padding: 0.72rem 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
   font-family: var(--font-mono);
   font-size: 0.66rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-dim);
-  background: var(--glass-fill);
-  border: 1px solid var(--glass-border);
-  cursor: pointer;
-  white-space: nowrap;
+  color: var(--text-primary);
   transition: color var(--dur-fast) var(--ease-out),
-              border-color var(--dur-fast) var(--ease-out);
+              background var(--dur-fast) var(--ease-out);
 }
-.np-chat__qr:hover { color: var(--cyan); border-color: var(--cyan-dim); }
+.np-chat__mi:last-child { border-bottom: 0; }
+.np-chat__mi:hover { color: var(--cyan); background: var(--void-elevated); }
 
 /* ─── Barra de entrada ───────────────────────────────────── */
 .np-chat__bar {
