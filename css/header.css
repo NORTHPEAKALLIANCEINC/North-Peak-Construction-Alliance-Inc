@@ -59,6 +59,14 @@ html[data-theme="light"] body.is-scrolled .site-header__row {
   box-shadow: 0 10px 30px -18px rgba(15, 30, 56, 0.45);
 }
 
+/* TEMA OSCURO — misma lógica: transparente en la primera pantalla,
+   sólido en cuanto se ha bajado. */
+html[data-theme="dark"] body.is-scrolled .site-header__row {
+  background: var(--void-soft);
+  border-color: var(--glass-border-strong);
+  box-shadow: 0 14px 36px -20px rgba(0, 0, 0, 0.85);
+}
+
 /* ─── Zona de logo (antes inexistente) ───
    Monograma de cristal + wordmark. Reemplazar el <span> del
    monograma por <img> cuando exista logotipo real del cliente. */

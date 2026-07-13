@@ -460,19 +460,71 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
   border-bottom: 1px solid rgba(150, 180, 235, 0.10);
 }
 
+/* minmax(0, 1fr) — sin esto, las celdas de grid tienen min-width:auto
+   y el contenido más largo ("Federal · No. 1521162-0") ensancha su
+   columna y desborda: en Chrome se veía CORTADO. */
 .trust-bar__grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1px;
   background: rgba(150, 180, 235, 0.10);
 }
 
 .trust-bar__item {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  overflow: hidden;
   background: #070C16;
   padding: 1.6rem var(--space-2);
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 0.4rem;
+  transition: background var(--dur-base) var(--ease-out);
+}
+
+/* Filamento de luz dorada en el borde superior — el mismo lenguaje
+   de los botones. Crece de dentro hacia fuera al pasar el cursor.
+   El dorado va FIJO (#D9B863): esta franja es oscura en los dos
+   temas, así que var(--cyan) en claro (bronce) se embarraría. */
+.trust-bar__item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  z-index: 2;
+  background: linear-gradient(90deg, transparent, #D9B863, transparent);
+  opacity: 0;
+  transform: scaleX(0.35);
+  transition: opacity var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
+}
+
+/* Resplandor que SIGUE AL CURSOR (--mx/--my las publica main.js,
+   igual que en las tarjetas de servicio). */
+.trust-bar__item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%),
+              rgba(217, 184, 99, 0.16), transparent 72%);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.trust-bar__item:hover { background: #0B1322; }
+.trust-bar__item:hover::before { opacity: 1; transform: scaleX(1); }
+.trust-bar__item:hover::after  { opacity: 1; }
+
+.trust-bar__label,
+.trust-bar__value {
+  position: relative;
+  z-index: 2;
 }
 
 .trust-bar__label {
@@ -481,7 +533,10 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(232, 238, 249, 0.45);
+  transition: color var(--dur-base) var(--ease-out);
 }
+
+.trust-bar__item:hover .trust-bar__label { color: rgba(217, 184, 99, 0.9); }
 
 .trust-bar__value {
   font-family: var(--font-display);
@@ -489,16 +544,37 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
   font-size: 1rem;
   line-height: 1.3;
   color: #FFFFFF;
+  overflow-wrap: anywhere;
 }
 
 .trust-bar__value em {
   font-style: normal;
-  color: var(--cyan);
+  color: #D9B863;
 }
 
 @media (max-width: 860px) {
-  .trust-bar__grid { grid-template-columns: repeat(2, 1fr); }
+  .trust-bar__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .trust-bar__item { padding: 1.2rem var(--space-2); }
+
+  /* MÓVIL + TEMA CLARO: aquí el hero cae en flujo normal y el texto
+     ya va sobre el fondo de la página, así que la franja negra queda
+     como un bloque suelto sin relación con nada. Se pasa a superficie
+     clara — un escalón por debajo del fondo, que además da cuerpo al
+     modo claro. En tema oscuro no cambia nada. */
+  html[data-theme="light"] .trust-bar {
+    background: var(--void-elevated);
+    border-color: rgba(15, 30, 56, 0.12);
+  }
+  html[data-theme="light"] .trust-bar__grid { background: rgba(15, 30, 56, 0.12); }
+  html[data-theme="light"] .trust-bar__item { background: var(--void-elevated); }
+  html[data-theme="light"] .trust-bar__item:hover { background: var(--void-soft); }
+  html[data-theme="light"] .trust-bar__label { color: rgba(15, 30, 56, 0.55); }
+  html[data-theme="light"] .trust-bar__value { color: var(--text-primary); }
+  html[data-theme="light"] .trust-bar__value em,
+  html[data-theme="light"] .trust-bar__item:hover .trust-bar__label { color: #856612; }
+  html[data-theme="light"] .trust-bar__item::before {
+    background: linear-gradient(90deg, transparent, #856612, transparent);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
