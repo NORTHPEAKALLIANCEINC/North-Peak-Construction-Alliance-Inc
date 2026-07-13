@@ -536,8 +536,79 @@
      lee de vuelta, y envía al correo de la empresa.
   ════════════════════════════════════════════════════════ */
 
-  var AFFIRM = /^(yes|yeah|yep|yes please|sure|ok|okay|go ahead|please do|do it|lets do it|let us do it|alright|fine|sounds good|correct|right|send it|send)\b/;
-  var NEGATE = /^(no|nope|not now|later|cancel|stop|forget it|never mind|nevermind|quit|exit)\b/;
+  /* ── Sí, no, y cancelar ────────────────────────────────────
+     [FALLOS CORREGIDOS, los dos gordos]
+
+     1. Solo se reconocía el inglés. Un visitante que escribe "sí" — o
+        que usa el traductor del navegador, que es lo que hace medio
+        mundo — no era entendido. Ahora se reconocen inglés, español y
+        francés, que es lo que se habla en Canadá y en la práctica.
+
+     2. "no hay que corregir nada, así está bien" EMPEZABA por "no", y el
+        bot lo leía como CANCELAR. Una frase de aprobación se tomaba por
+        un rechazo. Ahora: se busca la aprobación en TODA la frase, y
+        solo cancela quien lo dice explícitamente ("cancel", "cancelar").
+        Un "no" suelto ya no destruye una toma de datos. */
+
+  var YES = new RegExp('\\b(' + [
+    'yes', 'yeah', 'yep', 'yup', 'sure', 'ok', 'okay', 'sounds good', 'go ahead',
+    'please do', 'do it', 'send it', 'send', 'submit', 'correct', 'right', 'perfect',
+    'looks good', 'thats right', 'that is right', 'all good', 'fine', 'alright', 'confirm',
+    'si', 'claro', 'dale', 'adelante', 'correcto', 'perfecto', 'enviar', 'envialo',
+    'envialo ya', 'esta bien', 'todo bien', 'esta correcto', 'de acuerdo', 'vale',
+    'oui', 'daccord', 'envoyer'
+  ].join('|') + ')\\b');
+
+  var CANCEL = new RegExp('\\b(' + [
+    'cancel', 'cancelled', 'stop', 'forget it', 'never mind', 'nevermind', 'quit', 'exit',
+    'not now', 'maybe later', 'abort', 'drop it',
+    'cancelar', 'cancela', 'olvidalo', 'olvidate', 'detener', 'parar', 'no quiero',
+    'no gracias', 'mas tarde', 'annuler'
+  ].join('|') + ')\\b');
+
+  /* Rechazo suave: solo válido cuando se OFRECE algo, nunca dentro de
+     una toma de datos ya empezada. */
+  var DECLINE = new RegExp('^(no|nope|non|nah)\\b');
+
+  /* NEGACIÓN de corrección: "no hay que corregir nada", "nothing to change".
+     Contiene la palabra "corregir", pero significa lo contrario. Sin esto,
+     la frase de aprobación más natural del mundo mandaba a corregir. */
+  var NOFIX = new RegExp('(' + [
+    'nada que (corregir|cambiar|arreglar)',
+    'no hay que (corregir|cambiar|arreglar)',
+    'no (corrijas|cambies|hace falta)',
+    'sin cambios', 'todo esta bien', 'esta todo bien',
+    'nothing to (change|fix|correct)', 'no changes', 'no need to change',
+    'do not change', 'dont change', 'leave it'
+  ].join('|') + ')');
+
+  /* Petición de corregir algo. */
+  var FIXWORD = new RegExp('\\b(' + [
+    'change', 'fix', 'correct it', 'edit', 'modify', 'wrong', 'mistake',
+    'cambiar', 'cambia', 'corregir', 'corrige', 'arreglar', 'arregla', 'esta mal',
+    'incorrecto', 'error', 'modifier'
+  ].join('|') + ')\\b');
+
+  /* Cada paso responde también por su nombre traducido: el visitante ve
+     la web traducida por el navegador y escribe lo que ve. */
+  var STEP_ALIASES = {
+    what:       ['what', 'work', 'project', 'obra', 'trabajo', 'proyecto'],
+    where:      ['where', 'city', 'location', 'donde', 'dónde', 'ciudad', 'lugar', 'ou'],
+    when:       ['when', 'date', 'timing', 'cuando', 'cuándo', 'fecha', 'plazo', 'quand'],
+    name:       ['name', 'nombre', 'nom'],
+    contact:    ['contact', 'phone', 'email', 'mail', 'contacto', 'correo', 'telefono',
+                 'teléfono', 'numero', 'número', 'courriel'],
+    trade:      ['trade', 'role', 'oficio', 'puesto', 'metier'],
+    experience: ['experience', 'experiencia']
+  };
+
+  function mentionsStep(norm, stepId) {
+    var list = STEP_ALIASES[stepId] || [stepId];
+    for (var i = 0; i < list.length; i++) {
+      if (new RegExp('\\b' + normalize(list[i]) + '\\b').test(norm)) return true;
+    }
+    return false;
+  }
 
   function saveFlow() {
     try { sessionStorage.setItem('np-chat-flow', JSON.stringify(flow)); } catch (e) {}
@@ -650,32 +721,52 @@
     var def = flowDef();
     var n = normalize(text);
 
-    if (NEGATE.test(n) && flow.stage === 'asking') {
+    if (CANCEL.test(n) && flow.stage === 'asking') {
       clearFlow();
       speak(pickVariant(DATA.flowTalk.cancelled, 'cancel'), null, done);
       return;
     }
 
-    /* Está esperando confirmación final. */
+    /* Está esperando confirmación final.
+       ORDEN IMPORTANTE: primero se mira si pide corregir algo concreto,
+       DESPUÉS si aprueba, y solo al final si cancela. Con el orden al
+       revés, "no hay que corregir nada, así está bien" se cancelaba. */
     if (flow.stage === 'confirm') {
-      if (AFFIRM.test(n)) { submitLead(done); return; }
-      if (NEGATE.test(n)) {
+
+      /* "no hay que corregir nada, así está bien" → es un SÍ. Va primero. */
+      if (NOFIX.test(n)) { submitLead(done); return; }
+
+      /* ¿Señala un campo concreto? ("cambia el teléfono", "el nombre está mal") */
+      var target = null;
+      def.steps.forEach(function (s, i) {
+        if (mentionsStep(n, s.id)) target = i;
+      });
+
+      if (target !== null && (FIXWORD.test(n) || !YES.test(n))) {
+        flow.step = target;
+        flow.stage = 'fixing';
+        askStep(done);
+        return;
+      }
+
+      /* ¿Aprueba? Se busca en TODA la frase, no solo al principio. */
+      if (YES.test(n) && !FIXWORD.test(n)) { submitLead(done); return; }
+
+      /* ¿Cancela de verdad? Palabras explícitas, nunca un "no" suelto. */
+      if (CANCEL.test(n)) {
         clearFlow();
         speak(pickVariant(DATA.flowTalk.cancelled, 'cancel'), null, done);
         return;
       }
-      /* "cambia el teléfono", "el nombre está mal"… */
-      var target = null;
-      def.steps.forEach(function (s, i) {
-        if (n.indexOf(s.id) !== -1) target = i;
-      });
-      if (target === null) {
+
+      /* Pide corregir, pero no dice qué. */
+      if (FIXWORD.test(n) || DECLINE.test(n)) {
         speak(pickVariant(DATA.flowTalk.whatToChange, 'change'), null, done);
         return;
       }
-      flow.step = target;
-      flow.stage = 'fixing';
-      askStep(done);
+
+      /* No se ha entendido la confirmación: se pregunta claro. */
+      speak(pickVariant(DATA.flowTalk.confirmUnclear, 'confirmUnclear'), null, done);
       return;
     }
 
@@ -683,7 +774,7 @@
     var step = def.steps[flow.step];
 
     /* Paso de contacto y ya teníamos uno apuntado: se ofrece reutilizarlo. */
-    if (step.type === 'contact' && flow.saved && AFFIRM.test(n)) {
+    if (step.type === 'contact' && flow.saved && YES.test(n) && !looksLikeContact(text)) {
       flow.data[step.id] = flow.saved;
       advance(done);
       return;
@@ -773,8 +864,8 @@
     /* 2. ¿Se ofreció una y el visitante ha dicho que sí? */
     if (pendingFlow) {
       var n0 = normalize(text);
-      if (AFFIRM.test(n0)) { startFlow(pendingFlow, release); return; }
-      if (NEGATE.test(n0)) {
+      if (YES.test(n0)) { startFlow(pendingFlow, release); return; }
+      if (DECLINE.test(n0) || CANCEL.test(n0)) {
         pendingFlow = null;
         savePending();
         speak(pickVariant(DATA.flowTalk.cancelled, 'cancel'), null, release);
@@ -791,8 +882,8 @@
     /* Red de seguridad: si lo último que se habló ofrecía tomar los datos
        y el visitante dice "sí", se abre el flujo. Pase lo que pase con la
        memoria, un "sí" nunca vuelve a repetir la respuesta anterior. */
-    if (AFFIRM.test(normalize(text)) && lastEntry && lastEntry.offerFlow &&
-        DATA.flows[lastEntry.offerFlow]) {
+    if (YES.test(normalize(text)) && normalize(text).split(' ').length <= 4 &&
+        lastEntry && lastEntry.offerFlow && DATA.flows[lastEntry.offerFlow]) {
       startFlow(lastEntry.offerFlow, release);
       return;
     }

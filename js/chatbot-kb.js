@@ -191,9 +191,9 @@ window.NP_BOT_KB = {
           id: 'contact',
           type: 'contact',
           ask: [
-            'Last one — the best way to reach you. A phone number or an email.',
-            'And how do we reach you? Phone or email, whichever you prefer.',
-            'Finally: your phone or your email, so a person can come back to you.'
+            'Last one — just type your phone number or your email address.',
+            'And your contact: write the phone number or the email itself.',
+            'Finally, write your email or your phone number, and a person will come back to you.'
           ]
         }
       ],
@@ -258,8 +258,8 @@ window.NP_BOT_KB = {
           id: 'contact',
           type: 'contact',
           ask: [
-            'Best way to reach you — phone or email.',
-            'And your phone or email, so they can come back to you.'
+            'Now just type your phone number or your email.',
+            'Write your email or phone number and they will come back to you.'
           ]
         }
       ],
@@ -309,9 +309,18 @@ window.NP_BOT_KB = {
       'Sending it now…',
       'One moment — passing it to the team…'
     ],
+    /* No se ha entendido si aprueba o no. Se pregunta sin ambigüedad. */
+    confirmUnclear: [
+      'Sorry — I did not catch whether that is a yes.\n\nSay **yes** to send it, or tell me what to change.',
+      'I am not sure if you are approving it. **Yes** sends it; otherwise tell me what to fix.',
+      'Just so I do not get this wrong: **yes** and it goes to the team. Or name what needs correcting.'
+    ],
+
     whatToChange: [
       'Which part? Say **what**, **where**, **when**, **name** or **contact**.',
-      'Tell me which one to fix: **what**, **where**, **when**, **name** or **contact**.'
+      'Tell me which one to fix: **what**, **where**, **when**, **name** or **contact**.',
+      'No problem. Which one — the work, the city, the date, your name, or your contact?',
+      'Happy to correct it. Name the part: **what**, **where**, **when**, **name** or **contact**.'
     ]
   },
 
