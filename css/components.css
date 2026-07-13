@@ -800,8 +800,10 @@ html[data-theme="light"] .site-footer__cta {
    ::before, NO ::after: la sección lleva también .grid-texture, que ya
    usa ::after con inset:0. Al compartir pseudo-elemento, el top:0 de
    la retícula se mezclaba con mi height:5px y la barra dorada acababa
-   CLAVADA ARRIBA (y encima borraba la cuadrícula). Ese era el bug. */
-@media (min-width: 860px) {
+   CLAVADA ARRIBA (y encima borraba la cuadrícula). Ese era el bug.
+
+   Ahora también en móvil, en los dos temas. */
+@media (min-width: 1px) {
   .page-hero::before {
     top: auto;
     content: "";
@@ -846,6 +848,12 @@ html[data-theme="light"] .site-footer__cta {
   .btn__full  { display: none; }
   .btn__short { display: inline; }
   .btn { padding: 0.9rem 1.3rem; }
+}
+
+/* Los títulos de cabecera se disparaban en móvil: se acota su tamaño. */
+@media (max-width: 640px) {
+  .page-hero h1 { font-size: clamp(1.7rem, 7.4vw, 2.25rem); line-height: 1.16; }
+  .page-hero .lede { font-size: 0.98rem; }
 }
 
 /* Fila de botones: centrada y CON separación. Apilados en móvil se
