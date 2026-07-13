@@ -255,7 +255,12 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
    lista los 7 ítems cómodamente con su numeración. El nav
    horizontal solo se muestra en escritorio ancho (min-width:1101px). */
 @media (max-width: 1100px) {
-  .site-header__cta { display: none; }
+  /* .site-header__cta.btn — cualificado a propósito: el elemento
+     también lleva .btn, y components.css (que carga DESPUÉS) le pone
+     display:inline-flex con la misma especificidad, así que ganaba.
+     Por eso el botón seguía saliendo en móvil, comiéndose el sitio y
+     encogiendo el logo hasta hacerlo desaparecer. */
+  .site-header__cta.btn { display: none; }
   .site-nav {
     position: fixed;
     top: 4.6rem;
@@ -387,7 +392,7 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
 .site-footer__logo { height: 60px; }
 
 @media (max-width: 560px) {
-  .site-header__logo { height: 34px; }
+  .site-header__logo { height: 40px; }
   .site-footer__logo { height: 50px; }
   .site-header__row {
     gap: 0.6rem;
@@ -396,7 +401,7 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
 }
 
 @media (max-width: 400px) {
-  .site-header__logo { height: 30px; }
+  .site-header__logo { height: 36px; }
 }
 
 /* La 2ª imagen se apila exactamente sobre la 1ª */
