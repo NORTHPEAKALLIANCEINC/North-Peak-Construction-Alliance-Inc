@@ -835,6 +835,19 @@ html[data-theme="light"] .site-footer__cta {
   }
 }
 
+/* ETIQUETA CORTA EN MÓVIL — cada botón lleva su texto completo y su
+   versión resumida; el CSS decide cuál se ve. Nada de recortar con
+   overflow: el botón se dimensiona con el texto que toca.
+   El botón fijo del pie (Book a consultation) no lleva versión corta
+   a propósito: ahí sí hay sitio. */
+.btn__short { display: none; }
+
+@media (max-width: 560px) {
+  .btn__full  { display: none; }
+  .btn__short { display: inline; }
+  .btn { padding: 0.9rem 1.3rem; }
+}
+
 /* Fila de botones: centrada y CON separación. Apilados en móvil se
    tocaban porque no había hueco entre ellos. */
 .btn-row {
