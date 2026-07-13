@@ -1,117 +1,124 @@
 /* ================================================================
-   KODIAK — Motor del asistente virtual
+   KODIAK — Motor v2
    North Peak Construction Alliance Inc.
 
-   QUÉ ES: un asistente 100 % local. Sin API, sin servidor, sin
-   claves, sin coste. Todo lo que sabe está en js/chatbot-kb.js.
+   100 % local. Sin API, sin servidor, sin claves, sin coste.
+   Todo lo que sabe vive en js/chatbot-kb.js.
 
-   QUÉ NO HACE (a propósito):
-   · No consulta Wikipedia ni ninguna fuente externa. En el proyecto
-     anterior eso provocaba respuestas enciclopédicas fuera de lugar.
-     Aquí, si no lo sabe, lo dice y ofrece una persona.
-   · No inventa. No estima precios. No afirma certificaciones.
-   · No habla español: el sitio es inglés y su público, canadiense.
-     (La estructura queda intacta por si algún día se reactiva.)
+   ── QUÉ HACE ESTE MOTOR QUE NO HACE UN CHATBOT DE BOTONES ─────
 
-   QUÉ SÍ HACE:
-   · Reconoce varias preguntas dentro de un mismo mensaje y responde
-     a cada una por separado.
-   · Tolera erratas, sinónimos y frases coloquiales.
-   · Guía: cuando la respuesta vive en otra página, ofrece el botón
-     que lleva allí, y la conversación sobrevive al cambio de página.
-   · Escribe con efecto máquina, con pausas proporcionales al texto.
+   1. MULTI-TEMA REAL. Si en un mismo párrafo le hablas de tres cosas
+      (un muro de ladrillo, si trabajáis en Ottawa, y cuánto cuesta),
+      detecta los TRES y contesta a cada uno EN SU PROPIO MENSAJE,
+      encabezado por el tema al que responde, con sus puntos de
+      "escribiendo" en medio. No un párrafo kilométrico.
 
-   INTEGRACIÓN (3 líneas por página):
-     <link rel="stylesheet" href="/css/chatbot.css?v=1">
-     <script src="/js/chatbot-kb.js?v=1"></script>
-     <script src="/js/chatbot.js?v=1"></script>
-   El widget se inyecta solo. No hay que tocar el HTML.
+   2. NO SE REPITE. Cada respuesta tiene variantes y el motor recuerda
+      cuál usó: nunca da dos veces seguidas la misma frase.
+
+   3. ENTIENDE MAL ESCRITO. Erratas (distancia de edición), sinónimos,
+      contracciones sin apóstrofo, plurales y números con símbolos.
+
+   4. TIENE MEMORIA CORTA. Sabe de qué se acaba de hablar: "sí",
+      "cuéntame más" o "¿y eso cuánto cuesta?" se entienden en contexto.
+
+   5. GUÍA. Cuando la respuesta vive en otra página, ofrece el botón
+      que lleva allí — y la conversación continúa al otro lado.
+
+   ── QUÉ NO HACE, A PROPÓSITO ─────────────────────────────────
+   · No consulta fuentes externas. Si no lo sabe, lo dice y pasa a una
+     persona. Un bot que adivina es un pasivo, no un activo.
+   · No da precios. No afirma certificaciones. No inventa proyectos.
+   · Lenguaje neutro: no presupone género, ni edad, ni cargo.
 ================================================================ */
 
 (function () {
   'use strict';
 
   var DATA = window.NP_BOT_KB;
-  if (!DATA || !DATA.kb) return;           // sin KB, no arranca
+  if (!DATA || !DATA.kb) return;
 
-  var BOT     = DATA.bot;
-  var STORE   = 'np-chat-history';         // sobrevive a la navegación
-  var OPEN    = 'np-chat-open';
+  var BOT   = DATA.bot;
+  var STORE = 'np-chat-history';
+  var OPEN  = 'np-chat-open';
+  var SEEN  = 'np-chat-seen';
 
-  /* ── Sinónimos: la diferencia entre "entiende" y "es un menú" ──
-     El visitante no escribe como la web. Escribe como habla.        */
-  var SYNONYMS = {
-    price:      ['cost', 'quote', 'quotation', 'estimate', 'budget', 'rate', 'fee', 'expensive', 'charge'],
-    hire:       ['contract', 'engage', 'book', 'start', 'work with', 'retain'],
-    indigenous: ['aboriginal', 'first nations', 'native', 'metis', 'inuit'],
-    work:       ['job', 'project', 'build', 'construction', 'site'],
-    person:     ['human', 'someone', 'advisor', 'representative', 'agent', 'staff', 'manager'],
-    area:       ['region', 'location', 'coverage', 'zone', 'territory', 'province', 'city'],
-    company:    ['firm', 'business', 'organisation', 'organization', 'you guys']
-  };
-
-  /* Ruido que no aporta significado. Se descarta antes de puntuar. */
-  var STOPWORDS = ('a an the and or but of to in on for with at by from is are was were be been ' +
-    'do does did can could would should will i you we they it my your our their me us them ' +
-    'this that these those what which who whom how when where why please tell give want need ' +
-    'like just get got have has had about there here if so as also very really ok okay hello hi'
-  ).split(' ');
+  /* Memoria de variantes: qué frase se usó la última vez en cada
+     entrada. Es lo que impide que el bot suene a disco rayado. */
+  var lastVariant = {};
+  /* Memoria de conversación: el último tema, para las preguntas que
+     dependen de lo anterior. */
+  var lastEntry = null;
 
   /* ════════════════════════════════════════════════════════
-     1. TEXTO
+     1. LENGUA
   ════════════════════════════════════════════════════════ */
 
-  /* Contracciones: la gente escribe "dont", "im", "whats". Sin esto,
-     "I dont know where to start" no casaba con "i do not know…".
-     Fallo real detectado en pruebas. */
   var CONTRACTIONS = [
-    [/\bdont\b|\bdon't\b/g, 'do not'],
-    [/\bcant\b|\bcan't\b/g, 'can not'],
-    [/\bwont\b|\bwon't\b/g, 'will not'],
-    [/\bim\b|\bi'm\b/g,     'i am'],
-    [/\bive\b|\bi've\b/g,   'i have'],
-    [/\bwhats\b|\bwhat's\b/g, 'what is'],
-    [/\bhows\b|\bhow's\b/g, 'how is'],
-    [/\byoure\b|\byou're\b/g, 'you are'],
-    [/\bdoesnt\b|\bdoesn't\b/g, 'does not'],
-    [/\bisnt\b|\bisn't\b/g, 'is not']
+    [/\bdon'?t\b/g, 'do not'],      [/\bcan'?t\b/g, 'can not'],
+    [/\bwon'?t\b/g, 'will not'],    [/\bisn'?t\b/g, 'is not'],
+    [/\bdoesn'?t\b/g, 'does not'],  [/\bwouldn'?t\b/g, 'would not'],
+    [/\bi'?m\b/g, 'i am'],          [/\bi'?ve\b/g, 'i have'],
+    [/\bwhat'?s\b/g, 'what is'],    [/\bhow'?s\b/g, 'how is'],
+    [/\bwhere'?s\b/g, 'where is'],  [/\byou'?re\b/g, 'you are'],
+    [/\bwe'?re\b/g, 'we are'],      [/\bit'?s\b/g, 'it is'],
+    [/\blet'?s\b/g, 'let us'],      [/\bthats\b/g, 'that is']
   ];
+
+  var SYNONYMS = {
+    price:      ['cost', 'costs', 'quote', 'quotation', 'estimate', 'budget', 'rate', 'rates', 'fee', 'pricing', 'charge', 'expensive', 'cheap'],
+    hire:       ['contract', 'engage', 'retain', 'commission', 'award'],
+    indigenous: ['aboriginal', 'nations', 'native', 'metis', 'inuit', 'reconciliation'],
+    work:       ['job', 'project', 'build', 'construction', 'site', 'works'],
+    person:     ['human', 'someone', 'somebody', 'advisor', 'adviser', 'representative', 'agent', 'staff', 'manager', 'estimator'],
+    area:       ['region', 'location', 'coverage', 'zone', 'territory', 'province', 'city', 'town'],
+    company:    ['firm', 'business', 'organisation', 'organization', 'outfit'],
+    schedule:   ['timeline', 'deadline', 'timeframe', 'duration', 'urgent'],
+    safety:     ['insurance', 'insured', 'wsib', 'liability', 'bonded', 'compliance']
+  };
+
+  var STOPWORDS = ('a an the and or but of to in on for with at by from is are was were be been am ' +
+    'do does did can could would should will i you we they it my your our their me us them ' +
+    'this that these those which who whom please tell give want need like just get got have has ' +
+    'had about there here if so as also very really ok okay hi hello thanks thank some any').split(' ');
 
   function normalize(str) {
     var s = String(str || '').toLowerCase();
     CONTRACTIONS.forEach(function (c) { s = s.replace(c[0], c[1]); });
     return s
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')   // acentos
-      .replace(/[^\w\s?]/g, ' ')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\w\s?%]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
   }
 
-  /* Distancia de edición acotada: absorbe erratas ("cocnrete"). */
+  function stem(w) {
+    if (w.length < 6) return w;
+    return w.replace(/(ing|ies|es|s)$/, '');
+  }
+
+  /* Tolerancia adaptativa: en palabras largas la gente comete DOS
+     erratas ("cocnrete repiar"). Con una sola de margen no se cazaban.
+     Fallo real detectado en pruebas. */
   function isTypo(a, b) {
-    if (Math.abs(a.length - b.length) > 2) return false;
-    if (a.length < 5) return false;
-    var m = a.length, n = b.length, prev = [], cur = [], i, j;
-    for (j = 0; j <= n; j++) prev[j] = j;
-    for (i = 1; i <= m; i++) {
-      cur[0] = i;
-      for (j = 1; j <= n; j++) {
+    if (a.length < 5 || Math.abs(a.length - b.length) > 2) return false;
+    var margin = (a.length >= 7) ? 2 : 1;
+    var prev = [], cur = [], i, j;
+    for (j = 0; j <= b.length; j++) prev[j] = j;
+    for (i = 1; i <= a.length; i++) {
+      cur = [i];
+      for (j = 1; j <= b.length; j++) {
         cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1,
                           prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
       }
       prev = cur.slice();
     }
-    return prev[n] <= 1;
+    return prev[b.length] <= margin;
   }
 
-  function keywords(text) {
-    /* Fuera el '?': normalize lo conserva para detectar preguntas, pero
-       aquí ensuciaba la palabra ("insured?" no casaba con "insured").
-       Fallo real detectado en pruebas. */
+  function tokens(text) {
     return normalize(text).replace(/\?/g, '').split(' ').filter(function (w) {
-      /* Los números cuentan aunque sean cortos: "5" en "my 5% target"
-         es justo la palabra que importa. */
-      if (/\d/.test(w)) return true;
+      if (/\d/.test(w)) return true;                       // "5", "5%"
       return w.length > 2 && STOPWORDS.indexOf(w) === -1;
     });
   }
@@ -119,6 +126,8 @@
   function expand(words) {
     var out = words.slice();
     words.forEach(function (w) {
+      var s = stem(w);
+      if (s !== w) out.push(s);
       Object.keys(SYNONYMS).forEach(function (root) {
         if (w === root || SYNONYMS[root].indexOf(w) !== -1) {
           out.push(root);
@@ -129,71 +138,111 @@
     return out;
   }
 
-  /* ── Multi-intención ──────────────────────────────────────
-     "Do you work in Ottawa? And how do I get a quote?"
-     Se parte en preguntas independientes y se responde a cada una. */
-  function segment(text) {
-    var parts = String(text)
-      .split(/(?<=\?)\s+|\s+(?:and also|also,|and then|;)\s+/i)
-      .map(function (s) { return s.trim(); })
-      .filter(function (s) { return s.length > 2; });
-
-    if (parts.length <= 1) return [text];
-    return parts.slice(0, 3);              // techo sensato: 3 respuestas
-  }
-
   /* ════════════════════════════════════════════════════════
-     2. BÚSQUEDA EN LA BASE DE CONOCIMIENTO
+     2. DETECCIÓN DE TEMAS — el corazón del asunto
   ════════════════════════════════════════════════════════ */
 
-  function score(entry, norm, words, expanded) {
-    var s = 0;
+  function scoreEntry(entry, norm, words, wide) {
+    var s = 0, pos = 9999, at;
     entry.keys.forEach(function (key) {
       var k = normalize(key);
 
-      /* Frase completa presente: la señal más fuerte. */
-      if (k.indexOf(' ') !== -1 && norm.indexOf(k) !== -1) {
-        s += 10 + k.split(' ').length;
+      if (k.indexOf(' ') !== -1) {                        // frase entera
+        at = norm.indexOf(k);
+        if (at !== -1) {
+          s += 12 + k.split(' ').length;
+          if (at < pos) pos = at;
+        }
         return;
       }
-      /* Palabra exacta. */
-      if (words.indexOf(k) !== -1) { s += 6; return; }
-      /* Sinónimo. */
-      if (expanded.indexOf(k) !== -1) { s += 3; return; }
-      /* Errata. */
+      if (words.indexOf(k) !== -1) {                      // palabra exacta
+        s += 7;
+        at = norm.indexOf(k);
+        if (at !== -1 && at < pos) pos = at;
+        return;
+      }
+      if (wide.indexOf(k) !== -1) { s += 3; return; }     // sinónimo o raíz
+
+      /* Errata. Una palabra LARGA mal escrita es una señal tan fuerte
+         como la palabra bien escrita: "cocnrete" no puede ser otra cosa
+         que "concrete". Antes valía 2 puntos y no llegaba al umbral:
+         el mensaje entero se perdía. */
       for (var i = 0; i < words.length; i++) {
-        if (isTypo(words[i], k)) { s += 2; return; }
+        if (isTypo(words[i], k)) {
+          s += (words[i].length >= 7) ? 7 : 5;
+          at = norm.indexOf(words[i]);
+          if (at !== -1 && at < pos) pos = at;
+          return;
+        }
       }
     });
-    return s;
+    return { score: s, pos: pos };
   }
 
-  function find(text) {
-    var norm     = normalize(text);
-    var words    = keywords(text);
-    var expanded = expand(words);
-    var best = null, bestScore = 0;
+  /* Devuelve TODOS los temas presentes en el mensaje, sin repetir tema.
+     Máximo tres: más de tres respuestas seguidas abruman a cualquiera. */
+  function detectTopics(text) {
+    var norm  = normalize(text);
+    var words = tokens(text);
+    var wide  = expand(words);
+    var hits  = [];
 
     DATA.kb.forEach(function (entry) {
-      var s = score(entry, norm, words, expanded);
-      if (s > bestScore) { bestScore = s; best = entry; }
+      var r = scoreEntry(entry, norm, words, wide);
+      if (r.score >= 7) hits.push({ entry: entry, score: r.score, pos: r.pos });
     });
 
-    /* Umbral: por debajo, preferimos admitir que no lo sabemos.
-       Un bot que adivina mal hace más daño que uno que deriva. */
-    return bestScore >= 5 ? best : null;
+    if (!hits.length) return [];
+
+    var byTopic = {};
+    hits.forEach(function (h) {
+      var t = h.entry.topic || h.entry.keys[0];
+      if (!byTopic[t] || byTopic[t].score < h.score) byTopic[t] = h;
+    });
+
+    var list = Object.keys(byTopic).map(function (t) { return byTopic[t]; });
+
+    /* El tema con más señal abre; los demás siguen por orden de
+       aparición en la frase, y solo si tienen señal sólida. */
+    /* El tema con más señal abre; los demás siguen por orden de
+       aparición. El umbral del secundario es el mismo que el del
+       principal: con uno más alto se perdían preguntas legítimas
+       ("¿hacéis hormigón? ¿y tenéis seguro?" se quedaba en el seguro). */
+    var top = list.reduce(function (a, b) { return b.score > a.score ? b : a; });
+    var rest = list
+      .filter(function (h) { return h !== top && h.score >= 7; })
+      .sort(function (a, b) { return a.pos - b.pos; });
+
+    return [top].concat(rest).slice(0, 3);
   }
 
-  function pick(list) {
+  function isFollowUp(text) {
+    var n = normalize(text);
+    return n.split(' ').length <= 4 &&
+      /^(yes|yeah|yep|sure|okay|ok|please|go on|tell me more|more|continue|and)\b/.test(n);
+  }
+
+  function pickVariant(list, memoKey) {
     if (!Array.isArray(list)) return list;
-    return list[Math.floor(Math.random() * list.length)];
+    if (list.length === 1) return list[0];
+    var last = lastVariant[memoKey], i, guard = 0;
+    do { i = Math.floor(Math.random() * list.length); guard++; }
+    while (i === last && guard < 10);
+    lastVariant[memoKey] = i;
+    return list[i];
   }
 
   /* ════════════════════════════════════════════════════════
      3. INTERFAZ
   ════════════════════════════════════════════════════════ */
 
-  var elChat, elMsgs, elInput, elFab, elQuick, typing = false;
+  var elChat, elMsgs, elInput, elFab, elMenu, typing = false, busy = false;
+
+  var ICO = {
+    phone: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
+    mail:  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>',
+    wa:    '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.8 5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.1c0 1.2.9 2.4 1 2.5.1.2 1.7 2.6 4.2 3.7 1.4.6 2 .6 2.7.5.4 0 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1z"/></svg>'
+  };
 
   function html(text) {
     return String(text)
@@ -208,49 +257,38 @@
     wrap.className = 'np-chat-root';
     wrap.innerHTML =
       '<button class="np-chat-fab" id="npFab" aria-label="Open chat">' +
-        /* Oleadas: dos anillos desfasados que salen del botón. */
         '<span class="np-chat-fab__wave"></span>' +
         '<span class="np-chat-fab__wave np-chat-fab__wave--2"></span>' +
-        /* Globo de conversación: se lee como chat al instante. */
         '<svg class="np-chat-fab__ico" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">' +
-          '<path d="M20 2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4v3.2a.8.8 0 0 0 1.3.62L13.5 18H20a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" ' +
-                'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>' +
-          '<circle cx="8"  cy="10" r="1.15" fill="currentColor"/>' +
-          '<circle cx="12" cy="10" r="1.15" fill="currentColor"/>' +
-          '<circle cx="16" cy="10" r="1.15" fill="currentColor"/>' +
+          '<path d="M20 2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4v3.2a.8.8 0 0 0 1.3.62L13.5 18H20a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>' +
+          '<circle cx="8" cy="10" r="1.15" fill="currentColor"/><circle cx="12" cy="10" r="1.15" fill="currentColor"/><circle cx="16" cy="10" r="1.15" fill="currentColor"/>' +
         '</svg>' +
         '<svg class="np-chat-fab__ico np-chat-fab__ico--x" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">' +
           '<line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>' +
           '<line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>' +
         '</svg>' +
-        /* Punto rojo: hay un mensaje esperando. Desaparece al abrir. */
         '<span class="np-chat-fab__dot" id="npDot"></span>' +
       '</button>' +
       '<section class="np-chat" id="npChat" role="dialog" aria-label="' + BOT.name + ' assistant" aria-hidden="true">' +
         '<header class="np-chat__head">' +
-          '<img class="np-chat__av" src="' + BOT.avatar + '" alt="" width="40" height="40">' +
+          '<img class="np-chat__av" src="' + BOT.avatar + '" alt="" width="38" height="38">' +
           '<div class="np-chat__id">' +
             '<span class="np-chat__name">' + BOT.name + '</span>' +
             '<span class="np-chat__status"><i></i>Online</span>' +
           '</div>' +
-          /* Botón de temas: abre la lista. Sustituye a la pila de
-             botones que antes se amontonaba abajo. */
           '<button class="np-chat__topics" id="npTopics" aria-expanded="false" aria-label="Common questions">' +
             '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">' +
-              '<line x1="4" y1="7"  x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/>' +
-            '</svg>' +
-            '<span>Topics</span>' +
+              '<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/>' +
+            '</svg><span>Topics</span>' +
           '</button>' +
           '<button class="np-chat__x" id="npClose" aria-label="Close chat">&times;</button>' +
           '<div class="np-chat__menu" id="npMenu" role="menu" aria-hidden="true"></div>' +
         '</header>' +
         '<div class="np-chat__msgs" id="npMsgs" role="log" aria-live="polite"></div>' +
         '<div class="np-chat__bar">' +
-          '<textarea id="npInput" class="np-chat__input" rows="1" maxlength="600" ' +
-            'placeholder="Ask me anything…" aria-label="Message"></textarea>' +
+          '<textarea id="npInput" class="np-chat__input" rows="1" maxlength="800" placeholder="Ask me anything…" aria-label="Message"></textarea>' +
           '<button class="np-chat__send" id="npSend" aria-label="Send">' +
-            '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
-            '<path d="M2 21l21-9L2 3v7l15 2-15 2z" fill="currentColor"/></svg>' +
+            '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2z" fill="currentColor"/></svg>' +
           '</button>' +
         '</div>' +
         '<p class="np-chat__foot">' + BOT.name + ' · ' + BOT.role + ' · automated answers</p>' +
@@ -261,29 +299,24 @@
     elMsgs  = document.getElementById('npMsgs');
     elInput = document.getElementById('npInput');
     elFab   = document.getElementById('npFab');
-    elQuick = document.getElementById('npMenu');
+    elMenu  = document.getElementById('npMenu');
 
-    /* Lista de temas: filas de ancho completo, todas iguales. Nada que
-       se desborde, nada que quede corto. */
     BOT.quick.forEach(function (q) {
       var b = document.createElement('button');
       b.className = 'np-chat__mi';
       b.setAttribute('role', 'menuitem');
       b.textContent = q.label;
-      b.addEventListener('click', function () {
-        closeMenu();
-        send(q.q);
-      });
-      elQuick.appendChild(b);
+      b.addEventListener('click', function () { closeMenu(); send(q.q); });
+      elMenu.appendChild(b);
     });
 
     var topics = document.getElementById('npTopics');
     topics.addEventListener('click', function (e) {
       e.stopPropagation();
-      elQuick.classList.contains('is-open') ? closeMenu() : openMenu();
+      elMenu.classList.contains('is-open') ? closeMenu() : openMenu();
     });
     document.addEventListener('click', function (e) {
-      if (!elQuick.contains(e.target)) closeMenu();
+      if (!elMenu.contains(e.target)) closeMenu();
     });
 
     elFab.addEventListener('click', toggle);
@@ -295,14 +328,14 @@
     });
     elInput.addEventListener('input', function () {
       elInput.style.height = 'auto';
-      elInput.style.height = Math.min(elInput.scrollHeight, 96) + 'px';
+      elInput.style.height = Math.min(elInput.scrollHeight, 90) + 'px';
     });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && elChat.classList.contains('is-open')) close();
     });
   }
 
-  /* ── Mensajes ─────────────────────────────────────────── */
+  /* ── Burbujas ─────────────────────────────────────────── */
 
   function bubble(role) {
     var b = document.createElement('div');
@@ -320,57 +353,53 @@
     save('user', text);
   }
 
-  /* Efecto máquina de escribir. La velocidad se adapta al largo:
-     un texto corto que tarda una eternidad se siente falso.        */
+  /* Tarjeta de contacto. Teléfono y WhatsApp son el MISMO número, y
+     está bien: hay quien llama y hay quien jamás llamaría pero sí
+     escribe. Por eso se etiqueta por la ACCIÓN, no por el dato. Y el
+     correo va abreviado: la dirección entera se partía contra el borde. */
+  function contactCard() {
+    var c = document.createElement('div');
+    c.className = 'np-chat__card';
+    c.innerHTML =
+      '<a href="' + BOT.contact.phoneHref + '">' + ICO.phone +
+        '<span><b>Call</b><em>' + BOT.contact.phone + '</em></span></a>' +
+      '<a href="' + BOT.contact.whatsapp + '" target="_blank" rel="noopener">' + ICO.wa +
+        '<span><b>WhatsApp</b><em>Same number, if you prefer to write</em></span></a>' +
+      '<a href="mailto:' + BOT.contact.email + '">' + ICO.mail +
+        '<span><b>Email</b><em>Opens your mail app</em></span></a>';
+    return c;
+  }
+
   function typewrite(el, text, done) {
     var out = html(text);
-    var speed = out.length > 400 ? 4 : out.length > 200 ? 8 : 14;
+    var speed = out.length > 400 ? 4 : out.length > 200 ? 7 : 12;
     var i = 0;
     (function step() {
-      /* Avanza saltando etiquetas completas para no romper el HTML. */
-      if (out[i] === '<') { i = out.indexOf('>', i) + 1; }
-      else { i++; }
+      if (out[i] === '<') i = out.indexOf('>', i) + 1;
+      else i++;
       el.innerHTML = out.slice(0, i);
       bottom();
-      if (i < out.length) { setTimeout(step, speed); }
-      else if (done) { done(); }
+      if (i < out.length) setTimeout(step, speed);
+      else if (done) done();
     })();
   }
 
   function addBot(text, entry, animate) {
     var b = bubble('bot');
-    var render = function () {
+    var tail = function () {
       if (entry && entry.nav) {
         var a = document.createElement('a');
         a.className = 'np-chat__nav';
         a.href = entry.nav.href;
-        a.textContent = entry.nav.label + ' →';
+        a.textContent = entry.nav.label + ' \u2192';
         b.appendChild(a);
       }
       if (entry && entry.contactCard) b.appendChild(contactCard());
       bottom();
     };
-    if (animate === false) { b.innerHTML = html(text); render(); }
-    else { typewrite(b, text, render); }
+    if (animate === false) { b.innerHTML = html(text); tail(); }
+    else typewrite(b, text, tail);
     save('bot', text, entry);
-  }
-
-  /* Iconos SVG, NO emojis. Un emoji en la web de una constructora que
-     licita con organismos públicos abarata todo lo demás. */
-  var ICO = {
-    phone: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
-    mail:  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>',
-    wa:    '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.8 5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.1c0 1.2.9 2.4 1 2.5.1.2 1.7 2.6 4.2 3.7 1.4.6 2 .6 2.7.5.4 0 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1z"/></svg>'
-  };
-
-  function contactCard() {
-    var c = document.createElement('div');
-    c.className = 'np-chat__card';
-    c.innerHTML =
-      '<a href="' + BOT.contact.phoneHref + '">' + ICO.phone + '<span>' + BOT.contact.phone + '</span></a>' +
-      '<a href="mailto:' + BOT.contact.email + '">' + ICO.mail + '<span>' + BOT.contact.email + '</span></a>' +
-      '<a href="' + BOT.contact.whatsapp + '" target="_blank" rel="noopener">' + ICO.wa + '<span>WhatsApp</span></a>';
-    return c;
   }
 
   function showTyping() {
@@ -389,80 +418,114 @@
     typing = false;
   }
 
-  /* ── Historial: la conversación sobrevive al cambio de página ── */
+  /* ── Historial ────────────────────────────────────────── */
 
   function save(role, text, entry) {
     try {
       var h = JSON.parse(sessionStorage.getItem(STORE) || '[]');
       h.push({ r: role, t: text, nav: entry && entry.nav, card: entry && entry.contactCard });
-      sessionStorage.setItem(STORE, JSON.stringify(h.slice(-30)));
-    } catch (e) { /* sin almacenamiento: se pierde, no se rompe */ }
+      sessionStorage.setItem(STORE, JSON.stringify(h.slice(-40)));
+    } catch (e) {}
   }
 
   function restore() {
     var h = [];
     try { h = JSON.parse(sessionStorage.getItem(STORE) || '[]'); } catch (e) {}
-    /* Sin historial NO se pinta nada. El saludo se escribe cuando el
-       visitante abre el chat, con sus puntos de "escribiendo" — así se
-       siente que alguien te está atendiendo, no un cartel ya puesto. */
-    if (!h.length) return;
+    if (!h.length) return;              // el saludo se escribe al abrir
     h.forEach(function (m) {
       if (m.r === 'user') { var b = bubble('user'); b.textContent = m.t; }
       else addBot(m.t, { nav: m.nav, contactCard: m.card }, false);
     });
-    /* Se repintó el historial: no hay que volver a guardarlo. */
-    try { sessionStorage.setItem(STORE, JSON.stringify(h)); } catch (e) {}
     bottom();
   }
 
-  /* ── Envío ────────────────────────────────────────────── */
+  /* ════════════════════════════════════════════════════════
+     4. CONVERSACIÓN
+  ════════════════════════════════════════════════════════ */
+
+  /* Pausa humana: proporcional a lo que hay que decir, con tope. Ni
+     instantánea (delata la máquina) ni eterna. */
+  function pause(text) {
+    return 480 + Math.min(String(text).length * 5, 850);
+  }
+
+  function speak(text, entry, done) {
+    showTyping();
+    setTimeout(function () {
+      hideTyping();
+      addBot(text, entry, true);
+      setTimeout(done || function () {}, 450);
+    }, pause(text));
+  }
 
   function send(raw) {
     var text = String(raw || '').trim();
-    if (!text || typing) return;
+    if (!text || busy) return;
 
+    busy = true;
     addUser(text);
     elInput.value = '';
     elInput.style.height = 'auto';
+    closeMenu();
 
-    var parts = segment(text);
+    /* Continuación de lo anterior: "yes", "tell me more", "go on". */
+    if (isFollowUp(text) && lastEntry) {
+      var key  = lastEntry.topic || lastEntry.keys[0];
+      var more = lastEntry.more
+        ? pickVariant(lastEntry.more, key + '#more')
+        : pickVariant(lastEntry.answer, key + '#a');
+      speak(more, { nav: lastEntry.nav, contactCard: lastEntry.contactCard },
+            function () { busy = false; });
+      return;
+    }
+
+    var topics = detectTopics(text);
+
+    if (!topics.length) {
+      lastEntry = null;
+      speak(pickVariant(BOT.fallback, 'fallback'),
+            { contactCard: true, nav: { label: 'Contact page', href: BOT.contact.page } },
+            function () { busy = false; });
+      return;
+    }
+
+    lastEntry = topics[0].entry;
+    var multi = topics.length > 1;
     var i = 0;
 
     (function next() {
-      if (i >= parts.length) return;
-      var part  = parts[i++];
-      var entry = find(part);
-      var answer, e;
+      if (i >= topics.length) { busy = false; return; }
 
-      if (entry) {
-        answer = pick(entry.answer);
-        e = entry;
-      } else {
-        answer = pick(BOT.fallback);
-        e = { contactCard: true, nav: { label: 'Contact page', href: BOT.contact.page } };
+      var entry = topics[i].entry;
+      var key   = entry.topic || entry.keys[0];
+      var body  = pickVariant(entry.answer, key + '#a');
+      var out   = body;
+
+      /* Con varios temas, cada respuesta se presenta: el visitante ve
+         que se le entendió TODO y sabe a qué contesta cada bloque. Los
+         conectores rotan, así que nunca suena a plantilla. */
+      if (multi) {
+        var lead = pickVariant(BOT.connectors, 'connector' + i);
+        out = lead.replace('{topic}', key) + '\n\n' + body;
       }
 
-      showTyping();
-      /* Pausa proporcional: leer una pregunta lleva un momento. */
-      setTimeout(function () {
-        hideTyping();
-        addBot(answer, e, true);
-        setTimeout(next, 500);
-      }, 450 + Math.min(part.length * 8, 700));
+      i++;
+      speak(out, entry, next);
     })();
   }
 
   /* ── Menú de temas ────────────────────────────────────── */
 
   function openMenu() {
-    elQuick.classList.add('is-open');
-    elQuick.setAttribute('aria-hidden', 'false');
+    elMenu.classList.add('is-open');
+    elMenu.setAttribute('aria-hidden', 'false');
     document.getElementById('npTopics').setAttribute('aria-expanded', 'true');
   }
 
   function closeMenu() {
-    elQuick.classList.remove('is-open');
-    elQuick.setAttribute('aria-hidden', 'true');
+    if (!elMenu) return;
+    elMenu.classList.remove('is-open');
+    elMenu.setAttribute('aria-hidden', 'true');
     var t = document.getElementById('npTopics');
     if (t) t.setAttribute('aria-expanded', 'false');
   }
@@ -472,29 +535,26 @@
   function open() {
     var dot = document.getElementById('npDot');
     if (dot) dot.remove();
-    try { sessionStorage.setItem('np-chat-seen', '1'); } catch (e) {}
+    try { sessionStorage.setItem(SEEN, '1'); sessionStorage.setItem(OPEN, '1'); } catch (e) {}
     elFab.classList.remove('np-chat-fab--call');
+    elFab.classList.add('is-open');
     elChat.classList.add('is-open');
     elChat.setAttribute('aria-hidden', 'false');
-    elFab.classList.add('is-open');
     setTimeout(function () { elInput.focus(); }, 260);
-    try { sessionStorage.setItem(OPEN, '1'); } catch (e) {}
 
-    /* Primera apertura: Kodiak saluda EN VIVO. Pausa, puntos, y escribe.
-       Es la diferencia entre "hay un bot" y "alguien me está atendiendo". */
-    if (!elMsgs.children.length && !typing) {
+    /* Kodiak saluda EN VIVO: pausa, puntos, y escribe. Nunca un cartel
+       ya puesto esperando. Diez saludos posibles, sin repetir. */
+    if (!elMsgs.children.length && !busy) {
+      busy = true;
       setTimeout(function () {
-        showTyping();
-        setTimeout(function () {
-          hideTyping();
-          addBot(pick(BOT.greeting), null, true);
-        }, 900);
-      }, 400);
+        speak(pickVariant(BOT.greeting, 'greeting'), null, function () { busy = false; });
+      }, 350);
     }
     bottom();
   }
 
   function close() {
+    closeMenu();
     elChat.classList.remove('is-open');
     elChat.setAttribute('aria-hidden', 'true');
     elFab.classList.remove('is-open');
@@ -512,29 +572,21 @@
     var wasOpen = false, seen = false;
     try {
       wasOpen = sessionStorage.getItem(OPEN) === '1';
-      seen    = sessionStorage.getItem('np-chat-seen') === '1';
+      seen    = sessionStorage.getItem(SEEN) === '1';
     } catch (e) {}
 
     if (wasOpen) { open(); return; }
-
     if (seen) {
-      var dot = document.getElementById('npDot');
-      if (dot) dot.remove();
+      var d = document.getElementById('npDot');
+      if (d) d.remove();
       return;
     }
 
-    /* Primera visita: a los 2 s el icono se hace notar una vez. No es un
-       parpadeo eterno; es un golpecito en el hombro y se calla. */
     setTimeout(function () {
-      if (!elChat.classList.contains('is-open')) {
-        elFab.classList.add('np-chat-fab--call');
-      }
+      if (!elChat.classList.contains('is-open')) elFab.classList.add('np-chat-fab--call');
     }, 2000);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
