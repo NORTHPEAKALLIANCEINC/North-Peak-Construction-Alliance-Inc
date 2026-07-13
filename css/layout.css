@@ -481,6 +481,8 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
   flex-direction: column;
   justify-content: center;
   gap: 0.4rem;
+  cursor: default;          /* nunca el cursor de texto: no es un campo */
+  user-select: none;
   transition: background var(--dur-base) var(--ease-out);
 }
 
@@ -547,9 +549,12 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
   overflow-wrap: anywhere;
 }
 
+/* Los cuatro datos pesan lo mismo: todos en blanco. El dorado se
+   reserva para la luz y las etiquetas al enfocar — un valor en
+   dorado y tres en blanco parecía un error, no una jerarquía. */
 .trust-bar__value em {
   font-style: normal;
-  color: #D9B863;
+  color: inherit;
 }
 
 @media (max-width: 860px) {
@@ -570,7 +575,6 @@ html[data-theme="light"] .banner__frame-img--light { opacity: 1; }
   html[data-theme="light"] .trust-bar__item:hover { background: var(--void-soft); }
   html[data-theme="light"] .trust-bar__label { color: rgba(15, 30, 56, 0.55); }
   html[data-theme="light"] .trust-bar__value { color: var(--text-primary); }
-  html[data-theme="light"] .trust-bar__value em,
   html[data-theme="light"] .trust-bar__item:hover .trust-bar__label { color: #856612; }
   html[data-theme="light"] .trust-bar__item::before {
     background: linear-gradient(90deg, transparent, #856612, transparent);
