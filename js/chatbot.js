@@ -536,8 +536,8 @@
      lee de vuelta, y envía al correo de la empresa.
   ════════════════════════════════════════════════════════ */
 
-  var AFFIRM = /^(yes|yeah|yep|yes please|sure|ok|okay|go ahead|please do|do it|lets do it|let us do it|alright|fine|sounds good|correct|right|send it|send)/;
-  var NEGATE = /^(no|nope|not now|later|cancel|stop|forget it|never mind|nevermind|quit|exit)/;
+  var AFFIRM = /^(yes|yeah|yep|yes please|sure|ok|okay|go ahead|please do|do it|lets do it|let us do it|alright|fine|sounds good|correct|right|send it|send)\b/;
+  var NEGATE = /^(no|nope|not now|later|cancel|stop|forget it|never mind|nevermind|quit|exit)\b/;
 
   function saveFlow() {
     try { sessionStorage.setItem('np-chat-flow', JSON.stringify(flow)); } catch (e) {}
