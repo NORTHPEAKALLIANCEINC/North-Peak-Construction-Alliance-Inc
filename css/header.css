@@ -342,17 +342,28 @@ html[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotat
   .site-header__actions .theme-toggle { display: none; }
   .site-nav__tools {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    align-items: stretch;
     gap: 0.6rem;
     margin: 0.9rem 0.75rem 0.25rem;
   }
+  /* WhatsApp ocupa todo el ancho libre: así queda alineado con los
+     enlaces de arriba y no como un botoncito suelto en la esquina. */
+  .wa-btn {
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: center;
+    height: 48px;
+  }
+  /* No es un enlace de navegación: fuera el numerito (01, 02…) que el
+     contador del menú le estaba pintando delante. */
+  .site-nav a.wa-btn { counter-increment: none; }
+  .site-nav a.wa-btn::before { content: none; }
   .theme-toggle--nav {
     display: grid;
-    width: 42px;
-    height: 42px;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
   }
-  .wa-btn { display: inline-flex; }
   .site-nav a {
     counter-increment: navitem;
     display: flex;
