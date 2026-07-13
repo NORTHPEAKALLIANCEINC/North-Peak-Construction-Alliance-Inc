@@ -233,10 +233,18 @@
             '<span class="np-chat__name">' + BOT.name + '</span>' +
             '<span class="np-chat__status"><i></i>Online</span>' +
           '</div>' +
+          /* Botón de temas: abre la lista. Sustituye a la pila de
+             botones que antes se amontonaba abajo. */
+          '<button class="np-chat__topics" id="npTopics" aria-expanded="false" aria-label="Common questions">' +
+            '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">' +
+              '<line x1="4" y1="7"  x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/>' +
+            '</svg>' +
+            '<span>Topics</span>' +
+          '</button>' +
           '<button class="np-chat__x" id="npClose" aria-label="Close chat">&times;</button>' +
+          '<div class="np-chat__menu" id="npMenu" role="menu" aria-hidden="true"></div>' +
         '</header>' +
         '<div class="np-chat__msgs" id="npMsgs" role="log" aria-live="polite"></div>' +
-        '<div class="np-chat__quick" id="npQuick"></div>' +
         '<div class="np-chat__bar">' +
           '<textarea id="npInput" class="np-chat__input" rows="1" maxlength="600" ' +
             'placeholder="Ask me anything…" aria-label="Message"></textarea>' +
@@ -253,14 +261,29 @@
     elMsgs  = document.getElementById('npMsgs');
     elInput = document.getElementById('npInput');
     elFab   = document.getElementById('npFab');
-    elQuick = document.getElementById('npQuick');
+    elQuick = document.getElementById('npMenu');
 
+    /* Lista de temas: filas de ancho completo, todas iguales. Nada que
+       se desborde, nada que quede corto. */
     BOT.quick.forEach(function (q) {
       var b = document.createElement('button');
-      b.className = 'np-chat__qr';
+      b.className = 'np-chat__mi';
+      b.setAttribute('role', 'menuitem');
       b.textContent = q.label;
-      b.addEventListener('click', function () { send(q.q); });
+      b.addEventListener('click', function () {
+        closeMenu();
+        send(q.q);
+      });
       elQuick.appendChild(b);
+    });
+
+    var topics = document.getElementById('npTopics');
+    topics.addEventListener('click', function (e) {
+      e.stopPropagation();
+      elQuick.classList.contains('is-open') ? closeMenu() : openMenu();
+    });
+    document.addEventListener('click', function (e) {
+      if (!elQuick.contains(e.target)) closeMenu();
     });
 
     elFab.addEventListener('click', toggle);
@@ -332,13 +355,21 @@
     save('bot', text, entry);
   }
 
+  /* Iconos SVG, NO emojis. Un emoji en la web de una constructora que
+     licita con organismos públicos abarata todo lo demás. */
+  var ICO = {
+    phone: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
+    mail:  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>',
+    wa:    '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.8 5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.1c0 1.2.9 2.4 1 2.5.1.2 1.7 2.6 4.2 3.7 1.4.6 2 .6 2.7.5.4 0 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1z"/></svg>'
+  };
+
   function contactCard() {
     var c = document.createElement('div');
     c.className = 'np-chat__card';
     c.innerHTML =
-      '<a href="' + BOT.contact.phoneHref + '">📞 ' + BOT.contact.phone + '</a>' +
-      '<a href="mailto:' + BOT.contact.email + '">✉️ ' + BOT.contact.email + '</a>' +
-      '<a href="' + BOT.contact.whatsapp + '" target="_blank" rel="noopener">💬 WhatsApp</a>';
+      '<a href="' + BOT.contact.phoneHref + '">' + ICO.phone + '<span>' + BOT.contact.phone + '</span></a>' +
+      '<a href="mailto:' + BOT.contact.email + '">' + ICO.mail + '<span>' + BOT.contact.email + '</span></a>' +
+      '<a href="' + BOT.contact.whatsapp + '" target="_blank" rel="noopener">' + ICO.wa + '<span>WhatsApp</span></a>';
     return c;
   }
 
@@ -371,7 +402,10 @@
   function restore() {
     var h = [];
     try { h = JSON.parse(sessionStorage.getItem(STORE) || '[]'); } catch (e) {}
-    if (!h.length) { addBot(pick(BOT.greeting), null, false); return; }
+    /* Sin historial NO se pinta nada. El saludo se escribe cuando el
+       visitante abre el chat, con sus puntos de "escribiendo" — así se
+       siente que alguien te está atendiendo, no un cartel ya puesto. */
+    if (!h.length) return;
     h.forEach(function (m) {
       if (m.r === 'user') { var b = bubble('user'); b.textContent = m.t; }
       else addBot(m.t, { nav: m.nav, contactCard: m.card }, false);
@@ -418,6 +452,21 @@
     })();
   }
 
+  /* ── Menú de temas ────────────────────────────────────── */
+
+  function openMenu() {
+    elQuick.classList.add('is-open');
+    elQuick.setAttribute('aria-hidden', 'false');
+    document.getElementById('npTopics').setAttribute('aria-expanded', 'true');
+  }
+
+  function closeMenu() {
+    elQuick.classList.remove('is-open');
+    elQuick.setAttribute('aria-hidden', 'true');
+    var t = document.getElementById('npTopics');
+    if (t) t.setAttribute('aria-expanded', 'false');
+  }
+
   /* ── Abrir / cerrar ───────────────────────────────────── */
 
   function open() {
@@ -430,6 +479,18 @@
     elFab.classList.add('is-open');
     setTimeout(function () { elInput.focus(); }, 260);
     try { sessionStorage.setItem(OPEN, '1'); } catch (e) {}
+
+    /* Primera apertura: Kodiak saluda EN VIVO. Pausa, puntos, y escribe.
+       Es la diferencia entre "hay un bot" y "alguien me está atendiendo". */
+    if (!elMsgs.children.length && !typing) {
+      setTimeout(function () {
+        showTyping();
+        setTimeout(function () {
+          hideTyping();
+          addBot(pick(BOT.greeting), null, true);
+        }, 900);
+      }, 400);
+    }
     bottom();
   }
 
