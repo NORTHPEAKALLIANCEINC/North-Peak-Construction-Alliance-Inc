@@ -402,6 +402,7 @@ window.NP_BOT_KB = {
     /* ══ SERVICIOS ══════════════════════════════════════════ */
     {
       topic: 'services',
+      offerFlow: 'project',
       keys: [
         'services', 'what do you do', 'what you do', 'what do you offer', 'offer', 'work you do',
         'capabilities', 'what can you build', 'trades', 'what type of work', 'lines of work', 'scope'
@@ -418,6 +419,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'project management',
+      offerFlow: 'project',
       keys: ['project management', 'manage the project', 'do you manage projects', 'construction management', 'run the project'],
       answer: [
         'Yes. We plan it, coordinate the trades, and keep it on schedule and on budget, start to finish.\n\nIs it a project you already have on the table?',
@@ -427,6 +429,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'general contracting',
+      offerFlow: 'project',
       keys: ['general contracting', 'general contractor', 'are you a gc', 'main contractor', 'act as contractor', 'prime contractor'],
       answer: [
         'Yes. As general contractor we take the whole delivery — subcontractors, suppliers, and the result.\n\nWhat is the project?',
@@ -436,6 +439,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'labour supply',
+      offerFlow: 'project',
       keys: ['labour', 'labor', 'skilled labour', 'workers', 'crew', 'manpower', 'supply workers', 'staff for site', 'trades people', 'short handed'],
       answer: [
         'Yes — qualified site crews, for when what you need is capacity, not a full contract.\n\nWhich trades are you short on?',
@@ -445,6 +449,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'commercial construction',
+      offerFlow: 'project',
       keys: ['commercial construction', 'commercial building', 'office build', 'retail', 'fit out', 'warehouse'],
       answer: [
         'Yes, commercial construction and fit-outs.\n\nWhat is the building, and where is it?',
@@ -454,6 +459,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'institutional construction',
+      offerFlow: 'project',
       keys: ['institutional', 'public building', 'school', 'hospital', 'government building', 'municipal', 'university'],
       answer: [
         'Yes. Institutional and public facilities are core work for us.\n\nIs this a tender, or a direct award?',
@@ -463,6 +469,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'infrastructure',
+      offerFlow: 'project',
       keys: ['infrastructure', 'civil works', 'roads', 'utilities', 'bridges', 'civil'],
       answer: [
         'Yes, infrastructure and civil works.\n\nTell me roughly what it involves.',
@@ -472,6 +479,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'restoration',
+      offerFlow: 'project',
       keys: ['restoration', 'rehabilitation', 'refurbish', 'repair building', 'renovation', 'restore', 'heritage'],
       answer: [
         'Yes — restoration and rehabilitation of existing structures.\n\nWhat kind of building is it?',
@@ -481,6 +489,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'masonry',
+      offerFlow: 'project',
       keys: ['masonry', 'bricklaying', 'bricklayer', 'mason', 'brick', 'block work', 'stone work', 'wall'],
       answer: [
         'Yes, masonry, brick and block work.\n\nNew build, or repair?',
@@ -490,6 +499,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'concrete',
+      offerFlow: 'project',
       keys: ['concrete', 'concrete repair', 'formwork', 'slab', 'foundation', 'rebar', 'pour', 'cement'],
       answer: [
         'Yes — concrete work and concrete repair.\n\nWhat is the job?',
@@ -499,6 +509,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'specialized work',
+      offerFlow: 'project',
       keys: ['specialized', 'special services', 'something specific', 'custom work', 'unusual', 'complicated'],
       answer: [
         'If it does not fit a standard box, tell me what it involves. You will get an honest yes or no, not a run-around.',
@@ -530,6 +541,7 @@ window.NP_BOT_KB = {
     /* ══ COBERTURA ══════════════════════════════════════════ */
     {
       topic: 'coverage',
+      offerFlow: 'project',
       keys: [
         'where do you work', 'coverage', 'regions', 'do you work in', 'ontario', 'toronto',
         'canada', 'outside ontario', 'other provinces', 'service area', 'gta', 'do you travel',
@@ -595,6 +607,7 @@ window.NP_BOT_KB = {
     /* ══ PROYECTOS — honesto mientras no haya casos reales ══ */
     {
       topic: 'past projects',
+      offerFlow: 'project',
       keys: [
         'your projects', 'past projects', 'previous projects', 'portfolio', 'case studies',
         'past work', 'references', 'examples of your work', 'what have you built',
@@ -625,6 +638,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'subcontracting',
+      offerFlow: 'job',
       keys: ['subcontractor', 'subcontract', 'supplier', 'vendor', 'register as supplier', 'work as a sub', 'partner with you'],
       answer: [
         'Yes, we register subcontractors and suppliers. Send your trade, your area and your credentials, and you stay on file for upcoming work.',
@@ -664,6 +678,7 @@ window.NP_BOT_KB = {
     /* ══ PLAZOS ═════════════════════════════════════════════ */
     {
       topic: 'timelines',
+      offerFlow: 'project',
       keys: ['how long', 'timeline', 'schedule', 'deadline', 'when can you start', 'urgent', 'how soon', 'availability', 'duration'],
       answer: [
         'That depends entirely on the scope and the site — and anyone who gives you a timeline without seeing either is guessing.\n\nTell the team what you have and when you need it, and you will get a real answer:',
@@ -735,6 +750,7 @@ window.NP_BOT_KB = {
     /* ── EL JOVEN EMPRENDEDOR: "¿esto a mí en qué me sirve?" ── */
     {
       topic: 'how this helps your business',
+      offerFlow: 'project',
       keys: [
         'how does this help me', 'how can you help my business', 'what is in it for me',
         'why should i work with you', 'what do i gain', 'benefit for me', 'value',
@@ -750,6 +766,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'small businesses and startups',
+      offerFlow: 'project',
       keys: [
         'small business', 'startup', 'start up', 'small company', 'new business', 'minimum project',
         'too small', 'small project', 'is there a minimum', 'small budget', 'just starting'
@@ -774,6 +791,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'what makes you different',
+      offerFlow: 'project',
       keys: [
         'what makes you different', 'why you and not', 'competition', 'competitors', 'better than',
         'compare', 'advantage', 'unique', 'differentiator', 'stand out'
@@ -875,6 +893,7 @@ window.NP_BOT_KB = {
     /* ══ RESIDENCIAL ════════════════════════════════════════ */
     {
       topic: 'residential work',
+      offerFlow: 'project',
       keys: ['residential', 'my house', 'home renovation', 'basement', 'kitchen', 'small job', 'handyman', 'my home'],
       /* ⚠️ PENDIENTE: confirmar si aceptan residencial. */
       answer: [

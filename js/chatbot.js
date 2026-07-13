@@ -56,6 +56,17 @@
   var flow = null;          // { id, step, data, stage }
   var pendingFlow = null;   // flujo ofrecido, esperando un "sí"
 
+  /* Se ofrece la toma de datos UNA vez por sesión y por tipo. Un bot que
+     lo ofrece en cada respuesta es un vendedor pesado, no un asistente.
+     (Si el visitante lo pide él mismo, se abre siempre: eso es otra cosa.) */
+  function alreadyOffered(id) {
+    try { return sessionStorage.getItem('np-chat-offered-' + id) === '1'; }
+    catch (e) { return false; }
+  }
+  function markOffered(id) {
+    try { sessionStorage.setItem('np-chat-offered-' + id, '1'); } catch (e) {}
+  }
+
   /* Clave de Web3Forms: la MISMA que ya usan los formularios del sitio.
      Sin servidor, sin coste, 250 envíos al mes. La tubería ya estaba
      puesta; simplemente no la estábamos usando. */
@@ -770,8 +781,10 @@
          agradable en un cliente en el buzón de la empresa. */
       var isLast = (i >= topics.length);
       speak(out, entry, function () {
-        if (isLast && entry.offerFlow && DATA.flows[entry.offerFlow]) {
+        if (isLast && entry.offerFlow && DATA.flows[entry.offerFlow] &&
+            !alreadyOffered(entry.offerFlow)) {
           pendingFlow = entry.offerFlow;
+          markOffered(entry.offerFlow);
           speak(pickVariant(DATA.flows[entry.offerFlow].offer, entry.offerFlow + '#offer'),
                 null, next);
           return;
