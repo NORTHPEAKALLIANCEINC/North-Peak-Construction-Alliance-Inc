@@ -404,6 +404,11 @@
     'mason', 'bricklayer', 'project', 'site', 'jobsite', 'plant', 'facility',
     'warehouse', 'garage', 'shop', 'store', 'unit', 'office', 'school', 'hospital',
     'clinic', 'bridge', 'road', 'parking', 'driveway', 'sidewalk',
+    /* Lo que la gente TIENE, que no siempre es un edificio. Sin esto, "tengo
+       una finca y hay que hacerle algo" no era construcción. */
+    'land', 'lot', 'property', 'acre', 'bush', 'forest', 'clearing', 'terrain',
+    'access road', 'workshop', 'restaurant', 'kitchen', 'supermarket', 'duplex',
+    'loft', 'apartment', 'house', 'home', 'shed', 'barn', 'yard', 'terreno', 'finca',
     /* de qué está hecho */
     'concrete', 'cement', 'masonry', 'brick', 'block', 'stone', 'mortar', 'steel',
     'rebar', 'roof', 'wall', 'floor', 'slab', 'foundation', 'footing', 'column',
@@ -697,7 +702,7 @@
 
   var INTENTS = [
     { id: 'proof',      re: /\b(certif\w*|insur\w*|licen\w*|bond\w*|reference|prequal\w*|wsib|liability|compliance|accredit\w*)\b/ },
-    { id: 'price',      re: /\b(how much|price\w*|pricing|cost\w*|quote|estimate|budget\w*|ballpark|figure|rate|rates|fee|fees|charge|indicative)\b/ },
+    { id: 'price',      re: /\b(how much|price\w*|pricing|cost\w*|quote|estimate|budget\w*|ballpark|figure|rate|rates|fee|fees|charge|indicative|a number|give me a number|rough idea|roughly|approximate|expensive|cheap|afford|per square)\b/ },
     { id: 'time',       re: /\b(when|how long|how soon|deadline|timeline|timeframe|schedule|start date|availability|lead time)\b/ },
     { id: 'place',      re: /\b(where|which city|what city|do you work in|do you cover|do you serve|do you travel|area)\b/ },
     { id: 'person',     re: /\b(who|speak to|talk to|call someone|contact|human|a person|manager|owner|director)\b/ },
@@ -707,11 +712,18 @@
     { id: 'unsure',     re: /\b(no idea|not sure|do not know|dont know|i do not know the words|what should i|what would you|advice|guidance|help me decide|inherited|no se|no tengo idea)\b/ },
     { id: 'explain',    re: /\b(what is|what are|what does|explain|tell me about|how does|how do you|why)\b/ },
     { id: 'compare',    re: /\b(better|different|compare|versus|vs|instead of|competitor|why you)\b/ },
+    /* [NUEVO — el hueco más caro de esta ronda] "Have you built supermarkets
+       before?", "¿habéis trabajado en reserva?", "experience with security
+       installations?". Es LA pregunta que hace todo comprador antes de
+       contratar, y el bot le hacía TRIAJE. Ahora reconoce la forma — y la
+       contesta con la verdad, que es que aún no hay casos publicados. */
+    { id: 'experience', re: /\b(have you (ever )?(built|done|worked|delivered|completed|handled)|any experience|experience (with|in|on)|done (this|that|it) before|worked on (a|any)|track record|case stud\w*|portfolio)\b/ },
+
     /* [NUEVO] Una PRESENTACIÓN no es una pregunta, pero tampoco es ruido.
        "I am a consulting structural engineer." recibía un triaje: el bot le
        decía "no te he entendido" a alguien que se estaba presentando. Se
        acusa recibo y se le devuelve la palabra. */
-    { id: 'intro',      re: /^(i am a|i am an|im a|im an|i work as|i represent|my name is|this is)\b/ }
+    { id: 'intro',      re: /^(i am|im|i work|i lead|i run|i represent|we are|we run|we maintain|we operate|we manage|my name is|this is|retired|good day|good morning|good afternoon)\b/ }
   ];
 
   function detectIntent(text) {
@@ -817,6 +829,20 @@
         if (at !== -1 && at < pos) pos = at;
         return;
       }
+
+      /* [FALLO CORREGIDO] "hello" y "there" son las dos palabras VACÍAS: se
+         filtran antes de puntuar. Así que "hello" solo se reconocía cuando era
+         el mensaje entero — y "hello there" se quedaba sin una sola ficha que
+         puntuar, y recibía un "no te he entendido". Saludar así es lo más
+         normal del mundo.
+         Una palabra vacía que ES la clave de un tema (hello, thanks) tiene que
+         puntuar: se busca en el texto crudo. */
+      if (STOPWORDS.indexOf(k) !== -1 && new RegExp('\\b' + k + '\\b').test(norm)) {
+        s += 7;
+        at = norm.indexOf(k);
+        if (at !== -1 && at < pos) pos = at;
+        return;
+      }
       if (wide.indexOf(k) !== -1) { s += 3; return; }     // sinónimo o raíz
 
       /* Errata. Una palabra LARGA mal escrita es una señal tan fuerte
@@ -864,6 +890,17 @@
     });
 
     var list = Object.keys(byTopic).map(function (t) { return byTopic[t]; });
+
+    /* [FALLO CORREGIDO] "Hello from Belfast. What does your company do?" traía
+       DOS temas: el saludo y la empresa. Y el bot anunciaba el primero con un
+       conector: "Regarding **greeting**:". Usar la etiqueta interna del tema
+       como si fuera un asunto del que hablar es absurdo. La cortesía acompaña,
+       no compite: si hay algo real que contestar, el saludo sobra. */
+    var CORTESIA = ['greeting', 'thanks', 'goodbye', 'small talk', 'how are you'];
+    var reales = list.filter(function (h) {
+      return CORTESIA.indexOf(h.entry.topic) === -1;
+    });
+    if (reales.length) list = reales;
 
     /* El tema con más señal abre; los demás siguen por orden de
        aparición en la frase, y solo si tienen señal sólida. */
@@ -1609,6 +1646,26 @@
       var qIntent = detectIntent(text);
       var qEntry  = qTopics.length ? qTopics[0].entry : null;
 
+      /* [FALLO CORREGIDO — el bot secuestraba al visitante] Quien seguía
+         PREGUNTANDO en vez de contestar recibía, una y otra vez, la misma
+         pregunta del formulario. Cuatro veces "¿qué obra es?" a alguien que
+         solo quería informarse. Eso no es conducir: es acosar.
+
+         A la tercera pregunta seguida sin contestar, el formulario se aparta.
+         Lo tomado no se pierde: se le dice cómo retomarlo cuando quiera. */
+      flow.dodges = (flow.dodges || 0) + 1;
+      if (flow.dodges >= 3) {
+        clearFlow();
+        speak(pickVariant(DATA.flowTalk.paused, 'paused'), null, function () {
+          if (qEntry) {
+            addBot(pickVariant(qEntry.answer, (qEntry.topic || qEntry.keys[0]) + '#a'),
+                   { nav: qEntry.nav, contactCard: qEntry.contactCard }, true);
+          }
+          if (done) done();
+        });
+        return;
+      }
+
       if (qEntry) {
         speak(pickVariant(qEntry.answer, (qEntry.topic || qEntry.keys[0]) + '#a'),
               { nav: qEntry.nav, contactCard: qEntry.contactCard },
@@ -1662,6 +1719,7 @@
     }
 
     flow.data[step.id] = text.trim();
+    flow.dodges = 0;              // ha contestado: la cuenta vuelve a cero
 
     advance(done);
   }
@@ -2080,8 +2138,15 @@
     ══════════════════════════════════════════════════════════ */
     if (!topics.length) {
 
-      /* 1. ¿Hay una obra descrita ahí dentro? */
-      if (reflectWork(extract(text), release)) return;
+      /* 1. ¿Hay una obra descrita ahí dentro?
+         [FALLO CORREGIDO] Esta llamada NO comprobaba si el mensaje era una
+         pregunta. Resultado: "Do you have experience building on difficult
+         soils?" — una pregunta — se tomaba por un encargo, y el bot
+         contestaba "Entendido: building on difficult soils. ¿En qué ciudad?".
+         Preguntar por una obra no es encargarla. Aquí valen las MISMAS dos
+         condiciones que arriba: ni una pregunta, ni un texto largo. */
+      if (!isQuestion(text) && normalize(text).split(/\s+/).length <= 25 &&
+          reflectWork(extract(text), release)) return;
 
       /* 2. ¿Reconozco la forma de la pregunta? */
       var intent = detectIntent(text);
@@ -2145,8 +2210,13 @@
     if (topName === lastTopic) repeats++; else repeats = 0;
     lastTopic = topName;
 
+    /* [FALLO CORREGIDO] Bastaba con rozar el mismo tema DOS veces para que el
+       bot dejara de contestar y arrancara el formulario. Un consultor que
+       preguntaba por la cobertura y luego por el alcance geográfico —
+       informarse, que es a lo que había venido — acababa metido en una toma de
+       datos que no había pedido. Insistir es preguntar lo mismo TRES veces. */
     var repeatFlow = topEntry.offerFlow && flowFor(topEntry.offerFlow);
-    if (repeats >= 1 && repeatFlow && DATA.flows[repeatFlow]) {
+    if (repeats >= 2 && repeatFlow && DATA.flows[repeatFlow]) {
       repeats = 0;
       markOffered(repeatFlow);
       /* [FALLO CORREGIDO — estaba en producción] Esto se llamaba 'seed', y

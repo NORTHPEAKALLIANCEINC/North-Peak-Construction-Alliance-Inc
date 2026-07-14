@@ -292,6 +292,22 @@ window.NP_BOT_KB = {
         ]
       },
 
+      /* [NUEVA] "¿Habéis construido supermercados / talleres / restaurantes?"
+         La verdad es que no hay casos publicados todavía. Un bot que dice
+         "sí, tenemos amplia experiencia" para caer bien está firmando una
+         mentira que se descubre en la primera reunión — y hunde la
+         licitación. Se dice lo que hay, y se pasa a una persona.
+         ⚠️ PENDIENTE: cuando lleguen proyectos verificados, reescribir. */
+      experience: {
+        answer: [
+          'I am not going to tell you we have done exactly that, because I cannot verify it — and a claim like that falls apart in the first meeting.\n\nWhat I can do is put the question to the team, who can answer for the real jobs they have delivered. What is the project?',
+          'Honestly: the verified cases are not published yet, and I will not dress up a placeholder as a track record.\n\nThe team will tell you straight whether they have done work like yours. Shall I pass this to them?',
+          'That is a fair question, and the honest answer is that I cannot confirm it myself.\n\nAsk the team directly — they will tell you what they have actually built, not what I guess. What would you be building?'
+        ],
+        offerFlow: 'project',
+        contactCard: true
+      },
+
       intro: {
         answer: [
           'Good to know, thank you.\n\nWhat brings you to North Peak today?',
@@ -627,6 +643,13 @@ window.NP_BOT_KB = {
        mal acotada. Un humano no la daría por buena — la afinaría. */
     /* El visitante ha insistido. Se deja de conversar y se actúa. */
     /* Tras usar el botón de editar. */
+    /* Cuando el visitante prefiere preguntar antes que rellenar. Se aparta el
+       formulario sin reproche y se le dice cómo volver. */
+    paused: [
+      'I will stop asking for details — you clearly have questions first, and that is fair.\n\nAsk me whatever you need. When you want to send your details to the team, just say **take my details**.',
+      'Let me put the form aside. You have questions, and they come first.\n\nAsk away. Say **take my details** whenever you are ready and I will pick it up again.'
+    ],
+
     saved: [
       'Updated. Here is how it stands now:',
       'Saved. This is what I have now:'
@@ -1061,6 +1084,44 @@ window.NP_BOT_KB = {
       ],
       contactCard: true,
       weight: 3
+    },
+
+    /* [ENTRADA NUEVA] "¿Qué máquinas usáis?", "¿tenéis excavadoras?". Lo
+       preguntan los industriales y los curiosos. No hay inventario confirmado:
+       no se inventa una flota.
+       ⚠️ PENDIENTE: si la empresa tiene maquinaria propia, listarla aquí. */
+    {
+      topic: 'equipment and machinery',
+      keys: [
+        'what machines', 'what machinery', 'equipment', 'excavator', 'machinery',
+        'do you own machinery', 'heavy equipment', 'plant and equipment', 'fleet',
+        'maquinaria', 'excavadora'
+      ],
+      answer: [
+        'I will not list machinery I cannot verify. What I can tell you is that the work gets done with our own crews, and the equipment is put to the job.\n\nTell me what the site needs and the team will tell you exactly what they would bring.',
+        'That is a question for the people who run the sites, not for me — and I would rather not invent an inventory.\n\nWhat is the work? They will tell you what it takes.'
+      ],
+      offerFlow: 'project',
+      weight: 3
+    },
+
+    /* [ENTRADA NUEVA] "¿Hay alguien que hable español?". Lo pregunta quien no
+       se siente cómodo explicando una grieta en un idioma que no es el suyo.
+       El bot entiende español y francés — pero NO puede prometer que el equipo
+       conteste en español, porque eso no está confirmado. Se dice la verdad.
+       ⚠️ PENDIENTE: confirmar qué idiomas habla el equipo. */
+    {
+      topic: 'language',
+      keys: [
+        'do you speak spanish', 'anyone speak spanish', 'hablan espanol',
+        'habla espanol', 'alguien que hable espanol', 'in spanish', 'en espanol',
+        'do you speak french', 'parlez vous francais', 'en francais', 'what languages'
+      ],
+      answer: [
+        'Write to me in Spanish or French — I understand you perfectly, and I will pass on what you tell me.\n\nWhether someone on the team can answer you in your language, I cannot promise, and I would rather not promise it than let you down. What do you need doing?',
+        'You can write here in your own language and I will understand. I cannot confirm which languages the team speaks, so I will not pretend.\n\nTell me what the work is and I will make sure it reaches a person.'
+      ],
+      weight: 4
     },
 
     /* [ENTRADA NUEVA] Un niño. Llega por curiosidad, y antes recibía un
