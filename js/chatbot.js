@@ -243,12 +243,30 @@
         'register as a supplier', 'register as a subcontractor', 'work as a subcontractor',
         'my company can', 'our company supplies', 'we supply', 'we can supply',
         'partner with you', 'become a vendor', 'get on your vendor list',
-        'prequalify as a supplier', 'somos proveedores', 'somos subcontratistas'
+        'prequalify as a supplier', 'somos proveedores', 'somos subcontratistas',
+        /* [AMPLIADO — el que OFRECE una brigada de mano de obra]
+           Carlos: "tengo 50 hombres, soldadores", "nosotros ponemos la mano de
+           obra, ustedes los materiales", "entrar en su lista de subcontratistas",
+           "movilizar una cuadrilla". Ofrece SU cuadrilla: es proveedor, no un
+           candidato individual ni un comprador. */
+        'tengo 50 hombres', 'tengo cincuenta hombres', 'tenemos una cuadrilla',
+        'tengo una cuadrilla', 'tenemos una brigada', 'ponemos la mano de obra',
+        'nosotros ponemos la mano de obra', 'ustedes los materiales', 'we bring the labour',
+        'we bring the labor', 'we supply the crew', 'we provide the crew', 'we provide labour',
+        'we provide manpower', 'i have a crew of', 'we have a crew of', 'crew of welders',
+        'welders and formworkers', 'soldadores y encofradores', 'lista de subcontratistas',
+        'entrar en su lista', 'proceso de precalificacion', 'process to get on your list',
+        'get on your subcontractor list', 'movilizar una cuadrilla', 'mobilize a crew',
+        'papeleo de precalificacion', 'prequalification paperwork', 'vendor onboarding',
+        'proceso de alta de proveedores', 'bid on your', 'bid on your upcoming',
+        'we would like to bid', 'designated vendor list', 'vendor onboarding process'
       ],
       weak: [
         'subcontractor', 'subcontract', 'subtrade', 'supplier', 'vendor',
         'distributor', 'wholesaler', 'our crew', 'our company', 'we install',
-        'we manufacture', 'proveedor', 'subcontratista'
+        'we manufacture', 'proveedor', 'subcontratista', 'cuadrilla', 'brigada',
+        'encofradores', 'precalificacion', 'prequalification', 'onboarding',
+        'mano de obra', 'manpower', 'warehousing', 'we operate'
       ]
     }
   };
@@ -1461,6 +1479,12 @@
     'oui', 'daccord', 'envoyer', 'cest correct'
   ].join('|') + ')\\b');
 
+  /* [FALLO CORREGIDO] "SOLO SÍ O NO", "yes or no", "sí o no" contienen "sí" y
+     se leían como una ACEPTACIÓN — arrancaban el formulario. Pero son lo
+     contrario: una EXIGENCIA de respuesta binaria de alguien impaciente
+     (Marcus). Estas frases anulan el YES. */
+  var NOT_YES = /\b(solo )?(si o no|yes or no|si\/no|yes\/no|un si o un no|it is a (yes or no|simple question))\b/i;
+
   var CANCEL = new RegExp('\\b(' + [
     'cancel', 'cancelled', 'stop', 'forget it', 'never mind', 'nevermind', 'quit', 'exit',
     'not now', 'maybe later', 'abort', 'drop it',
@@ -2361,7 +2385,7 @@
          arranque porque YES reconoce "exacto/exactamente" como un sí (se añadió
          como forma de confirmar). Pero dentro de una PREGUNTA no es un sí: es
          parte de la pregunta. Un "sí" solo cuenta si el turno no es pregunta. */
-      if (YES.test(n0) && !isQuestion(text)) {
+      if (YES.test(n0) && !isQuestion(text) && !NOT_YES.test(n0)) {
         arranqueOK = true;
         pendingAsk = null;
         startFlow(flowFor(pendingFlow), release, seed && seed.work, seed);
