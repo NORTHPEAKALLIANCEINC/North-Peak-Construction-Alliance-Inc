@@ -55,6 +55,11 @@
      porque perder los datos de alguien a mitad de camino es imperdonable. */
   var flow = null;          // { id, step, data, stage }
   var pendingFlow = null;   // flujo ofrecido, esperando un "sí"
+  /* Qué dato ha pedido el bot al repetir lo que entendió ('where' | 'when').
+     Sin esto, el bot preguntaba "¿para qué fecha?" y NO SABÍA ESCUCHAR la
+     respuesta: solo entendía un "sí". El visitante contestaba "en primavera"
+     y el bot le hacía triaje, como si no hubiera entendido nada. */
+  var pendingAsk = null;
 
   /* [FALLO CORREGIDO] pendingFlow y lastEntry vivían SOLO en memoria: al
      recargar la página o al navegar, se perdían, y un "yes" del visitante
@@ -64,6 +69,7 @@
     try {
       sessionStorage.setItem('np-chat-seed', JSON.stringify(seed || null));
       sessionStorage.setItem('np-chat-pending', pendingFlow || '');
+      sessionStorage.setItem('np-chat-ask', pendingAsk || '');
       sessionStorage.setItem('np-chat-last', (lastEntry && (lastEntry.topic || lastEntry.keys[0])) || '');
     } catch (e) {}
   }
@@ -72,6 +78,7 @@
     try {
       seed = JSON.parse(sessionStorage.getItem('np-chat-seed') || 'null');
       pendingFlow = sessionStorage.getItem('np-chat-pending') || null;
+      pendingAsk  = sessionStorage.getItem('np-chat-ask') || null;
       var t = sessionStorage.getItem('np-chat-last');
       if (t) {
         DATA.kb.forEach(function (e) {
@@ -108,7 +115,7 @@
      Si decías "Ottawa" y tres mensajes después preguntabas por hormigón,
      no lo relacionaba. Eso es lo que más delata a una máquina.
      Ahora retiene lo que le has dicho, y lo usa. */
-  var MEM = { city: null, role: null };
+  var MEM = { city: null, role: null, roleScore: 0, trade: null, experience: null };
 
   /* ── REPETICIÓN ────────────────────────────────────────────
      Si el visitante insiste en lo mismo, no quiere más conversación:
@@ -131,33 +138,229 @@
     'scarborough', 'etobicoke', 'north york', 'montreal', 'vancouver', 'calgary',
     'edmonton', 'winnipeg', 'halifax', 'quebec', 'ontario', 'alberta', 'manitoba'];
 
-  /* Quién es quien escribe. No para etiquetarlo, sino para no hacerle
-     perder el tiempo: a un candidato no se le habla de licitaciones. */
-  var ROLES = {
-    buyer:     ['tender', 'bid', 'procurement', 'rfp', 'contract', 'our project', 'we need', 'quote'],
-    candidate: ['job', 'hiring', 'resume', 'apply', 'looking for work', 'my trade', 'employment'],
-    supplier:  ['subcontractor', 'supplier', 'vendor', 'my company can', 'we supply']
+  /* ══════════════════════════════════════════════════════════
+     QUIÉN ESCRIBE  (Fase 2)
+
+     No para etiquetar a nadie, sino para no hacerle perder el tiempo: a
+     quien busca trabajo no se le habla de licitaciones, y a un
+     subcontratista no se le pregunta qué quiere construir.
+
+     [FALLO CORREGIDO — el gordo] La versión anterior buscaba palabras
+     por SUBCADENA: "job" está dentro de "job site", y "contract" dentro
+     de "contractor". Un comprador que escribía "when can your crew be on
+     the job site" quedaba marcado como candidato. Y ganaba el ÚLTIMO que
+     coincidiera, sin fuerza: una palabra suelta borraba lo ya sabido.
+
+     Ahora:
+       · Se busca por PALABRA COMPLETA, nunca por subcadena.
+       · Hay señales FUERTES (una declaración: "I am looking for a job")
+         y DÉBILES (una palabra suelta: "salary"). Puntúan distinto.
+       · El papel solo se fija con evidencia suficiente, y una vez fijado
+         solo lo cambia otra declaración explícita. Un roce no lo tumba.
+  ══════════════════════════════════════════════════════════ */
+
+  /* Falsos amigos: expresiones que contienen la palabra de un papel pero
+     no significan lo que parece. Se neutralizan ANTES de puntuar. */
+  var ROLE_NOISE = [
+    'job site', 'jobsite', 'job number', 'job order',
+    'apply for a permit', 'apply for a licence', 'apply for a license',
+    'contract price', 'contract value', 'contract documents'
+  ];
+
+  var STRONG = 3, WEAK = 1, ROLE_MIN = 2;
+
+  var ROLE_SIGNALS = {
+    /* Quien tiene una obra y busca quien la haga. */
+    buyer: {
+      strong: [
+        'we are tendering', 'we are looking for a contractor', 'looking for a contractor',
+        'need a contractor', 'need a builder', 'our tender', 'our project', 'our site',
+        'my project', 'we are building', 'we want to build', 'request a quote',
+        'send us a quote', 'our rfp', 'we are procuring', 'need a quote', 'need a price',
+        'buscamos una constructora', 'nuestro proyecto', 'necesito un contratista'
+      ],
+      weak: [
+        'tender', 'rfp', 'rfq', 'procurement', 'quote', 'estimate', 'budget',
+        'developer', 'architect', 'owner', 'client', 'we need', 'we want', 'we require',
+        'our building', 'our facility', 'our property', 'licitacion', 'presupuesto'
+      ]
+    },
+    /* Quien busca trabajo. */
+    candidate: {
+      strong: [
+        'looking for a job', 'looking for work', 'need a job', 'i want to apply',
+        'i would like to apply', 'apply for a job', 'are you hiring', 'do you have any openings',
+        'send my resume', 'send you my resume', 'my resume', 'my cv', 'i am looking for work',
+        'busco trabajo', 'busco empleo', 'quiero trabajar con ustedes', 'enviar mi curriculum'
+      ],
+      weak: [
+        'job', 'jobs', 'hiring', 'vacancy', 'vacancies', 'opening', 'openings',
+        'resume', 'cv', 'apply', 'employment', 'recruiting', 'apprentice', 'journeyman',
+        'salary', 'wage', 'wages', 'shift', 'my trade', 'empleo', 'trabajo', 'curriculum'
+      ]
+    },
+    /* Quien quiere trabajar PARA la empresa como empresa: subcontratista,
+       proveedor, socio. Ni compra, ni pide empleo. Hasta hoy no existía. */
+    supplier: {
+      strong: [
+        'we are a subcontractor', 'i am a subcontractor', 'we are a supplier',
+        'register as a supplier', 'register as a subcontractor', 'work as a subcontractor',
+        'my company can', 'our company supplies', 'we supply', 'we can supply',
+        'partner with you', 'become a vendor', 'get on your vendor list',
+        'prequalify as a supplier', 'somos proveedores', 'somos subcontratistas'
+      ],
+      weak: [
+        'subcontractor', 'subcontract', 'subtrade', 'supplier', 'vendor',
+        'distributor', 'wholesaler', 'our crew', 'our company', 'we install',
+        'we manufacture', 'proveedor', 'subcontratista'
+      ]
+    }
   };
+
+  /* Palabra completa, nunca subcadena.
+
+     [FALLO CORREGIDO EN PRUEBA] Estas expresiones se compilaban al cargar
+     el archivo, y usan normalize(), cuyas tablas se declaran MÁS ABAJO. En
+     el navegador eso reventaba el módulo entero: no habría habido chatbot,
+     no un chatbot con un fallo. Se compilan la primera vez que se usan,
+     cuando ya existe todo. */
+  var ROLE_RE = null, NOISE_RE = null;
+
+  function compileRoles() {
+    ROLE_RE = {};
+    Object.keys(ROLE_SIGNALS).forEach(function (r) {
+      ROLE_RE[r] = { strong: [], weak: [] };
+      ['strong', 'weak'].forEach(function (w) {
+        ROLE_SIGNALS[r][w].forEach(function (p) {
+          ROLE_RE[r][w].push(new RegExp('\\b' + normalize(p).replace(/\s+/g, '\\s+') + '\\b'));
+        });
+      });
+    });
+    NOISE_RE = ROLE_NOISE.map(function (p) {
+      return new RegExp('\\b' + p.replace(/\s+/g, '\\s+') + '\\b', 'g');
+    });
+  }
+
+  function scoreRoles(n) {
+    if (!ROLE_RE) compileRoles();
+    NOISE_RE.forEach(function (re) { re.lastIndex = 0; n = n.replace(re, ' '); });
+
+    var best = null;
+    Object.keys(ROLE_RE).forEach(function (r) {
+      var s = 0;
+      ROLE_RE[r].strong.forEach(function (re) { if (re.test(n)) s += STRONG; });
+      ROLE_RE[r].weak.forEach(function (re) { if (re.test(n)) s += WEAK; });
+      if (s > 0 && (!best || s > best.score)) best = { role: r, score: s };
+      else if (best && s === best.score && r !== best.role) best.tie = true;
+    });
+
+    if (!best || best.tie || best.score < ROLE_MIN) return null;
+    return best;
+  }
+
+  /* Oficios. Aquí SÍ vale una lista: al contrario que "las cosas que se
+     pueden construir", los oficios son un conjunto pequeño y cerrado.
+     Solo se apunta cuando ya creemos que es candidato o proveedor: a un
+     comprador que dice "soy el jefe de obra del ayuntamiento" no se le
+     apunta "jefe de obra" como oficio. */
+  var TRADES = [
+    'carpenter', 'framer', 'joiner', 'electrician', 'plumber', 'mason', 'bricklayer',
+    'stonemason', 'welder', 'ironworker', 'rebar', 'concrete finisher', 'cement finisher',
+    'labourer', 'laborer', 'operator', 'equipment operator', 'crane operator', 'foreman',
+    'forewoman', 'supervisor', 'superintendent', 'drywaller', 'taper', 'painter', 'roofer',
+    'glazier', 'tiler', 'plasterer', 'pipefitter', 'steamfitter', 'millwright', 'scaffolder',
+    'surveyor', 'estimator', 'project manager', 'site manager', 'safety officer', 'apprentice',
+    'helper', 'driver', 'landscaper', 'insulator', 'sheet metal worker', 'flooring installer',
+    'hvac technician', 'excavator operator', 'demolition', 'formwork'
+  ];
+  var TRADE_RE = new RegExp('\\b(' + TRADES.join('|') + ')s?\\b');
+  var EXP_RE   = new RegExp('\\b(\\d{1,2})\\s*\\+?\\s*(years?|yrs?|anos)\\b');
 
   function remember(text) {
     var n = normalize(text);
+
     CITIES.forEach(function (c) {
       if (new RegExp('\\b' + c + '\\b').test(n)) MEM.city = c;
     });
-    Object.keys(ROLES).forEach(function (r) {
-      ROLES[r].forEach(function (w) {
-        if (n.indexOf(normalize(w)) !== -1) MEM.role = r;
-      });
-    });
-    try { sessionStorage.setItem('np-chat-mem', JSON.stringify(MEM)); } catch (e) {}
+
+    /* ── El papel ── */
+    var r = scoreRoles(n);
+    if (r) {
+      if (!MEM.role) {
+        MEM.role = r.role; MEM.roleScore = r.score;
+      } else if (r.role === MEM.role) {
+        MEM.roleScore = Math.max(MEM.roleScore || 0, r.score);
+      } else if (r.score >= STRONG) {
+        /* Solo una declaración explícita cambia de papel. La gente cambia
+           de idea ("en realidad pregunto por un puesto"): hay que dejarla. */
+        MEM.role = r.role; MEM.roleScore = r.score;
+      }
+    }
+
+    /* ── Oficio y experiencia: para no preguntar dos veces lo que ya dijo ── */
+    if (MEM.role === 'candidate' || MEM.role === 'supplier') {
+      var t = TRADE_RE.exec(n);
+      if (t && !MEM.trade) MEM.trade = t[1];
+      var e = EXP_RE.exec(n);
+      if (e && !MEM.experience) MEM.experience = e[0];
+    }
+
+    try { sessionStorage.setItem('np-chat-mem', JSON.stringify(MEM)); } catch (err) {}
   }
 
   function loadMem() {
     try {
       var m = JSON.parse(sessionStorage.getItem('np-chat-mem') || 'null');
-      if (m) MEM = m;
+      if (m) {
+        MEM.city       = m.city       || null;
+        MEM.role       = m.role       || null;
+        MEM.roleScore  = m.roleScore  || 0;
+        MEM.trade      = m.trade      || null;
+        MEM.experience = m.experience || null;
+      }
     } catch (e) {}
   }
+
+  /* ══════════════════════════════════════════════════════════
+     UN SOLO SITIO DECIDE QUÉ FLUJO SE OFRECE
+
+     [FALLO CORREGIDO] El motor daba por hecho que todo el mundo venía a
+     comprar: 'project' estaba cableado en cinco puntos del motor y en
+     treinta entradas de la base. Un albañil que escribía "tengo diez años
+     en mampostería" recibía "¿te tomo los datos de tu proyecto?".
+
+     Ahora la base sigue diciendo lo mismo ('project' es el supuesto por
+     defecto) y es AQUÍ, en un único punto, donde se traduce al papel de
+     quien escribe. Añadir un papel nuevo mañana se hace en esta función,
+     no en treinta entradas.
+  ══════════════════════════════════════════════════════════ */
+  var ROLE_FLOW = { buyer: 'project', candidate: 'job', supplier: 'supplier' };
+
+  function flowFor(id) {
+    if (!MEM.role) return id;
+    var want = ROLE_FLOW[MEM.role];
+    if (!want || want === id) return id;
+
+    /* Solo se corrige el SUPUESTO por defecto (comprador). Si la base pide
+       expresamente un flujo distinto del genérico, se respeta. */
+    if (id !== 'project' && !(id === 'job' && MEM.role === 'supplier')) return id;
+
+    return DATA.flows[want] ? want : id;
+  }
+
+  /* Variantes por papel. Una lista de la base puede ser un array de toda
+     la vida (y entonces vale para todos) o un objeto por papel:
+       { any: [...], candidate: [...] }
+     El motor no sabe qué es un candidato: sabe que hay listas que pueden
+     variar. Mismo principio que la traducción — un solo punto, y las 53
+     entradas se quedan como están. */
+  function roleList(x) {
+    if (!x) return [];
+    if (Object.prototype.toString.call(x) === '[object Array]') return x;
+    return x[MEM.role] || x.any || [];
+  }
+
+  function roleKey(base) { return base + '#' + (MEM.role || 'any'); }
 
   /* ── URGENCIA ──────────────────────────────────────────────
      Alguien con prisa no quiere cinco preguntas: quiere un teléfono. */
@@ -860,7 +1063,11 @@
   function save(role, text, entry) {
     try {
       var h = JSON.parse(sessionStorage.getItem(STORE) || '[]');
-      h.push({ r: role, t: text, nav: entry && entry.nav, card: entry && entry.contactCard });
+      /* [FALLO CORREGIDO] El botón de editar no se guardaba: quien navegaba
+         a otra página en mitad de la confirmación se quedaba mirando su
+         resumen sin forma de corregirlo. */
+      h.push({ r: role, t: text, nav: entry && entry.nav,
+               card: entry && entry.contactCard, edit: entry && entry.editButton });
       sessionStorage.setItem(STORE, JSON.stringify(h.slice(-40)));
     } catch (e) {}
   }
@@ -871,7 +1078,7 @@
     if (!h.length) return;              // el saludo se escribe al abrir
     h.forEach(function (m) {
       if (m.r === 'user') { var b = bubble('user'); b.textContent = m.t; }
-      else addBot(m.t, { nav: m.nav, contactCard: m.card }, false);
+      else addBot(m.t, { nav: m.nav, contactCard: m.card, editButton: m.edit }, false);
     });
     bottom();
   }
@@ -897,14 +1104,23 @@
   function ensureExit(text, entry) {
     if (String(text).indexOf('?') !== -1) return text;
     if (entry && (entry.contactCard || entry.nav || entry.editButton)) return text;
-    return text + '\n\n' + pickVariant(BOT.nudges, 'nudge');
+
+    /* [FALLO CORREGIDO — estaba en producción] Con una toma de datos en
+       marcha, el bot SIEMPRE va a hablar otra vez acto seguido: la salida
+       es la pregunta del paso siguiente. Añadir aquí un empujón metía una
+       pregunta suelta entre medias ("¿cuánta experiencia tienes?") justo
+       antes de preguntar lo mismo — o peor, algo que la persona ya había
+       contado. Conduciendo no se empuja. */
+    if (flow) return text;
+
+    return text + '\n\n' + pickVariant(roleList(BOT.nudges), roleKey('nudge'));
   }
 
   function speak(text, entry, done) {
     /* Red de última hora: un mensaje vacío es lo peor que puede pasar
        (el visitante ve una burbuja con un signo suelto y nada más).
        Si por lo que sea el texto viene vacío, se hace triaje. */
-    if (!String(text || '').trim()) text = pickVariant(BOT.triage, 'triage');
+    if (!String(text || '').trim()) text = pickVariant(roleList(BOT.triage), roleKey('triage'));
     text = ensureExit(text, entry);
     showTyping();
     setTimeout(function () {
@@ -977,6 +1193,7 @@
      la web traducida por el navegador y escribe lo que ve. */
   var STEP_ALIASES = {
     what:       ['what', 'work', 'project', 'obra', 'trabajo', 'proyecto'],
+    company:    ['company', 'business', 'firm', 'empresa', 'compania', 'negocio', 'entreprise'],
     where:      ['where', 'city', 'location', 'donde', 'dónde', 'ciudad', 'lugar', 'ou'],
     when:       ['when', 'date', 'timing', 'cuando', 'cuándo', 'fecha', 'plazo', 'quand'],
     name:       ['name', 'nombre', 'nom'],
@@ -985,6 +1202,11 @@
     trade:      ['trade', 'role', 'oficio', 'puesto', 'metier'],
     experience: ['experience', 'experiencia']
   };
+
+  /* Los campos del flujo EN MARCHA, para poder nombrarlos sin cablearlos. */
+  function fieldList(def) {
+    return def.steps.map(function (s) { return '**' + s.id + '**'; }).join(', ');
+  }
 
   function mentionsStep(norm, stepId) {
     var list = STEP_ALIASES[stepId] || [stepId];
@@ -1015,19 +1237,51 @@
     savePending();
 
     /* Todo lo que el visitante YA nos ha dicho se da por dicho. No se le
-       pregunta dos veces lo mismo: eso es lo que delata a una máquina. */
+       pregunta dos veces lo mismo: eso es lo que delata a una máquina.
+       [FASE 2] Antes solo se recuperaban la obra, la ciudad y la fecha —
+       los datos del comprador. Ahora también el oficio y la experiencia:
+       quien ya ha escrito "soy carpintero, diez años" no debe oír
+       "¿cuál es tu oficio?". */
     if (prefillWhat && def.steps[0] && def.steps[0].id === 'what') {
       flow.data.what = prefillWhat;
     }
-    if (got) {
-      if (got.city) flow.data.where = got.city;
-      if (got.when) flow.data.when  = got.when;
-    }
+
+    var known = {
+      where:      (got && got.city) || null,
+      when:       (got && got.when) || null,
+      trade:      MEM.trade || null,
+      experience: MEM.experience || null
+    };
+    def.steps.forEach(function (st) {
+      if (known[st.id] && !flow.data[st.id]) flow.data[st.id] = known[st.id];
+    });
     while (def.steps[flow.step] && flow.data[def.steps[flow.step].id]) flow.step++;
     saveFlow();
-    speak(pickVariant(def.start, id + '#start'), null, function () {
+
+    /* [FALLO CORREGIDO] La base prometía "cuatro preguntas". Con el
+       prellenado, a veces quedaban dos. Prometer de más es perder la
+       confianza por nada: el número lo cuenta el motor. */
+    speak(startLine(def, id), null, function () {
       askStep(done);
     });
+  }
+
+  /* Cuántas preguntas quedan de verdad, en palabras. */
+  var NUM = ['no', 'one', 'two', 'three', 'four', 'five', 'six'];
+
+  /* Y si el número cae al principio de una frase, va en mayúscula. La base
+     no tiene por qué preocuparse de dónde coloca {n}. */
+  function startLine(def, id) {
+    return pickVariant(def.start, id + '#start')
+      .replace('{n}', remaining())
+      .replace(/(^|[.!?]\s+)([a-z])/g, function (m, p, c) { return p + c.toUpperCase(); });
+  }
+
+  function remaining() {
+    var def = flowDef();
+    if (!def) return 'a few';
+    var n = def.steps.filter(function (s) { return !flow.data[s.id]; }).length;
+    return NUM[n] || String(n);
   }
 
   function askStep(done) {
@@ -1059,6 +1313,15 @@
     var v = value.trim();
     if (step.type === 'contact') {
       return looksLikeContact(v) ? null : 'invalidContact';
+    }
+    /* [FALLO CORREGIDO] Un oficio o el nombre de una empresa son UNA
+       palabra: "carpenter", "Acme". El tipo 'text' exige dos palabras (lo
+       correcto para describir una obra) y contestaba "dame más detalle" a
+       quien había contestado perfectamente. Este tipo es para respuestas
+       que legítimamente caben en una palabra. */
+    if (step.type === 'short') {
+      if (looksLikeContact(v)) return 'looksLikeContact';
+      return v.length >= 2 ? null : 'tooShort';
     }
     if (step.type === 'place') {
       if (looksLikeContact(v)) return 'looksLikeContact';
@@ -1116,8 +1379,9 @@
     .then(function (res) {
       hideTyping();
       if (res && res.success) {
-        addBot(pickVariant(def.success, flow.id + '#ok'), null, true);
-        clearFlow();
+        var msg = pickVariant(def.success, flow.id + '#ok');
+        clearFlow();                       // primero se cierra: ya no se conduce
+        addBot(ensureExit(msg, null), null, true);
       } else { throw new Error('web3forms'); }
       if (done) done();
     })
@@ -1172,9 +1436,15 @@
         return;
       }
 
-      /* Pide corregir, pero no dice qué. */
+      /* Pide corregir, pero no dice qué.
+         [FALLO CORREGIDO] El texto listaba "what, where, when, name,
+         contact" — los campos del flujo de PROYECTO — aunque quien
+         estuviera hablando fuese un candidato, cuyo flujo no tiene
+         ninguno de esos campos salvo dos. Ahora los campos se leen del
+         flujo que está en marcha. */
       if (FIXWORD.test(n) || DECLINE.test(n)) {
-        speak(pickVariant(DATA.flowTalk.whatToChange, 'change'), null, done);
+        speak(pickVariant(DATA.flowTalk.whatToChange, 'change')
+                .replace('{fields}', fieldList(def)), null, done);
         return;
       }
 
@@ -1203,8 +1473,19 @@
     var err = validate(step, text);
     if (err) {
       if (err === 'looksLikeContact') {
-        flow.saved = text.trim();     // se apunta para el final
+        /* Ha soltado su correo cuando se le preguntaba otra cosa. Se apunta
+           para el final y se vuelve a hacer LA MISMA pregunta.
+           [FALLO CORREGIDO] El texto terminaba en "¿cuál es la obra?" —
+           válido solo en el flujo de proyecto. A un candidato se le
+           preguntaba por una obra que no tiene. Ahora el acuse no lleva
+           pregunta y la pregunta la repite el propio paso: un mensaje,
+           una pregunta. */
+        flow.saved = text.trim();
         saveFlow();
+        speak(pickVariant(DATA.flowTalk.looksLikeContact, 'looksLikeContact'), null, function () {
+          askStep(done);
+        });
+        return;
       }
       speak(pickVariant(DATA.flowTalk[err], err), null, done);
       return;
@@ -1368,6 +1649,7 @@
       else if (isConstruction(text) && normalize(text).split(' ').length >= 3) {
         seed = { work: text.trim(), city: g0.city, when: g0.when };
       }
+      if (seed) savePending();      // y sobrevive al cambio de página
     }
 
     /* 1. ¿Hay una toma de datos en marcha? Entonces se conduce. */
@@ -1377,7 +1659,7 @@
        cinco preguntas a alguien con una urgencia es no escuchar. */
     if (URGENT.test(normalize(text)) && !alreadyOffered('urgent')) {
       markOffered('urgent');
-      pendingFlow = 'project';
+      pendingFlow = flowFor('project');
       savePending();
       speak(pickVariant(BOT.urgent, 'urgent'), { contactCard: true }, release);
       return;
@@ -1387,16 +1669,67 @@
     if (pendingFlow) {
       var n0 = normalize(text);
       if (YES.test(n0)) {
+        pendingAsk = null;
         startFlow(pendingFlow, release, seed && seed.work, seed);
         return;
       }
       if (DECLINE.test(n0) || CANCEL.test(n0)) {
         pendingFlow = null;
+        pendingAsk = null;
         savePending();
         speak(pickVariant(DATA.flowTalk.cancelled, 'cancel'), null, release);
         return;
       }
+
+      /* ══════════════════════════════════════════════════════
+         [FALLO CORREGIDO — estaba en producción y perdía clientes]
+
+         El bot hacía una pregunta ("¿para qué fecha?", "¿te tomo los
+         datos?") y después SOLO sabía oír un "sí". El visitante contestaba
+         "en primavera" — es decir, contestaba — y el bot le hacía TRIAJE:
+         "no te he entendido, ¿esto es un proyecto, un empleo o…?". Había
+         preguntado algo y no escuchaba la respuesta. No hay forma más
+         rápida de perder a alguien.
+
+         Regla: con un ofrecimiento en el aire y una obra ya contada,
+         cualquier respuesta que no sea OTRO tema, OTRA intención ni un
+         galimatías es información sobre esa obra. Se recoge y se conduce.
+         El resumen final se lee de vuelta y se puede cancelar: el peor
+         caso de equivocarse aquí es una pregunta de más. El peor caso de
+         no hacerlo es un cliente que se va.
+      ══════════════════════════════════════════════════════ */
+      if (seed && seed.work && !isUnintelligible(text) &&
+          !detectTopics(text).length && !detectIntent(text) && !flowTrigger(text)) {
+
+        var g1 = extract(text);
+
+        /* Si el bot preguntó por un dato concreto, la respuesta ES ese dato,
+           aunque no la reconozca ninguna expresión regular. */
+        if (pendingAsk === 'where') {
+          var place = g1.city || text.trim();
+          var errPlace = validate({ type: 'place' }, place);
+          if (errPlace) {                       // "Canadá" no es una ciudad
+            speak(pickVariant(DATA.flowTalk[errPlace], errPlace), null, release);
+            return;
+          }
+          seed.city = place;
+        } else if (pendingAsk === 'when') {
+          seed.when = g1.when || text.trim();
+        } else {
+          if (g1.city) seed.city = g1.city;
+          if (g1.when) seed.when = g1.when;
+        }
+
+        pendingAsk = null;
+        var pfNow = pendingFlow;
+        markOffered(pfNow);
+        savePending();
+        startFlow(pfNow, release, seed.work, seed);
+        return;
+      }
+
       pendingFlow = null;   // ha cambiado de tema: se sigue como siempre
+      pendingAsk  = null;
       savePending();
     }
 
@@ -1409,7 +1742,7 @@
        a hablar de cobertura geográfica. */
     if (OFFTOPIC.test(normalize(text)) && !isConstruction(text)) {
       misses = 0;
-      speak(pickVariant(BOT.redirect, 'redirect'), null, release);
+      speak(pickVariant(roleList(BOT.redirect), roleKey('redirect')), null, release);
       return;
     }
 
@@ -1417,8 +1750,8 @@
        y el visitante dice "sí", se abre el flujo. Pase lo que pase con la
        memoria, un "sí" nunca vuelve a repetir la respuesta anterior. */
     if (YES.test(normalize(text)) && normalize(text).split(' ').length <= 4 &&
-        lastEntry && lastEntry.offerFlow && DATA.flows[lastEntry.offerFlow]) {
-      startFlow(lastEntry.offerFlow, release, seed && seed.work, seed);
+        lastEntry && lastEntry.offerFlow && DATA.flows[flowFor(lastEntry.offerFlow)]) {
+      startFlow(flowFor(lastEntry.offerFlow), release, seed && seed.work, seed);
       return;
     }
 
@@ -1463,14 +1796,22 @@
                     .replace('{city}', got.city || '')
                     .replace('{when}', got.when || '');
 
-        if (tpl === 'full') {          /* lo sabe todo: no marea, actúa */
+        pendingAsk = (tpl === 'workCity') ? 'when'
+                   : (tpl === 'workWhen' || tpl === 'workOnly') ? 'where'
+                   : null;
+        var pf = flowFor('project');
+
+        /* Lo sabe todo Y es una obra de quien la encarga: no marea, actúa.
+           Si quien escribe NO es un comprador, describir una obra no es
+           encargarla: se ofrece su flujo y se le deja decidir. */
+        if (tpl === 'full' && pf === 'project') {
           markOffered('project');
           speak(msg, null, function () {
             startFlow('project', release, got.work, got);
           });
           return;
         }
-        pendingFlow = 'project';
+        pendingFlow = pf;
         savePending();
         speak(msg, null, release);
         return;
@@ -1481,8 +1822,9 @@
       if (intent && BOT.intentAnswers[intent]) {
         misses = 0;
         var ia = BOT.intentAnswers[intent];
-        if (ia.offerFlow && !alreadyOffered(ia.offerFlow)) {
-          pendingFlow = ia.offerFlow;
+        var iaFlow = ia.offerFlow && flowFor(ia.offerFlow);
+        if (iaFlow && DATA.flows[iaFlow] && !alreadyOffered(iaFlow)) {
+          pendingFlow = iaFlow;
           savePending();
         }
         speak(pickVariant(ia.answer, 'intent#' + intent),
@@ -1493,8 +1835,10 @@
       /* 3. ¿Habla de construcción, aunque no sepa de qué? */
       if (isConstruction(text) && normalize(text).split(' ').length >= 3) {
         misses = 0;
-        if (!alreadyOffered('project')) { pendingFlow = 'project'; savePending(); }
-        speak(pickVariant(BOT.intentAnswers.need.answer, 'intent#need'), null, release);
+        var cf = flowFor('project');
+        if (!alreadyOffered(cf)) { pendingFlow = cf; savePending(); }
+        speak(pickVariant(roleList(BOT.intentAnswers.need.answer), roleKey('intent#need')),
+              null, release);
         return;
       }
 
@@ -1508,7 +1852,7 @@
         text2 = pickVariant(BOT.clarify, 'clarify');
         extra = null;
       } else if (misses === 1) {
-        text2 = pickVariant(BOT.triage, 'triage');
+        text2 = pickVariant(roleList(BOT.triage), roleKey('triage'));
         extra = null;
       } else if (misses === 2) {
         text2 = pickVariant(BOT.retry, 'retry');
@@ -1535,12 +1879,20 @@
     if (topName === lastTopic) repeats++; else repeats = 0;
     lastTopic = topName;
 
-    if (repeats >= 1 && topEntry.offerFlow && DATA.flows[topEntry.offerFlow]) {
+    var repeatFlow = topEntry.offerFlow && flowFor(topEntry.offerFlow);
+    if (repeats >= 1 && repeatFlow && DATA.flows[repeatFlow]) {
       repeats = 0;
-      markOffered(topEntry.offerFlow);
-      var seed = extract(text);
+      markOffered(repeatFlow);
+      /* [FALLO CORREGIDO — estaba en producción] Esto se llamaba 'seed', y
+         al declararse con var DENTRO de send() se izaba y TAPABA la semilla
+         del módulo en toda la función. La semilla se guardaba en una
+         variable local que moría con el mensaje: el visitante decía "quiero
+         construir un almacén", decía "sí"… y el bot le preguntaba qué quería
+         construir. El fallo que los comentarios daban por corregido seguía
+         vivo, escondido detrás de un nombre repetido. */
+      var seedNow = extract(text);
       speak(pickVariant(DATA.flowTalk.justStart, 'justStart'), null, function () {
-        startFlow(topEntry.offerFlow, release, seed.work || (isConstruction(text) ? text : null), seed);
+        startFlow(repeatFlow, release, seedNow.work || (isConstruction(text) ? text : null), seedNow);
       });
       return;
     }
@@ -1573,21 +1925,19 @@
          offerFlow. Pero si el ofrecimiento YA se había hecho, la respuesta
          moría sin pregunta y el visitante se quedaba sin saber qué escribir.
          Ahora: sin pregunta, no se cede el turno. */
-      var isLast = (i >= topics.length);
-      var willOffer = entry.offerFlow && DATA.flows[entry.offerFlow] &&
-                      !alreadyOffered(entry.offerFlow);
+      var isLast   = (i >= topics.length);
+      var entryFlow = entry.offerFlow && flowFor(entry.offerFlow);
+      var willOffer = entryFlow && DATA.flows[entryFlow] && !alreadyOffered(entryFlow);
       if (isLast && out.indexOf('?') === -1 && !entry.contactCard && !willOffer) {
-        out += '\n\n' + pickVariant(BOT.nudges, 'nudge');
+        out += '\n\n' + pickVariant(roleList(BOT.nudges), roleKey('nudge'));
       }
 
       speak(out, entry, function () {
-        if (isLast && entry.offerFlow && DATA.flows[entry.offerFlow] &&
-            !alreadyOffered(entry.offerFlow)) {
-          pendingFlow = entry.offerFlow;
+        if (isLast && willOffer) {
+          pendingFlow = entryFlow;
           savePending();
-          markOffered(entry.offerFlow);
-          speak(pickVariant(DATA.flows[entry.offerFlow].offer, entry.offerFlow + '#offer'),
-                null, next);
+          markOffered(entryFlow);
+          speak(pickVariant(DATA.flows[entryFlow].offer, entryFlow + '#offer'), null, next);
           return;
         }
         next();

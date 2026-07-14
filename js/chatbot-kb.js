@@ -66,11 +66,29 @@ window.NP_BOT_KB = {
        al visitante sintiéndose despachado. Un buen empleado acota: tres
        puertas, y que elija. El bot nunca pierde el control, ni siquiera
        cuando no entiende nada. */
-    triage: [
-      'I want to point you the right way rather than guess.\n\nIs this about **a project**, about **working with us**, or about **the company**?',
-      'Let me narrow this down.\n\nAre you here about **a project you need built**, about **a job**, or for **information about the company**?',
-      'I did not follow that, and I do not want to leave you stuck.\n\nWhich is nearest: **a project**, **a job**, or **information**?'
-    ],
+    /* [FASE 2] Las tres puertas dependen de quién esté delante. Ofrecerle
+       "¿una licitación?" a quien acaba de decir que busca trabajo es no
+       haberle escuchado. El motor elige la lista; aquí solo vive el texto.
+       'any' es la de siempre, y se usa mientras no se sepa quién escribe. */
+    triage: {
+      any: [
+        'I want to point you the right way rather than guess.\n\nIs this about **a project**, about **working with us**, or about **the company**?',
+        'Let me narrow this down.\n\nAre you here about **a project you need built**, about **a job**, or for **information about the company**?',
+        'I did not follow that, and I do not want to leave you stuck.\n\nWhich is nearest: **a project**, **a job**, or **information**?'
+      ],
+      buyer: [
+        'I want to point you the right way rather than guess.\n\nIs this about **the work itself**, about **documents and prequalification**, or about **speaking to a person**?',
+        'Let me narrow this down.\n\nIs it **the project**, **the paperwork**, or **the people** you need?'
+      ],
+      candidate: [
+        'I did not follow that, and I do not want to leave you stuck.\n\nIs this about **a role on site**, about **a technical or office role**, or about **something else**?',
+        'Let me point you the right way.\n\nAre you asking about **a position**, about **how to apply**, or about **the company itself**?'
+      ],
+      supplier: [
+        'Let me narrow this down.\n\nIs this about **registering as a subcontractor**, about **supplying materials**, or about **something else**?',
+        'I want to point you the right way.\n\nIs it **work as a subcontractor**, **a supply agreement**, or **information about the company**?'
+      ]
+    },
 
     /* ── Cuando no sabe. Cinco variantes, todas honestas. ── */
     fallback: [
@@ -111,28 +129,66 @@ window.NP_BOT_KB = {
        se iba. Ahora, cuando una respuesta no termina en pregunta, el
        bot AÑADE una — y esa pregunta lleva a su terreno.
        Nunca se cede el turno sin devolver la pelota. */
-    nudges: [
-      'Is there a project behind the question, or are you gathering information for now?',
-      'Tell me a little about what you are working on and I can be more useful.',
-      'What is the project, if there is one? I can put it in front of a person today.',
-      'Would it help to speak to someone on the team about it?',
-      'Where are you in the process — early thinking, or a live tender?',
-      'Is this for something you are planning now, or further out?',
-      'What would be most useful to you right now?',
-      'Anything specific I can dig into for you?'
-    ],
+    nudges: {
+      any: [
+        'Is there a project behind the question, or are you gathering information for now?',
+        'Tell me a little about what you are working on and I can be more useful.',
+        'What is the project, if there is one? I can put it in front of a person today.',
+        'Would it help to speak to someone on the team about it?',
+        'Where are you in the process — early thinking, or a live tender?',
+        'Is this for something you are planning now, or further out?',
+        'What would be most useful to you right now?',
+        'Anything specific I can dig into for you?'
+      ],
+      buyer: [
+        'What is the project? I can put it in front of a person today.',
+        'Where are you in the process — early thinking, or a live tender?',
+        'Would it help to speak to someone on the team about it?',
+        'Tell me what the work involves and I can be more useful.',
+        'Is there a date you are working towards?'
+      ],
+      /* Nada de licitaciones aquí. A quien busca trabajo se le pregunta
+         por su oficio, no por su presupuesto. */
+      candidate: [
+        'What is your trade, or the role you are after?',
+        'Would you like me to pass your details to the team?',
+        'How much experience do you have in it?',
+        'Are you looking for site work, or a technical or office role?',
+        'Anything else you would like to know before you apply?'
+      ],
+      supplier: [
+        'What does your company do, and which trades do you cover?',
+        'Would you like me to pass your company details to the team?',
+        'Which areas do you cover?',
+        'Are you offering labour, materials, or both?'
+      ]
+    },
 
     /* ── DESVÍOS ──────────────────────────────────────────────
        Cuando alguien se sale del tema (el tiempo, el fútbol, un chiste),
        un bot corporativo suele contestar "no lo sé" y matar la conversación.
        Eso es un cliente perdido por una tontería. Se reconoce con humor
        breve, y se vuelve al terreno propio sin brusquedad. */
-    redirect: [
-      'That is outside what I can help with. Construction is what I know.\n\nIs there something about the company or a project I can help you with?',
-      'That is not something I can help with, but construction is.\n\nWhat brings you to North Peak today?',
-      'I will leave that one to someone else.\n\nWhat can I help you with: a project, a job, or information?',
-      'That is outside what I am here for. If you have something to build, however, I can help. Do you?'
-    ],
+    redirect: {
+      any: [
+        'That is outside what I can help with. Construction is what I know.\n\nIs there something about the company or a project I can help you with?',
+        'That is not something I can help with, but construction is.\n\nWhat brings you to North Peak today?',
+        'I will leave that one to someone else.\n\nWhat can I help you with: a project, a job, or information?',
+        'That is outside what I am here for. If you have something to build, however, I can help. Do you?'
+      ],
+      buyer: [
+        'That is outside what I can help with. Construction is what I know.\n\nShall we go back to the project?',
+        'I will leave that one to someone else.\n\nWhat would you like to know about the work?'
+      ],
+      candidate: [
+        'That is outside what I can help with. Construction is what I know.\n\nShall we go back to the role you are after?',
+        'I will leave that one to someone else.\n\nWhat would you like to know about working here?'
+      ],
+      supplier: [
+        'That is outside what I can help with. Construction is what I know.\n\nShall we go back to what your company does?',
+        'I will leave that one to someone else.\n\nWhat would you like to know about working with us?'
+      ]
+    },
 
     /* ── URGENCIA ─────────────────────────────────────────────
        Alguien con prisa no quiere cinco preguntas. Quiere un teléfono.
@@ -299,10 +355,12 @@ window.NP_BOT_KB = {
         'Shall I take a few short details and put them in front of a person today?',
         'Rather than send you to a form, shall I take the details myself and pass them to the team?'
       ],
+      /* {n} lo sustituye el motor por las preguntas que QUEDAN de verdad:
+         si el visitante ya ha contado la obra, no son cuatro, son tres. */
       start: [
-        'Good. Four questions, in plain words. No technical language needed.',
-        'Right. Four quick things and I will pass it on.',
-        'Let us do it. Four questions, and you may stop at any point.'
+        'Good. {n} questions, in plain words. No technical language needed.',
+        'Right. {n} quick things and I will pass it on.',
+        'Let us do it. {n} questions, and you may stop at any point.'
       ],
       steps: [
         {
@@ -311,7 +369,7 @@ window.NP_BOT_KB = {
           ask: [
             'First: what needs building, repairing or managing?',
             'What is the work? Describe it in your own words.',
-            'Tell me what the project involves. Plain language is fine.'
+            'What does the project involve? Plain language is fine.'
           ]
         },
         {
@@ -345,9 +403,9 @@ window.NP_BOT_KB = {
           id: 'contact',
           type: 'contact',
           ask: [
-            'Last one — just type your phone number or your email address.',
-            'And your contact: write the phone number or the email itself.',
-            'Finally, write your email or your phone number, and a person will come back to you.'
+            'Last one — what is your phone number or email address?',
+            'And your contact. What is the phone number, or the email?',
+            'Finally: what is your email or phone number? A person will come back to you.'
           ]
         }
       ],
@@ -383,13 +441,16 @@ window.NP_BOT_KB = {
         'If you like, I can take your trade and your contact and put them in front of the right person.'
       ],
       start: [
-        'Good. Three quick questions.',
-        'Right — three things and I will pass it on.'
+        'Good. {n} quick questions.',
+        'Right — {n} things and I will pass it on.'
       ],
       steps: [
         {
           id: 'trade',
-          type: 'text',
+          /* [FALLO CORREGIDO] Era 'text', que exige dos palabras. Quien
+             contestaba "carpenter" recibía "dame un poco más de detalle".
+             'short' acepta una palabra, que es lo que es un oficio. */
+          type: 'short',
           ask: [
             'What is your trade, or the role you are after?',
             'What do you do — trade or position?'
@@ -412,8 +473,8 @@ window.NP_BOT_KB = {
           id: 'contact',
           type: 'contact',
           ask: [
-            'Now just type your phone number or your email.',
-            'Write your email or phone number and they will come back to you.'
+            'And your phone number or email address?',
+            'What is your email or phone number? They will come back to you.'
           ]
         }
       ],
@@ -432,6 +493,86 @@ window.NP_BOT_KB = {
       failure: [
         'It did not go through, and I will not pretend it did. Use the Careers page or write directly:'
       ]
+    },
+
+    /* ══════════════════════════════════════════════════════════
+       PROVEEDORES Y SUBCONTRATISTAS  (Fase 2)
+
+       [HUECO CORREGIDO] No existía. Un subcontratista que se ofrecía caía
+       en el flujo de EMPLEO: a la oficina le llegaba un correo titulado
+       "candidate enquiry" con su oficio y sus años de experiencia, como si
+       fuera un albañil buscando trabajo. Ni el asunto ni los campos eran
+       los suyos. Ahora tiene su propio flujo y su propio asunto.
+    ══════════════════════════════════════════════════════════ */
+    supplier: {
+      id: 'supplier',
+      subject: 'New subcontractor / supplier enquiry from the website assistant',
+      trigger: [
+        'register as a supplier', 'register as a subcontractor', 'register my company',
+        'send my company details', 'get on your vendor list', 'add us to your list'
+      ],
+      offer: [
+        'I can take your company details now and put them in front of the team, if you would like.',
+        'Shall I take your company, your trade and your coverage, and pass them to the team?'
+      ],
+      start: [
+        'Good. {n} questions about your company.',
+        'Right — {n} short questions and I will pass it on.'
+      ],
+      steps: [
+        {
+          id: 'company',
+          type: 'short',
+          ask: [
+            'What is the name of your company?',
+            'First: your company name?'
+          ]
+        },
+        {
+          id: 'trade',
+          type: 'short',
+          ask: [
+            'What does it do? Name the trade or the materials you supply.',
+            'What is your trade, or what do you supply?'
+          ]
+        },
+        {
+          id: 'where',
+          type: 'place',
+          ask: [
+            'Which city or area do you cover?',
+            'And your coverage. Which city or area?'
+          ]
+        },
+        {
+          id: 'name',
+          type: 'name',
+          ask: ['And your name?', 'Who should the team ask for?']
+        },
+        {
+          id: 'contact',
+          type: 'contact',
+          ask: [
+            'Last one — what is your phone number or email address?',
+            'What is your email or phone number? A person will come back to you.'
+          ]
+        }
+      ],
+      confirm: [
+        'Here is what I have:',
+        'Let me read it back before it goes anywhere:'
+      ],
+      confirmAsk: [
+        'If that is correct, say so and I will send it. To change anything, use **Edit details** below.',
+        'Confirm and it goes to the team. Otherwise, **Edit details** below.'
+      ],
+      success: [
+        'Sent. Your company details are with the team, and you stay on file for upcoming work.\n\nIs there anything else?',
+        'Done — that is in the office inbox. Someone will come back to you.'
+      ],
+      failure: [
+        'It did not go through, and I will not pretend it did. Write to the office directly and your details will get there:'
+      ]
     }
   },
 
@@ -443,13 +584,18 @@ window.NP_BOT_KB = {
     ],
     invalidContact: [
       'That does not look like a phone number or an email. Could you write it again?',
-      'I need something a person can actually reach you on — a phone number or an email address.'
+      'I need something a person can actually reach you on. What is your phone number, or your email?'
     ],
     /* El visitante suelta su correo o su teléfono cuando se le pregunta
        otra cosa. Un humano no lo tragaría: lo apuntaría y seguiría. */
+    /* [FALLO CORREGIDO] Terminaba en "¿cuál es la obra?", que solo tiene
+       sentido en el flujo de proyecto: a un candidato se le preguntaba por
+       una obra que no tiene. Ahora es solo el acuse de recibo — el motor
+       vuelve a hacer la pregunta del paso en el mensaje siguiente. Un
+       mensaje, una pregunta. */
     looksLikeContact: [
-      'That looks like how to reach you — I have made a note of it, and I will use it at the end.\n\nFor now: what is the work?',
-      'I will hold on to that as your contact, and come back to it.\n\nFirst, tell me what needs doing.'
+      'That looks like how to reach you. I have made a note of it and I will use it at the end.',
+      'I will hold on to that as your contact and come back to it at the end.'
     ],
     useSaved: [
       'Earlier you gave me **{contact}**. Shall I use that? Say **yes**, or give me another.',
@@ -474,15 +620,18 @@ window.NP_BOT_KB = {
     tooBroadPlace: [
       'Canada is a big country. Which province, and which city or town?',
       'That covers a very large area. Which province, and which city?',
-      'I need it a bit tighter than that — the province, and the city if you have it.'
+      'I need it a bit tighter than that. Which province, and which city?'
     ],
+    /* Estos mensajes vuelven a pedir el mismo dato, así que PREGUNTAN. Antes
+       terminaban en punto, y el bot cedía el turno sin pregunta: dentro de
+       una toma de datos eso deja al visitante mirando la pantalla. */
     tooVague: [
-      'A little more detail, if you can. Even a few words about what it involves.',
-      'Give me a bit more to work with — the team will need something to go on.'
+      'A little more detail, if you can. What does it involve?',
+      'Give me a bit more to work with — the team will need something to go on. Can you say a few words about it?'
     ],
     tooShort: [
-      'A little more than that, if you can. Even one sentence helps.',
-      'Give me a bit more to work with — a few words.'
+      'A little more than that, if you can. Could you give me one sentence?',
+      'Give me a bit more to work with — could you write it out in a few words?'
     ],
     sending: [
       'Sending it now…',
@@ -490,16 +639,20 @@ window.NP_BOT_KB = {
     ],
     /* No se ha entendido si aprueba o no. Se pregunta sin ambigüedad. */
     confirmUnclear: [
-      'Sorry — I did not catch whether that is a yes.\n\nSay **yes** to send it, or tell me what to change.',
-      'I am not sure if you are approving it. **Yes** sends it; otherwise tell me what to fix.',
-      'Just so I do not get this wrong: **yes** and it goes to the team. Or name what needs correcting.'
+      'Sorry — I did not catch whether that is a yes.\n\nShall I send it? Say **yes**, or tell me what to change.',
+      'I am not sure if you are approving it. Is that a **yes**, or is there something to fix?',
+      'Just so I do not get this wrong — is it a **yes**? If not, name what needs correcting.'
     ],
 
+    /* [FALLO CORREGIDO] Listaba los campos del flujo de PROYECTO aunque
+       quien estuviera hablando fuese un candidato, cuyo flujo no tiene ni
+       "where" ni "when". {fields} lo sustituye el motor por los campos
+       reales del flujo en marcha. */
     whatToChange: [
-      'Which part? Say **what**, **where**, **when**, **name** or **contact**.',
-      'Tell me which one to fix: **what**, **where**, **when**, **name** or **contact**.',
-      'No problem. Which one — the work, the city, the date, your name, or your contact?',
-      'Happy to correct it. Name the part: **what**, **where**, **when**, **name** or **contact**.'
+      'Which part? Say {fields}.',
+      'Which one shall I fix: {fields}?',
+      'No problem. Which one — {fields}?',
+      'Happy to correct it. Which part — {fields}?'
     ]
   },
 
@@ -871,7 +1024,10 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'subcontracting',
-      offerFlow: 'job',
+      /* [FALLO CORREGIDO] Ofrecía el flujo de EMPLEO: a un subcontratista
+         se le preguntaba su oficio y sus años de experiencia, y a la
+         oficina le llegaba como candidato. Ahora tiene el suyo. */
+      offerFlow: 'supplier',
       keys: ['subcontractor', 'subcontract', 'supplier', 'vendor', 'register as supplier', 'work as a sub', 'partner with you'],
       answer: [
         'Yes, we register subcontractors and suppliers. Send your trade, your area and your credentials, and you stay on file for upcoming work.',
