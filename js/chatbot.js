@@ -101,6 +101,81 @@
      o al correo. Se reinicia en cuanto entiende algo. */
   var misses = 0;
 
+  /* ── MEMORIA DE LA CONVERSACIÓN ────────────────────────────
+     Hasta ahora el bot trataba cada mensaje como si acabara de conocerte.
+     Si decías "Ottawa" y tres mensajes después preguntabas por hormigón,
+     no lo relacionaba. Eso es lo que más delata a una máquina.
+     Ahora retiene lo que le has dicho, y lo usa. */
+  var MEM = { city: null, role: null };
+
+  var CITIES = ['toronto', 'ottawa', 'hamilton', 'mississauga', 'brampton', 'markham',
+    'vaughan', 'london', 'kingston', 'windsor', 'sudbury', 'thunder bay', 'barrie',
+    'oshawa', 'kitchener', 'waterloo', 'guelph', 'niagara', 'north bay', 'peterborough',
+    'scarborough', 'etobicoke', 'north york', 'montreal', 'vancouver', 'calgary',
+    'edmonton', 'winnipeg', 'halifax', 'quebec', 'ontario', 'alberta', 'manitoba'];
+
+  /* Quién es quien escribe. No para etiquetarlo, sino para no hacerle
+     perder el tiempo: a un candidato no se le habla de licitaciones. */
+  var ROLES = {
+    buyer:     ['tender', 'bid', 'procurement', 'rfp', 'contract', 'our project', 'we need', 'quote'],
+    candidate: ['job', 'hiring', 'resume', 'apply', 'looking for work', 'my trade', 'employment'],
+    supplier:  ['subcontractor', 'supplier', 'vendor', 'my company can', 'we supply']
+  };
+
+  function remember(text) {
+    var n = normalize(text);
+    CITIES.forEach(function (c) {
+      if (new RegExp('\\b' + c + '\\b').test(n)) MEM.city = c;
+    });
+    Object.keys(ROLES).forEach(function (r) {
+      ROLES[r].forEach(function (w) {
+        if (n.indexOf(normalize(w)) !== -1) MEM.role = r;
+      });
+    });
+    try { sessionStorage.setItem('np-chat-mem', JSON.stringify(MEM)); } catch (e) {}
+  }
+
+  function loadMem() {
+    try {
+      var m = JSON.parse(sessionStorage.getItem('np-chat-mem') || 'null');
+      if (m) MEM = m;
+    } catch (e) {}
+  }
+
+  /* ── URGENCIA ──────────────────────────────────────────────
+     Alguien con prisa no quiere cinco preguntas: quiere un teléfono. */
+  var URGENT = new RegExp('\\b(' + [
+    'urgent', 'urgently', 'asap', 'as soon as possible', 'emergency', 'right away',
+    'immediately', 'today', 'tomorrow', 'this week', 'deadline is', 'running out of time',
+    'urgente', 'cuanto antes', 'ya mismo', 'de inmediato'
+  ].join('|') + ')\\b');
+
+  /* ── FUERA DE TEMA ─────────────────────────────────────────
+     El tiempo, el fútbol, un chiste. Un "no lo sé" mata la conversación
+     y con ella al cliente. Se reconoce, y se vuelve al terreno propio. */
+  /* RED DE SEGURIDAD del desvío. "A movie theatre renovation" contiene
+     "movie", pero es una obra de verdad. Si aparece cualquier palabra de
+     construcción, NO se desvía jamás. Perder un cliente por un filtro
+     tonto es el peor error posible. */
+  var CONSTRUCTION = new RegExp('\\b(' + [
+    'build', 'building', 'construct', 'construction', 'renovate', 'renovation',
+    'repair', 'restore', 'restoration', 'demolish', 'fit out', 'fitout', 'refurbish',
+    'contractor', 'project', 'site', 'concrete', 'masonry', 'brick', 'roof', 'wall',
+    'floor', 'foundation', 'plant', 'facility', 'tender', 'bid', 'quote', 'crew',
+    'obra', 'construir', 'reforma', 'reparar', 'proyecto'
+  ].join('|') + ')\\b');
+
+  function isConstruction(text) {
+    return CONSTRUCTION.test(normalize(text));
+  }
+
+  var OFFTOPIC = new RegExp('\\b(' + [
+    'weather', 'raining', 'snowing', 'hockey', 'soccer', 'football', 'basketball',
+    'joke', 'music', 'movie', 'film', 'politics', 'election', 'religion',
+    'girlfriend', 'boyfriend', 'married', 'birthday', 'vacation', 'horoscope',
+    'clima', 'futbol', 'chiste', 'pelicula'
+  ].join('|') + ')\\b');
+
   /* ════════════════════════════════════════════════════════
      1. LENGUA
   ════════════════════════════════════════════════════════ */
@@ -798,6 +873,13 @@
       return;
     }
 
+    /* Paso de lugar y ya sabíamos la ciudad: un "sí" la confirma. */
+    if (step.type === 'place' && MEM.city && YES.test(n) && n.split(' ').length <= 3) {
+      flow.data[step.id] = MEM.city.charAt(0).toUpperCase() + MEM.city.slice(1);
+      advance(done);
+      return;
+    }
+
     var err = validate(step, text);
     if (err) {
       if (err === 'looksLikeContact') {
@@ -829,6 +911,18 @@
 
     if (flow.step < def.steps.length) {
       var next = def.steps[flow.step];
+
+      /* Si ya nos dijo la ciudad antes de empezar, no se la preguntamos
+         como si no hubiéramos escuchado. Se confirma. */
+      if (next.type === 'place' && MEM.city && !flow.askedCity) {
+        flow.askedCity = true;
+        saveFlow();
+        var city = MEM.city.charAt(0).toUpperCase() + MEM.city.slice(1);
+        speak('You mentioned **' + city + '** earlier. Is that where the project is? ' +
+              'Say **yes**, or give me the city.', null, done);
+        return;
+      }
+
       /* Si ya nos dio un contacto sin querer, no se lo pedimos como si
          no hubiéramos escuchado: se lo recordamos. */
       if (next.type === 'contact' && flow.saved) {
@@ -876,8 +970,21 @@
 
     var release = function () { busy = false; };
 
+    /* Se retiene lo que dice, siempre, aunque esté en mitad de un flujo. */
+    remember(text);
+
     /* 1. ¿Hay una toma de datos en marcha? Entonces se conduce. */
     if (flow) { handleFlow(text, release); return; }
+
+    /* 2. ¿Tiene prisa? Se le da el teléfono ANTES que nada. Hacerle
+       cinco preguntas a alguien con una urgencia es no escuchar. */
+    if (URGENT.test(normalize(text)) && !alreadyOffered('urgent')) {
+      markOffered('urgent');
+      pendingFlow = 'project';
+      savePending();
+      speak(pickVariant(BOT.urgent, 'urgent'), { contactCard: true }, release);
+      return;
+    }
 
     /* 2. ¿Se ofreció una y el visitante ha dicho que sí? */
     if (pendingFlow) {
@@ -896,6 +1003,15 @@
     /* 3. ¿Lo pide directamente? ("send my project") */
     var direct = flowTrigger(text);
     if (direct) { startFlow(direct, release); return; }
+
+    /* 4. ¿Se ha ido de tema? Se comprueba ANTES de puntuar: si no, una
+       ciudad suelta dentro de "¿qué tiempo hace en Toronto?" lo mandaba
+       a hablar de cobertura geográfica. */
+    if (OFFTOPIC.test(normalize(text)) && !isConstruction(text)) {
+      misses = 0;
+      speak(pickVariant(BOT.redirect, 'redirect'), null, release);
+      return;
+    }
 
     /* Red de seguridad: si lo último que se habló ofrecía tomar los datos
        y el visitante dice "sí", se abre el flujo. Pase lo que pase con la
@@ -925,6 +1041,7 @@
 
       /* Escalada en tres tiempos. */
       var text2, extra;
+
       if (misses === 1 && isUnintelligible(text)) {
         /* No lo he entendido: no es que no lo sepa. */
         text2 = pickVariant(BOT.clarify, 'clarify');
@@ -969,10 +1086,15 @@
 
       i++;
 
-      /* Al terminar de responder, si esa entrada lo merece, el bot se
-         OFRECE a tomar los datos. Es el paso que convierte una charla
-         agradable en un cliente en el buzón de la empresa. */
+      /* EMPUJÓN. Si la respuesta no termina en pregunta, el bot añade una.
+         Antes contestaba y se callaba: el visitante se quedaba mirando la
+         pantalla sin saber qué hacer, y se iba. Nunca se cede el turno sin
+         devolver la pelota. */
       var isLast = (i >= topics.length);
+      if (isLast && out.indexOf('?') === -1 && !entry.contactCard && !entry.offerFlow) {
+        out += '\n\n' + pickVariant(BOT.nudges, 'nudge');
+      }
+
       speak(out, entry, function () {
         if (isLast && entry.offerFlow && DATA.flows[entry.offerFlow] &&
             !alreadyOffered(entry.offerFlow)) {
@@ -1043,6 +1165,7 @@
     build();
     loadFlow();      // una toma de datos a medias sobrevive al cambio de página
     loadPending();   // y también el ofrecimiento en el aire
+    loadMem();       // y lo que el visitante ya nos contó
     restore();
 
     var wasOpen = false, seen = false;

@@ -94,6 +94,43 @@ window.NP_BOT_KB = {
       'I am not going to pretend any longer. Take it to a person — they will sort you out in a minute:'
     ],
 
+    /* ── EMPUJONES ────────────────────────────────────────────
+       El fallo más silencioso del bot: contestaba… y se callaba. El
+       visitante se quedaba mirando la pantalla sin saber qué hacer, y
+       se iba. Ahora, cuando una respuesta no termina en pregunta, el
+       bot AÑADE una — y esa pregunta lleva a su terreno.
+       Nunca se cede el turno sin devolver la pelota. */
+    nudges: [
+      'Is there a project behind the question, or are you gathering information for now?',
+      'Tell me a little about what you are working on and I can be more useful.',
+      'What is the project, if there is one? I can put it in front of a person today.',
+      'Would it help to speak to someone on the team about it?',
+      'Where are you in the process — early thinking, or a live tender?',
+      'Is this for something you are planning now, or further out?',
+      'What would be most useful to you right now?',
+      'Anything specific I can dig into for you?'
+    ],
+
+    /* ── DESVÍOS ──────────────────────────────────────────────
+       Cuando alguien se sale del tema (el tiempo, el fútbol, un chiste),
+       un bot corporativo suele contestar "no lo sé" y matar la conversación.
+       Eso es un cliente perdido por una tontería. Se reconoce con humor
+       breve, y se vuelve al terreno propio sin brusquedad. */
+    redirect: [
+      'That one is outside my trade, I am afraid — I am better on construction.\n\nIs there something about the company or a project I can help with?',
+      'Not my ground. Building things is.\n\nWhat brings you to North Peak today?',
+      'I will leave that one to someone else.\n\nWhat can I help you with here — a project, a job, or information?',
+      'Outside what I am for, honestly.\n\nBut if you have something to build, that I can help with. Do you?'
+    ],
+
+    /* ── URGENCIA ─────────────────────────────────────────────
+       Alguien con prisa no quiere cinco preguntas. Quiere un teléfono.
+       Reconocerlo y saltarse el guion es lo que hace un buen empleado. */
+    urgent: [
+      'If it is urgent, do not go through me. Call **647 895 0939** now and speak to a person.\n\nI can still take the details as a backup, if you want.',
+      'Urgent changes the answer: call **647 895 0939** straight away. That is faster than anything I can do.\n\nWant me to take the details as well, so nothing gets lost?'
+    ],
+
     quick: [
       { label: 'What you do',      q: 'What services do you offer?' },
       { label: 'Indigenous',       q: 'What is your Indigenous participation?' },
@@ -952,6 +989,102 @@ window.NP_BOT_KB = {
       ],
       contactCard: true,
       nav: { label: 'Indigenous procurement', href: '/indigenous-procurement' }
+    },
+
+
+    /* ══════════════════════════════════════════════════════════
+       OBJECIONES Y CONVERSACIÓN HUMANA
+
+       Aquí es donde se ganan y se pierden los clientes. "Solo estoy
+       mirando", "ya tengo contratista", "me lo pienso" — un bot normal
+       contesta "de acuerdo" y pierde a la persona para siempre.
+
+       No se insiste (eso ahuyenta). Se reconoce la objeción, se da UNA
+       razón sólida, y se deja una puerta abierta que no compromete a nada.
+       Esa es la diferencia entre vender y atender bien.
+    ══════════════════════════════════════════════════════════ */
+
+    {
+      topic: 'just looking',
+      boost: 1.4,
+      keys: [
+        'just looking', 'just browsing', 'having a look', 'just curious', 'no reason',
+        'nothing specific', 'just checking', 'window shopping', 'solo estoy mirando',
+        'solo miraba', 'por curiosidad'
+      ],
+      answer: [
+        'Perfectly fine — most people are, the first time.\n\nIf it helps: the thing worth knowing about us is that we are Indigenous-owned **and** we do the construction ourselves. Most clients need one or the other. Some need both.\n\nAnything you want me to explain while you are here?',
+        'No obligation at all. Look around.\n\nIf a project ever does come up — or a tender with an Indigenous participation requirement — that is exactly when to come back. Shall I tell you how that part works?'
+      ]
+    },
+    {
+      topic: 'already have a contractor',
+      boost: 1.4,
+      keys: [
+        'already have a contractor', 'we have a contractor', 'we work with someone',
+        'we already work with', 'have a supplier', 'we are covered', 'not looking',
+        'happy with our', 'ya tengo contratista'
+      ],
+      answer: [
+        'Good — a contractor you trust is worth keeping.\n\nWhere we usually come in is different: as an **Indigenous-owned partner** on bids that carry a procurement or participation requirement. That is not a replacement for your contractor; it sits alongside them.\n\nDoes that come up in your work?',
+        'Then you are ahead of most.\n\nThe question worth asking is a different one: when a tender requires Indigenous participation, who do you call? That is where we are useful — and it does not disturb what you already have.\n\nIs that a situation you run into?'
+      ],
+      nav: { label: 'How that works', href: '/indigenous-procurement' }
+    },
+    {
+      topic: 'need to think about it',
+      keys: [
+        'i need to think', 'let me think', 'i will think about it', 'not sure yet',
+        'have to discuss', 'talk to my partner', 'talk to my team', 'get back to you',
+        'me lo pienso', 'lo tengo que consultar'
+      ],
+      answer: [
+        'Of course. Nobody should decide a construction contract in a chat window.\n\nOne suggestion: take the phone number with you — **647 895 0939**. When you have thought it through, one call gets you a real answer, with no obligation.\n\nAnything I can clarify before you go?',
+        'Sensible. Take your time.\n\nIf it would help your thinking, I can put a person on it now — no commitment, just a straight answer to whatever is making you hesitate. Want me to?'
+      ],
+      contactCard: true
+    },
+    {
+      topic: 'send me information',
+      keys: [
+        'send me information', 'send me a brochure', 'email me details', 'send me your',
+        'do you have a brochure', 'company profile', 'capability statement', 'more info'
+      ],
+      answer: [
+        'Better than a brochure: tell me what you need it for, and the team will send you something that actually answers it — capability, coverage, or the Indigenous participation side.\n\nWhat is the context?',
+        'I can do better than a generic PDF. If you tell me what you are evaluating, a person will send you exactly that.\n\nWhat should it cover?'
+      ],
+      offerFlow: 'project'
+    },
+    {
+      topic: 'a decision maker',
+      keys: [
+        'i am not the decision maker', 'my boss', 'i need approval', 'the board',
+        'procurement department', 'i just do the research', 'on behalf of'
+      ],
+      answer: [
+        'Then let me make your job easier, not harder.\n\nTell me what your side needs in order to say yes — capability, participation, coverage, references — and the team will put it in a form you can forward. What matters most to them?'
+      ],
+      offerFlow: 'project'
+    },
+    {
+      topic: 'how are you',
+      keys: ['how are you', 'how is it going', 'how do you do', 'how are things', 'que tal', 'como estas'],
+      answer: [
+        'Working, and glad to. What can I do for you?',
+        'Well, thank you. More to the point — what brings you here?'
+      ]
+    },
+    {
+      topic: 'a compliment or a joke',
+      keys: [
+        'you are funny', 'good bot', 'nice bot', 'you are smart', 'clever', 'tell me a joke',
+        'are you smart', 'i like you', 'well done'
+      ],
+      answer: [
+        'I will take it. Now, what can I actually do for you?',
+        'Kind of you. I am better at construction questions than at jokes, though — try me.'
+      ]
     },
 
     /* ══ RESIDENCIAL ════════════════════════════════════════ */
