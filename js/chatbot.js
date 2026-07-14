@@ -209,6 +209,14 @@
        proveedor, socio. Ni compra, ni pide empleo. Hasta hoy no existía. */
     supplier: {
       strong: [
+        /* [AMPLIADO] Un fabricante de prefabricado y un contratista eléctrico
+           que se ofrecen acababan en el flujo de OBRA: a la oficina les llegaban
+           como si quisieran CONTRATAR, no como proveedores. */
+        'looking for construction partners', 'looking for construction partner',
+        'do you need subcontractors', 'need subcontractors', 'take on new subcontractors',
+        'supplier list', 'vendor list', 'approved supplier', 'base de proveedores',
+        'somos fabricantes', 'we are manufacturers', 'we manufacture', 'we supply',
+        'register as a vendor', 'part of your supplier', 'who manages supplier',
         'i have a company', 'my company can', 'we have a company', 'our company can',
         'we are a subcontractor', 'i am a subcontractor', 'we are a supplier',
         'register as a supplier', 'register as a subcontractor', 'work as a subcontractor',
@@ -441,6 +449,11 @@
     'permit', 'excavation', 'dirt', 'soil', 'electrical', 'plumbing', 'hvac',
     'labourer', 'laborer', 'framers', 'installer', 'truck',
     'snow', 'snow removal', 'landscaping', 'cleaning', 'scaffolding',
+    'elevator', 'lift', 'membrane', 'tpo', 'epoxy', 'coating', 'high rise', 'highrise',
+    'waterproofing', 'sealant', 'caulking', 'facade', 'curtain wall', 'showroom',
+    'fit out', 'fitout', 'shell', 'addition', 'expansion', 'tear off', 'repointing',
+    'mortar', 'sandstone', 'heritage', 'drain', 'trench', 'cold room', 'lagoon',
+    'water treatment', 'pumps', 'tanks',
     'mechanical', 'shingle', 'balcony', 'basement', 'crew', 'guys', 'ticket',
     /* comercial */
     'tender', 'bid', 'quote', 'estimate',
@@ -772,7 +785,7 @@
        "I am a consulting structural engineer." recibía un triaje: el bot le
        decía "no te he entendido" a alguien que se estaba presentando. Se
        acusa recibo y se le devuelve la palabra. */
-    { id: 'intro',      re: /\b(i am a|i am an|i am the|im a|im an|i work as|i work for|i lead|i run a|i represent|we are a|we are an|we run|we maintain|we operate|we manage|my name is|my company|our company|i have a company|retired)\b/ }
+    { id: 'intro',      re: /\b(i am a|i am an|i am the|im a|im an|i work as|i work for|i lead|i run a|i represent|we are a|we are an|we run|we maintain|we operate|we manage|my name is|my company|our company|i have a company|retired|this is|here,|from the [a-z]+ (board|church|group|district))\b/ }
   ];
 
   function detectIntent(text) {
@@ -1541,6 +1554,19 @@
   /* De una frase entera se extrae el contacto, no la frase. Antes se guardaba
      "espera no mi numero es 416-555-0199" tal cual, y luego se le ofrecía eso
      de vuelta como si fuera su teléfono. */
+  /* Un nombre de persona: dos o tres palabras, sin cifras, sin arrobas. */
+  function looksLikeName(v) {
+    var t = String(v).trim();
+    if (t.length < 4 || t.length > 40) return false;
+    if (/\d|@/.test(t)) return false;
+
+    /* [AFINADO] Con "dos o tres palabras" bastaba… y entonces "next spring"
+       parecía un nombre y se rechazaba como fecha. Un nombre lleva MAYÚSCULAS
+       iniciales: "Anita Sharma" sí, "next spring" no. */
+    var base = t.replace(/,.*$/, '').trim();
+    return /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ'\-]+(\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ'\-]+){1,2}$/.test(base);
+  }
+
   function pullContact(v) {
     var t = fixContact(v);
     var mail = /[^\s@]+@[^\s@]+\.[^\s@]+/.exec(t);
@@ -1584,6 +1610,23 @@
        visitante contestaba con su NOMBRE (la gente contesta fuera de orden).
        El bot lo guardaba tal cual: a la oficina le llegaba un candidato con
        "experiencia: tyler smith". Una experiencia se mide en tiempo. */
+    /* [FALLO CORREGIDO] Se preguntaba la fecha y la clienta contestaba con su
+       NOMBRE (la gente contesta lo que quiere, no lo que se le pregunta). El
+       bot lo guardaba como fecha, y despues le pedia el nombre que ella acababa
+       de darle. Se fue sin dejar el contacto. */
+    if (step.type === 'date') {
+      /* [CORREGIDO DOS VECES] Primero intenté una LISTA de lo que es una fecha
+         ("asap", "next month", "spring"…). Mal: la gente dice "lo antes
+         posible", "tomorrow", "cuando podáis", "después de Navidad" — y una
+         lista siempre se queda corta, así que el bot empezó a rechazar fechas
+         perfectamente válidas.
+         La regla buena es la inversa: una fecha es CUALQUIER COSA que no sea
+         un nombre ni un teléfono. Solo hay que impedir lo que se sabe seguro
+         que no es una fecha, no adivinar lo que sí. */
+      if (looksLikeContact(v)) return 'looksLikeContact';
+      if (looksLikeName(v)) return 'notADate';
+      return v.length >= 2 ? null : 'tooShort';
+    }
     if (step.type === 'duration') {
       if (looksLikeContact(v)) return 'looksLikeContact';
       var n2 = normalize(v);
@@ -1833,6 +1876,14 @@
          A la segunda vez, se abre la puerta: el correo directo de la oficina,
          encima de la mesa. Se sigue pudiendo contestar — pero ya no es una
          ratonera. */
+      /* [FALLO CORREGIDO] Si lo que ha escrito no vale para ESTE paso pero es
+         claramente su NOMBRE, no se tira: se apunta. Lo mismo que ya se hacía
+         con el teléfono. La gente contesta lo que quiere, no lo que se le
+         pregunta, y eso no es motivo para perderla. */
+      if (step.id !== 'name' && !flow.data.name && looksLikeName(text)) {
+        flow.data.name = text.trim().replace(/,.*$/, '').trim();
+      }
+
       flow.badTries = (flow.badTries === undefined || flow.lastBad !== step.id) ? 1 : flow.badTries + 1;
       flow.lastBad = step.id;
       saveFlow();
@@ -2051,7 +2102,13 @@
        ofrece su flujo y decide él. */
     if (tpl === 'full' && pf === 'project') {
       markOffered('project');
-      speak(msg, null, function () { startFlow('project', release, got.work, got); });
+      /* [FALLO CORREGIDO] Aquí se arrancaba el flujo de OBRA a palo seco, sin
+         mirar quién estaba escribiendo. Un fabricante de prefabricado que decía
+         "somos fabricantes" — señal clarísima de PROVEEDOR — acababa en el
+         formulario de obra, y a la oficina le llegaba como si quisiera
+         CONTRATAR. flowFor() es el único sitio donde se traduce el papel a una
+         puerta: hay que pasar por él SIEMPRE, sin excepciones. */
+      speak(msg, null, function () { startFlow(flowFor('project'), release, got.work, got); });
       return true;
     }
 
@@ -2124,7 +2181,11 @@
       var n0 = normalize(text);
       if (YES.test(n0)) {
         pendingAsk = null;
-        startFlow(pendingFlow, release, seed && seed.work, seed);
+        /* [FALLO CORREGIDO] El ofrecimiento se guardaba ANTES de saber quién
+           era ("¿le tomo los datos?" → 'project'), y al aceptarlo se abría esa
+           puerta aunque para entonces ya se supiera que era un proveedor. La
+           puerta se decide al ABRIRLA, no al ofrecerla. */
+        startFlow(flowFor(pendingFlow), release, seed && seed.work, seed);
         return;
       }
       if (DECLINE.test(n0) || CANCEL.test(n0)) {
@@ -2196,7 +2257,7 @@
         var pfNow = pendingFlow;
         markOffered(pfNow);
         savePending();
-        startFlow(pfNow, release, seed.work, seed);
+        startFlow(flowFor(pfNow), release, seed.work, seed);
         return;
       }
 
@@ -2281,7 +2342,11 @@
     var soloCortesia = topics.length && topics.every(function (h) {
       return ['greeting', 'thanks', 'goodbye', 'small talk'].indexOf(h.entry.topic) !== -1;
     });
-    if (soloCortesia && tokens(text).length >= 3) topics = [];
+    /* [AFINADO] "Si hay tres palabras, aparta el saludo" era demasiado bruto:
+        "Hello, Claude Moreau from Peel DSB" es un SALUDO con un nombre, y el
+        bot le hacía triaje. El saludo solo estorba cuando detrás hay una
+        pregunta de verdad o una obra. */
+    if (soloCortesia && (isQuestion(text) || isConstruction(normalize(text)))) topics = [];
 
     /* ══════════════════════════════════════════════════════════
        LA CASCADA — lo que hace que no haga falta listar el mundo entero.

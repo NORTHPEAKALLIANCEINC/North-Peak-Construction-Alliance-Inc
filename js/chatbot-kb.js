@@ -423,10 +423,11 @@ window.NP_BOT_KB = {
         },
         {
           id: 'when',
-          /* [FALLO CORREGIDO] Era 'text', que exige dos palabras: a quien
-             contestaba "asap" — o "spring", o "March" — el bot le pedía "más
-             detalle". Una fecha cabe perfectamente en una palabra. */
-          type: 'short',
+          /* [FALLO CORREGIDO] Era 'text' (exigía dos palabras: a quien decía
+             "asap" le pedía "más detalle"). Luego fue 'short', y entonces se
+             tragaba CUALQUIER cosa: una clienta contestó con su nombre y el bot
+             lo guardó como la fecha de la obra. Una fecha es una fecha. */
+          type: 'date',
           ask: [
             'By what date would you want the work completed? An approximate date is fine, and the team will confirm what is possible.',
             'And the date. When would you like the work finished? The team will tell you what can be arranged.',
@@ -691,6 +692,10 @@ window.NP_BOT_KB = {
     giveUpContact: [
       'Without a way to reach you there is nothing I can send, and I am not going to keep asking.\n\nWrite to the office yourself and it lands in the same inbox:',
       'I will stop asking. If you would rather not leave a contact, here is the office directly — it goes to the same people:'
+    ],
+    notADate: [
+      'I meant the date. Roughly when would you want the work finished?',
+      'Sorry — I need a date, even an approximate one. When would you want it done?'
     ],
     notADuration: [
       'I meant how long you have been doing it. Roughly how many years?',
@@ -1374,8 +1379,17 @@ window.NP_BOT_KB = {
         'properties available', 'listings', 'do you have listings', 'send listings',
         'do you sell houses', 'homes for sale', 'homes coming soon', 'realtor',
         'real estate agent', 'buy a property', 'looking to buy in', 'inmobiliaria',
-        'units left', 'any units', 'two bedroom', '2 bedroom', 'condo', 'condos', 'virtual tour', 'pets allowed', 'price per square foot', 'unidades', 'piso',
-        'pets', 'mascotas', 'stalls'
+        'units left', 'any units', 'two bedroom', '2 bedroom', 'condo', 'condos',
+        'virtual tour', 'pets allowed', 'unidades de 2 habitaciones',
+        'mascotas en el edificio', 'link del tour'
+        /* [MINA RETIRADA] Aquí había la clave 'piso'. El motor TRADUCE las
+           claves al inglés antes de compararlas, y 'piso' se convierte en
+           'floor'. Es decir: cualquier cliente que mencionara un SUELO — el
+           food court de un centro comercial, los desagües de una cervecería —
+           recibía "creo que se ha equivocado de empresa". El escudo disparando
+           contra clientes de verdad, y por una palabra traducida.
+           Fuera también 'unidades', 'stalls' y 'price per square foot': las usa
+           cualquier promotor legítimo. */
       ],
       answer: [
         'I think you may have the wrong company, and I will not pretend otherwise. We do not sell or list property — we are a construction company. We build what someone else has bought.\n\nIf you have land or a building and something needs doing to it, that I can help with. Do you?'
