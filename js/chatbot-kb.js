@@ -141,6 +141,17 @@ window.NP_BOT_KB = {
       'I have not misunderstood you: this simply is not work we do. I am not going to take your details for something we cannot deliver.\n\nIf you want a person to point you the right way, here they are:'
     ],
 
+    /* [NUEVO] Ya está enviado. El cliente da las gracias, se despide, dice
+       "nada más por ahora". Antes recibía un TRIAJE ("¿esto es un proyecto, un
+       empleo o información?") — a alguien que acababa de dejar sus datos. Aquí
+       no se vende: se acompaña y se sale con elegancia. */
+    afterSend: [
+      'It has been a pleasure. Your details are with the team — if you need anything else, just say so.',
+      'Thank you. Everything is with a person now. I am here if anything else comes up.',
+      'Any time. It is all in the office inbox, and someone will be in touch.',
+      'Glad to have helped. Have a good day.'
+    ],
+
     /* ── EMPUJONES ────────────────────────────────────────────
        El fallo más silencioso del bot: contestaba… y se callaba. El
        visitante se quedaba mirando la pantalla sin saber qué hacer, y
@@ -468,10 +479,17 @@ window.NP_BOT_KB = {
         'If that is right, say so and it goes to the team. To correct anything, use **Edit details** below.',
         'Confirm it and I will send it. If something is wrong, **Edit details** below will let you fix it.'
       ],
+      /* [REESCRITO — el cierre]
+         Antes: el teléfono escrito a mano dentro del texto, y una pregunta de
+         venta detrás ("¿qué te sería más útil ahora mismo?"). A un cliente que
+         acababa de confirmar sus datos.
+         Ahora: se le da las gracias, se le dice qué pasa después, y la tarjeta
+         de contacto aparece debajo con el botón de LLAMAR y el de copiar. Sin
+         una sola pregunta más. */
       success: [
-        'Sent. It is in the office inbox now, and someone will come back to you.\n\nIf it is urgent, call **647 895 0939** and mention you spoke to me.',
-        'Done — that is with the team. Expect a reply from a person.\n\nIn a hurry? Call **647 895 0939**.',
-        'It has been sent. A person will pick it up and get in touch with you.\n\nIs there anything else?'
+        'Sent. It is in the office inbox now, and a person will come back to you.\n\nIt has been a pleasure. If you need anything else, I am right here.',
+        'Done — that is with the team, and someone will get in touch.\n\nGlad to have helped. If anything else comes up, just say so.',
+        'Your details are with the team now. A person picks it up from here.\n\nIt was good to talk to you. I am here if you need me.'
       ],
       /* Si el envío falla (sin red, servicio caído): NO se pierde nada */
       failure: [
@@ -535,8 +553,8 @@ window.NP_BOT_KB = {
         'Confirm and it goes to the team. Otherwise, **Edit details** below.'
       ],
       success: [
-        'Sent. Your details are with the team.\n\nIf you also want to send a résumé, use the Careers page — the form there takes a file.',
-        'Done. That is in the office inbox.\n\nTo attach a résumé, the Careers page has a form that takes one.'
+        'Sent. Your details are with the team.\n\nIf you also want to send a résumé, the Careers page has a form that takes a file. Good luck with it — I am here if you need anything.',
+        'Done. That is in the office inbox.\n\nTo attach a résumé, use the form on the Careers page. It was good to talk to you.'
       ],
       failure: [
         'It did not go through, and I will not pretend it did. Use the Careers page or write directly:'
@@ -741,6 +759,7 @@ window.NP_BOT_KB = {
     /* ══ CORTESÍA ═══════════════════════════════════════════ */
     {
       topic: 'greeting',
+      noNudge: true,   /* [CORREGIDO] Recibía un empujón de venta pegado detrás. A la cortesía no se le vende — y a un niño, menos que a nadie. */
       /* Las erratas del saludo se escriben mal más que ninguna otra palabra,
          y son demasiado cortas para que el corrector de erratas las cace
          (con cuatro letras, un error de uno confunde palabras de verdad).
@@ -757,26 +776,43 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'thanks',
-      keys: ['thank you', 'thanks', 'appreciate it', 'cheers', 'perfect', 'great', 'brilliant'],
+      noNudge: true,   /* a quien da las gracias no se le empuja a comprar */
+      keys: [
+        'thank you', 'thanks', 'thank you very much', 'thanks a lot', 'appreciate it',
+        'cheers', 'perfect', 'great', 'brilliant', 'much appreciated', 'thanks for your help',
+        'gracias', 'muchas gracias', 'mil gracias', 'gracias por su ayuda',
+        'gracias por tu ayuda', 'te lo agradezco', 'muy amable', 'merci'
+      ],
       answer: [
         'Glad to help. Anything else?',
         'My pleasure. Anything else on your mind?',
-        'Any time. What else can I do?',
-        'Happy to. Is there anything else?'
+        'Any time. What else can I do?'
       ]
     },
     {
       topic: 'goodbye',
-      keys: ['bye', 'goodbye', 'see you', 'that is all', 'nothing else', 'no thanks', 'thats all'],
+      /* [FALLO CORREGIDO] Estas respuestas no llevan pregunta… y por eso el
+         motor les enganchaba detrás un EMPUJÓN DE VENTA. El visitante se
+         despedía y recibía: "Gracias por su visita, estamos aquí cuando nos
+         necesite. ¿Cuál es el proyecto? Si es que existe, puedo explicárselo
+         hoy mismo." A quien se despide no se le vende nada. */
+      noNudge: true,
+      keys: [
+        'bye', 'goodbye', 'see you', 'that is all', 'thats all', 'nothing else',
+        'no thanks', 'nothing for now', 'not for now', 'that is everything',
+        'i am done', 'we are done', 'have a good day', 'take care',
+        'adios', 'hasta luego', 'nos vemos', 'chao', 'eso es todo', 'nada mas',
+        'nada mas por ahora', 'ya esta', 'listo', 'hasta pronto', 'au revoir'
+      ],
       answer: [
-        'Thank you. You can reach us on **647 895 0939** whenever you need us.',
+        'Thank you. It was a pleasure — we are here whenever you need us.',
         'It was good to speak with you. The door is open.',
-        'All the best. You are welcome back at any time.',
-        'Thanks for stopping by. We are here when you need us.'
+        'All the best. You are welcome back at any time.'
       ]
     },
     {
       topic: 'the assistant',
+      noNudge: true,   /* [CORREGIDO] Recibía un empujón de venta pegado detrás. A la cortesía no se le vende — y a un niño, menos que a nadie. */
       keys: ['who are you', 'what are you exactly', 'are you a robot', 'are you human', 'your name', 'are you a bot', 'am i talking to a person', 'are you real', 'ai',
         'robot', 'bot', 'eres un robot', 'are you a real robot', 'chatbot',
         'kodiak', 'is this kodiak'
@@ -1145,6 +1181,7 @@ window.NP_BOT_KB = {
        ⚠️ PENDIENTE: confirmar qué idiomas habla el equipo. */
     {
       topic: 'language',
+      noNudge: true,   /* [CORREGIDO] Recibía un empujón de venta pegado detrás. A la cortesía no se le vende — y a un niño, menos que a nadie. */
       keys: [
         'do you speak spanish', 'anyone speak spanish', 'hablan espanol',
         'habla espanol', 'alguien que hable espanol', 'in spanish', 'en espanol',
@@ -1164,6 +1201,7 @@ window.NP_BOT_KB = {
        verdad hay una obra detrás. Por eso esta entrada NO tiene offerFlow. */
     {
       topic: 'a child',
+      noNudge: true,   /* [CORREGIDO] Recibía un empujón de venta pegado detrás. A la cortesía no se le vende — y a un niño, menos que a nadie. */
       keys: [
         'i am 9', 'i am 10', 'i am 11', 'i am 12', 'i am 13', 'im 9', 'im 10', 'im 11',
         'i am a kid', 'im a kid', 'i am a child', 'tengo 9 anos', 'tengo 10 anos',

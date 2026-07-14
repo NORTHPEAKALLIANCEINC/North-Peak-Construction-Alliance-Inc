@@ -71,12 +71,14 @@
       sessionStorage.setItem('np-chat-pending', pendingFlow || '');
       sessionStorage.setItem('np-chat-ask', pendingAsk || '');
       sessionStorage.setItem('np-chat-last', (lastEntry && (lastEntry.topic || lastEntry.keys[0])) || '');
+      sessionStorage.setItem('np-chat-closed', closed ? '1' : '');
     } catch (e) {}
   }
 
   function loadPending() {
     try {
       seed = JSON.parse(sessionStorage.getItem('np-chat-seed') || 'null');
+      closed = sessionStorage.getItem('np-chat-closed') === '1';
       pendingFlow = sessionStorage.getItem('np-chat-pending') || null;
       pendingAsk  = sessionStorage.getItem('np-chat-ask') || null;
       var t = sessionStorage.getItem('np-chat-last');
@@ -109,6 +111,13 @@
      ofrece una persona; a la tercera deja de marear y manda a WhatsApp
      o al correo. Se reinicia en cuanto entiende algo. */
   var misses = 0;
+  /* [NUEVO — el cierre]
+     Cuando los datos han salido hacia la oficina, la conversación ha llegado a
+     su destino. El bot NO vuelve a vender, no vuelve a empujar y no vuelve a
+     preguntar "¿qué te sería más útil ahora mismo?". Se queda a mano, callado
+     y disponible. Un cliente que acaba de decir que sí no es un desconocido al
+     que hay que triar. */
+  var closed = false;
 
   /* ── MEMORIA DE LA CONVERSACIÓN ────────────────────────────
      Hasta ahora el bot trataba cada mensaje como si acabara de conocerte.
@@ -1373,6 +1382,16 @@
     if (String(text).indexOf('?') !== -1) return text;
     if (entry && (entry.contactCard || entry.nav || entry.editButton)) return text;
 
+    /* [FALLO CORREGIDO — el que estropeaba los cierres buenos]
+       Las despedidas y los agradecimientos NO llevan pregunta… así que este
+       empujón se les enganchaba detrás. El visitante se despedía y el bot le
+       contestaba: "Gracias por su visita, estamos aquí cuando nos necesite.
+       ¿Cuál es el proyecto? Si es que existe, puedo explicárselo hoy mismo."
+       Absurdo, y justo al final, que es donde más duele.
+       A la cortesía no se le empuja. Y a una conversación cerrada, tampoco. */
+    if (closed) return text;
+    if (entry && entry.noNudge) return text;
+
     /* [FALLO CORREGIDO — estaba en producción] Con una toma de datos en
        marcha, el bot SIEMPRE va a hablar otra vez acto seguido: la salida
        es la pregunta del paso siguiente. Añadir aquí un empujón metía una
@@ -1422,9 +1441,16 @@
     'yes', 'yeah', 'yep', 'yup', 'sure', 'ok', 'okay', 'sounds good', 'go ahead',
     'please do', 'do it', 'send it', 'send', 'submit', 'correct', 'right', 'perfect',
     'looks good', 'thats right', 'that is right', 'all good', 'fine', 'alright', 'confirm',
+    /* [AMPLIADO] Faltaban cinco maneras corrientísimas de decir que sí, y con
+       ellas se perdía el envío ENTERO de un cliente ya conseguido: "bien",
+       "muy bien", "exacto", "así es", "confirmo". La confirmación es el último
+       paso antes del correo: cualquier forma de asentir tiene que valer. */
     'si', 'claro', 'dale', 'adelante', 'correcto', 'perfecto', 'enviar', 'envialo',
     'envialo ya', 'esta bien', 'todo bien', 'esta correcto', 'de acuerdo', 'vale',
-    'oui', 'daccord', 'envoyer'
+    'bien', 'muy bien', 'exacto', 'exactamente', 'asi es', 'confirmo', 'confirmado',
+    'me parece correcto', 'me parece bien', 'esta todo bien', 'todo correcto',
+    'listo', 'mandalo', 'mandalo ya', 'procede', 'afirmativo',
+    'oui', 'daccord', 'envoyer', 'cest correct'
   ].join('|') + ')\\b');
 
   var CANCEL = new RegExp('\\b(' + [
@@ -1617,6 +1643,15 @@
     'canada wide', 'across canada', 'varios sitios', 'todo el pais'
   ];
 
+  /* [FALLO CORREGIDO] "bien" acabó guardado COMO LA CIUDAD de la obra: la
+     persona estaba asintiendo a otra cosa, no dándonos un dato. Una palabra de
+     asentimiento suelta no vale como respuesta a ningún paso. */
+  function esAsentimiento(v) {
+    var n = normalize(v).trim();
+    if (!n || n.split(/\s+/).length > 3) return false;
+    return YES.test(n) || DECLINE.test(n);
+  }
+
   function validate(step, value) {
     var v = value.trim();
     if (step.type === 'contact') {
@@ -1629,6 +1664,7 @@
        que legítimamente caben en una palabra. */
     if (step.type === 'short') {
       if (looksLikeContact(v)) return 'looksLikeContact';
+      if (esAsentimiento(v)) return 'tooShort';
       return v.length >= 2 ? null : 'tooShort';
     }
     /* [FALLO CORREGIDO] Se preguntaba "¿cuánta experiencia tienes?" y el
@@ -1649,6 +1685,7 @@
          un nombre ni un teléfono. Solo hay que impedir lo que se sabe seguro
          que no es una fecha, no adivinar lo que sí. */
       if (looksLikeContact(v)) return 'looksLikeContact';
+      if (esAsentimiento(v)) return 'notADate';
       if (looksLikeName(v)) return 'notADate';
       return v.length >= 2 ? null : 'tooShort';
     }
@@ -1661,6 +1698,7 @@
     }
     if (step.type === 'place') {
       if (looksLikeContact(v)) return 'looksLikeContact';
+      if (esAsentimiento(v)) return 'tooShort';
       /* [FALLO CORREGIDO] Se preguntaba la ciudad y la clienta contestaba con
          su NOMBRE. "Sarah Whitfield" quedaba guardada COMO LA CIUDAD DE LA
          OBRA, y a la oficina le llegaba un proyecto en la localidad de Sarah
@@ -1734,7 +1772,18 @@
       if (res && res.success) {
         var msg = pickVariant(def.success, flow.id + '#ok');
         clearFlow();                       // primero se cierra: ya no se conduce
-        addBot(ensureExit(msg, null), null, true);
+
+        /* [FALLO CORREGIDO — el peor sitio posible para fallar]
+           Aquí se llamaba a ensureExit(), que a todo mensaje sin pregunta le
+           engancha un EMPUJÓN DE VENTA. Así que al cliente que acababa de
+           confirmar sus datos, el bot le soltaba: "¿qué te sería más útil
+           ahora mismo?". Y el teléfono iba escrito a mano dentro del texto, en
+           vez de la tarjeta con el botón de llamar.
+
+           Un cierre es un cierre: gracias, la tarjeta a mano, y silencio. */
+        closed = true;
+        savePending();
+        addBot(msg, { contactCard: true }, true);
       } else { throw new Error('web3forms'); }
       if (done) done();
     })
@@ -1862,6 +1911,19 @@
     /* [FALLO CORREGIDO] "este formulario es estupido" se guardaba COMO SU
        NOMBRE. A la oficina le llegaba un candidato llamado así. Un enfado no
        es un dato: se reconoce, se responde con calma, y se repite la pregunta. */
+    /* [FALLO CORREGIDO] "muchas gracias por todo" / "hasta luego" a mitad del
+       formulario: el bot lo tomaba por un DATO y contestaba "eso no parece un
+       teléfono, ¿puede escribirlo otra vez?". La persona se está despidiendo.
+       Se la deja marchar con educación y con el contacto a mano. */
+    var salida = detectTopics(text).filter(function (h) {
+      return h.entry.topic === 'goodbye';       /* puede venir detrás de un "gracias" */
+    });
+    if (flow.stage !== 'confirm' && salida.length) {
+      clearFlow();
+      speak(pickVariant(salida[0].entry.answer, 'goodbye#a'), { contactCard: true }, done);
+      return;
+    }
+
     var enfado = detectTopics(text);
     if (flow.stage !== 'confirm' && enfado.length && enfado[0].entry.topic === 'frustration') {
       var fe = enfado[0].entry;
@@ -2378,6 +2440,22 @@
       }
 
       if (told.work && reflectWork(told, release)) return;
+    }
+
+    /* [NUEVO] Con la conversación ya cerrada, un "gracias" o un "adiós" se
+       contestan y punto: ni triaje, ni empujón, ni "¿qué más puedo hacer?".
+       Y si de verdad trae algo nuevo, la conversación se reabre sola. */
+    if (closed) {
+      var cierre = detectTopics(text);
+      var esCortesia = !cierre.length ||
+        ['thanks', 'goodbye', 'small talk', 'greeting'].indexOf(cierre[0].entry.topic) !== -1;
+      if (esCortesia && !isQuestion(text) && !flowTrigger(text)) {
+        misses = 0;
+        speak(pickVariant(BOT.afterSend, 'afterSend'), null, release);
+        return;
+      }
+      closed = false;                 // trae algo nuevo: se vuelve a abrir
+      savePending();
     }
 
     var topics = detectTopics(text);
