@@ -74,8 +74,8 @@ window.NP_BOT_KB = {
        No es "no lo sé": es "explícamelo mejor". La diferencia importa. */
     clarify: [
       'I did not quite catch that. Could you put it in a few more words?',
-      'Sorry — I am not sure what you mean. Tell me a bit more and I will help.',
-      'That one lost me. Can you say it a different way?',
+      'I am not sure what you mean. Tell me a little more and I will help.',
+      'I did not understand that. Could you say it a different way?',
       'I want to help, but I did not understand. What are you trying to do?',
       'Not sure I follow. Could you explain it in a sentence or two?'
     ],
@@ -83,15 +83,15 @@ window.NP_BOT_KB = {
     /* ── Segundo fallo seguido: dejar de insistir, ofrecer una persona ── */
     retry: [
       'I am still not getting it, and I do not want to waste your time.\n\nA person will understand you straight away:',
-      'Twice now I have missed your meaning — that is on me, not on you.\n\nGo straight to the team:',
+      'Twice now I have failed to understand you, and that is my fault, not yours.\n\nPlease go straight to the team:',
       'I am clearly not the right one for this question. Rather than guess again:'
     ],
 
     /* ── Tercer fallo: basta. WhatsApp o correo, sin rodeos. ── */
     escalate: [
-      'Let us stop going in circles. Write to the team — one message on WhatsApp and someone will answer you properly:',
+      'Rather than continue in circles, write to the team. One message on WhatsApp and someone will answer you properly:',
       'This is a conversation for a human, and I am holding you up.\n\nWhatsApp or email, whichever you prefer:',
-      'I am not going to pretend any longer. Take it to a person — they will sort you out in a minute:'
+      'I will not pretend otherwise: this needs a person. They will resolve it in a minute:'
     ],
 
     /* ── EMPUJONES ────────────────────────────────────────────
@@ -117,18 +117,18 @@ window.NP_BOT_KB = {
        Eso es un cliente perdido por una tontería. Se reconoce con humor
        breve, y se vuelve al terreno propio sin brusquedad. */
     redirect: [
-      'That one is outside my trade, I am afraid — I am better on construction.\n\nIs there something about the company or a project I can help with?',
-      'Not my ground. Building things is.\n\nWhat brings you to North Peak today?',
-      'I will leave that one to someone else.\n\nWhat can I help you with here — a project, a job, or information?',
-      'Outside what I am for, honestly.\n\nBut if you have something to build, that I can help with. Do you?'
+      'That is outside what I can help with. Construction is what I know.\n\nIs there something about the company or a project I can help you with?',
+      'That is not something I can help with, but construction is.\n\nWhat brings you to North Peak today?',
+      'I will leave that one to someone else.\n\nWhat can I help you with: a project, a job, or information?',
+      'That is outside what I am here for. If you have something to build, however, I can help. Do you?'
     ],
 
     /* ── URGENCIA ─────────────────────────────────────────────
        Alguien con prisa no quiere cinco preguntas. Quiere un teléfono.
        Reconocerlo y saltarse el guion es lo que hace un buen empleado. */
     urgent: [
-      'If it is urgent, do not go through me. Call **647 895 0939** now and speak to a person.\n\nI can still take the details as a backup, if you want.',
-      'Urgent changes the answer: call **647 895 0939** straight away. That is faster than anything I can do.\n\nWant me to take the details as well, so nothing gets lost?'
+      'If it is urgent, please do not go through me. Call **647 895 0939** now and speak to a person.\n\nI can also take the details as a record, if you wish.',
+      'If it is urgent, please call **647 895 0939** immediately. That is faster than anything I can do.\n\nShall I take the details as well, so that nothing is lost?'
     ],
 
     quick: [
@@ -193,8 +193,8 @@ window.NP_BOT_KB = {
           type: 'text',
           ask: [
             'First — what needs building, repairing or managing?',
-            'What is the work? Describe it however you would to a neighbour.',
-            'Tell me what the project involves. No need for technical terms.'
+            'What is the work? Describe it in your own words.',
+            'Tell me what the project involves. Plain language is fine.'
           ]
         },
         {
@@ -248,7 +248,7 @@ window.NP_BOT_KB = {
       success: [
         'Sent. It is in the office inbox now, and someone will come back to you.\n\nIf it is urgent, call **647 895 0939** and mention you spoke to me.',
         'Done — that is with the team. Expect a reply from a person.\n\nIn a hurry? Call **647 895 0939**.',
-        'Off it goes. A person will pick that up and get in touch.\n\nAnything else I can do?'
+        'It has been sent. A person will pick it up and get in touch with you.\n\nIs there anything else?'
       ],
       /* Si el envío falla (sin red, servicio caído): NO se pierde nada */
       failure: [
@@ -321,8 +321,8 @@ window.NP_BOT_KB = {
   /* Respuestas del motor durante una conversación guiada */
   flowTalk: {
     cancelled: [
-      'No problem — stopped. Nothing was sent.\n\nAnything else I can help with?',
-      'Dropped it. Nothing has gone anywhere.\n\nWhat else can I do?'
+      'Of course. Nothing has been sent.\n\nIs there anything else I can help you with?',
+      'Cancelled. Nothing has been sent.\n\nWhat else can I help you with?'
     ],
     invalidContact: [
       'That does not look like a phone number or an email. Could you write it again?',
@@ -343,7 +343,7 @@ window.NP_BOT_KB = {
        mal acotada. Un humano no la daría por buena — la afinaría. */
     tooBroadPlace: [
       'Canada is a big country. Which province, and which city or town?',
-      'That narrows it down to about ten million square kilometres. Which city or province?',
+      'That covers a very large area. Which province, and which city?',
       'I need it a bit tighter than that — the province, and the city if you have it.'
     ],
     tooVague: [
@@ -400,9 +400,9 @@ window.NP_BOT_KB = {
       topic: 'goodbye',
       keys: ['bye', 'goodbye', 'see you', 'that is all', 'nothing else', 'no thanks', 'thats all'],
       answer: [
-        'Take care. We are on **647 895 0939** whenever you need us.',
-        'Good talking to you. The door is open.',
-        'All the best. Come back any time.',
+        'Thank you. You can reach us on **647 895 0939** whenever you need us.',
+        'It was good to speak with you. The door is open.',
+        'All the best. You are welcome back at any time.',
         'Thanks for stopping by. We are here when you need us.'
       ]
     },
@@ -411,8 +411,8 @@ window.NP_BOT_KB = {
       keys: ['who are you', 'what are you exactly', 'are you a robot', 'are you human', 'your name', 'are you a bot', 'am i talking to a person', 'are you real', 'ai'],
       answer: [
         'I am **Kodiak**, an assistant — not a person. I only tell you what the company has confirmed, and I never make things up.\n\nIf you would rather talk to someone real, say the word.',
-        'Kodiak, an automated assistant. Honest about it, too: I am software, and I will not pretend otherwise.\n\nWant a human instead? Just ask.',
-        'I am the assistant for North Peak. Automated, but on a short leash: if I do not know something, I say so and hand you to a person.'
+        'I am Kodiak, an automated assistant. I am software, and I will not pretend otherwise.\n\nIf you would prefer a person, simply ask.',
+        'I am the assistant for North Peak. Automated, with clear limits: if I do not know something, I say so and pass you to a person.'
       ]
     },
 
@@ -521,7 +521,7 @@ window.NP_BOT_KB = {
       keys: ['commercial construction', 'commercial building', 'office build', 'retail', 'fit out', 'warehouse'],
       answer: [
         'Yes, commercial construction and fit-outs.\n\nWhat is the building, and where is it?',
-        'That is squarely our work. What does the project involve?'
+        'Yes, that is our work. What does the project involve?'
       ],
       nav: { label: 'Services', href: '/services' }
     },
@@ -561,7 +561,7 @@ window.NP_BOT_KB = {
       keys: ['masonry', 'bricklaying', 'bricklayer', 'mason', 'brick', 'block work', 'stone work', 'wall'],
       answer: [
         'Yes, masonry, brick and block work.\n\nNew build, or repair?',
-        'Brick and block are in the house. What does the job involve?'
+        'Yes, brick and block work. What does the job involve?'
       ],
       nav: { label: 'Services', href: '/services' }
     },
@@ -571,7 +571,7 @@ window.NP_BOT_KB = {
       keys: ['concrete', 'concrete repair', 'formwork', 'slab', 'foundation', 'rebar', 'pour', 'cement'],
       answer: [
         'Yes — concrete work and concrete repair.\n\nWhat is the job?',
-        'Concrete is one of our ten, and repair as much as new pours. Tell me what you have.'
+        'Concrete is one of our ten areas, repair as much as new work. Tell me what you have.'
       ],
       nav: { label: 'Services', href: '/services' }
     },
@@ -580,8 +580,8 @@ window.NP_BOT_KB = {
       offerFlow: 'project',
       keys: ['specialized', 'special services', 'something specific', 'custom work', 'unusual', 'complicated'],
       answer: [
-        'If it does not fit a standard box, tell me what it involves. You will get an honest yes or no, not a run-around.',
-        'That is literally one of our categories: the jobs that do not fit the other nine. What is it?'
+        'If it does not fit a standard box, tell me what it involves. You will get an honest yes or no.',
+        'That is one of our categories: the work that does not fit the other nine. What is it?'
       ],
       contactCard: true
     },
@@ -613,8 +613,8 @@ window.NP_BOT_KB = {
         'tengo un proyecto', 'busco un contratista'
       ],
       answer: [
-        'Good — that is exactly the kind of thing we do.\n\nTell me a little more, and I can pass it straight to the team.',
-        'That sounds like our work. Let me get the basics and put it in front of a person who can answer you properly.',
+        'That is exactly the kind of work we do.\n\nTell me a little more and I can pass it straight to the team.',
+        'That sounds like our work. Let me take the basics and put them in front of a person who can answer you properly.',
         'Understood. The fastest route from here is a person, and I can get you one.'
       ]
     },
@@ -631,7 +631,7 @@ window.NP_BOT_KB = {
       answer: [
         'We are **Indigenous-owned** — that is how the company is built, not a line in a brochure.\n\nWhat it means for you: the project counts towards your Indigenous procurement goals, and it is still delivered by people who know how to build.\n\nAre you working to meet a requirement?',
         'Yes, Indigenous-owned. Most clients come to us because they need to meet an Indigenous procurement or supplier-diversity target **without** giving up quality or schedule.\n\nIs that your situation?',
-        'That is the heart of it. An Indigenous-owned company with real construction capability — so a requirement stops being a box to tick and starts being an advantage in your bid.\n\nWant me to explain how that works on a tender?'
+        'That is the heart of it. An Indigenous-owned company with real construction capability — so a requirement stops being an obligation and becomes an advantage in your bid.\n\nWant me to explain how that works on a tender?'
       ],
       more: [
         'The practical version: many public and corporate buyers now carry Indigenous procurement commitments. Working with us contributes to those commitments **and** gets the job built properly.\n\nThe part most companies get wrong is treating it as paperwork. We are a construction company first — the participation is real, not a subcontracted signature.'
@@ -733,7 +733,7 @@ window.NP_BOT_KB = {
       answer: [
         'Good. We take on site and trades people, and technical and management roles.\n\nSend your trade and your experience through the Careers page — it takes two minutes.',
         'We are always interested in people who can actually do the work.\n\nTell us your trade and where you are based, through the Careers page.',
-        'Yes. Two broad groups: site and trades, and technical and management.\n\nWhich one are you?'
+        'Yes. Two broad groups: site and trades, and technical and management.\n\nWhich applies to you?'
       ],
       nav: { label: 'Careers', href: '/careers' }
     },
@@ -862,7 +862,7 @@ window.NP_BOT_KB = {
         'Straight answer: we are useful to you if you have something to build, a bid to win, or a site short of hands.\n\nWhich one describes your situation?'
       ],
       more: [
-        'The one that surprises people: if you are bidding on public or corporate work, having a genuine Indigenous-owned partner is not a box to tick — it can be the difference between winning and coming second. And unlike a paper arrangement, we actually do the construction.'
+        'The one that surprises people: if you are bidding on public or corporate work, having a genuine Indigenous-owned partner is not a formality — it can be the difference between winning and coming second. And unlike a paper arrangement, we actually do the construction.'
       ]
     },
     {
@@ -1013,7 +1013,7 @@ window.NP_BOT_KB = {
         'solo miraba', 'por curiosidad'
       ],
       answer: [
-        'Perfectly fine — most people are, the first time.\n\nIf it helps: the thing worth knowing about us is that we are Indigenous-owned **and** we do the construction ourselves. Most clients need one or the other. Some need both.\n\nAnything you want me to explain while you are here?',
+        'That is perfectly fine. Most people are, the first time.\n\nIf it helps: the thing worth knowing about us is that we are Indigenous-owned **and** we do the construction ourselves. Most clients need one or the other. Some need both.\n\nAnything you want me to explain while you are here?',
         'No obligation at all. Look around.\n\nIf a project ever does come up — or a tender with an Indigenous participation requirement — that is exactly when to come back. Shall I tell you how that part works?'
       ]
     },
@@ -1026,8 +1026,8 @@ window.NP_BOT_KB = {
         'happy with our', 'ya tengo contratista'
       ],
       answer: [
-        'Good — a contractor you trust is worth keeping.\n\nWhere we usually come in is different: as an **Indigenous-owned partner** on bids that carry a procurement or participation requirement. That is not a replacement for your contractor; it sits alongside them.\n\nDoes that come up in your work?',
-        'Then you are ahead of most.\n\nThe question worth asking is a different one: when a tender requires Indigenous participation, who do you call? That is where we are useful — and it does not disturb what you already have.\n\nIs that a situation you run into?'
+        'A contractor you trust is worth keeping.\n\nWhere we usually come in is different: as an **Indigenous-owned partner** on bids that carry a procurement or participation requirement. That is not a replacement for your contractor; it sits alongside them.\n\nDoes that come up in your work?',
+        'Then you are better placed than most.\n\nThe question worth asking is a different one: when a tender requires Indigenous participation, who do you call? That is where we are useful — and it does not disturb what you already have.\n\nIs that a situation you run into?'
       ],
       nav: { label: 'How that works', href: '/indigenous-procurement' }
     },
@@ -1040,7 +1040,7 @@ window.NP_BOT_KB = {
       ],
       answer: [
         'Of course. Nobody should decide a construction contract in a chat window.\n\nOne suggestion: take the phone number with you — **647 895 0939**. When you have thought it through, one call gets you a real answer, with no obligation.\n\nAnything I can clarify before you go?',
-        'Sensible. Take your time.\n\nIf it would help your thinking, I can put a person on it now — no commitment, just a straight answer to whatever is making you hesitate. Want me to?'
+        'That is sensible. Take your time.\n\nIf it would help your thinking, I can put a person on it now — no commitment, just a straight answer to whatever is making you hesitate. Want me to?'
       ],
       contactCard: true
     },
@@ -1052,7 +1052,7 @@ window.NP_BOT_KB = {
       ],
       answer: [
         'Better than a brochure: tell me what you need it for, and the team will send you something that actually answers it — capability, coverage, or the Indigenous participation side.\n\nWhat is the context?',
-        'I can do better than a generic PDF. If you tell me what you are evaluating, a person will send you exactly that.\n\nWhat should it cover?'
+        'A generic document rarely answers the real question. If you tell me what you are evaluating, a person will send you exactly that.\n\nWhat should it cover?'
       ],
       offerFlow: 'project'
     },
@@ -1071,8 +1071,8 @@ window.NP_BOT_KB = {
       topic: 'how are you',
       keys: ['how are you', 'how is it going', 'how do you do', 'how are things', 'que tal', 'como estas'],
       answer: [
-        'Working, and glad to. What can I do for you?',
-        'Well, thank you. More to the point — what brings you here?'
+        'Very well, thank you. What can I do for you?',
+        'Well, thank you. What brings you here today?'
       ]
     },
     {
@@ -1082,8 +1082,8 @@ window.NP_BOT_KB = {
         'are you smart', 'i like you', 'well done'
       ],
       answer: [
-        'I will take it. Now, what can I actually do for you?',
-        'Kind of you. I am better at construction questions than at jokes, though — try me.'
+        'Thank you. Now, what can I help you with?',
+        'That is kind of you. I am more useful on construction questions, though. Try me.'
       ]
     },
 
@@ -1094,7 +1094,7 @@ window.NP_BOT_KB = {
       keys: ['residential', 'my house', 'home renovation', 'basement', 'kitchen', 'small job', 'handyman', 'my home'],
       /* ⚠️ PENDIENTE: confirmar si aceptan residencial. */
       answer: [
-        'Our work is mostly commercial, institutional and infrastructure, and supporting general contractors.\n\nIf yours is smaller, ask anyway — you will get a straight yes or no, not a run-around.',
+        'Our work is mostly commercial, institutional and infrastructure, and supporting general contractors.\n\nIf yours is smaller, ask anyway — you will get a straight yes or no.',
         'That is not our usual ground, I will be honest. But rather than send you away, ask the team: they will tell you plainly whether it is a fit.'
       ],
       contactCard: true
