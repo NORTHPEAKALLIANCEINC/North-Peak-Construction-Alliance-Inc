@@ -62,6 +62,7 @@
      Ahora ambos sobreviven, como el resto de la conversación. */
   function savePending() {
     try {
+      sessionStorage.setItem('np-chat-seed', JSON.stringify(seed || null));
       sessionStorage.setItem('np-chat-pending', pendingFlow || '');
       sessionStorage.setItem('np-chat-last', (lastEntry && (lastEntry.topic || lastEntry.keys[0])) || '');
     } catch (e) {}
@@ -69,6 +70,7 @@
 
   function loadPending() {
     try {
+      seed = JSON.parse(sessionStorage.getItem('np-chat-seed') || 'null');
       pendingFlow = sessionStorage.getItem('np-chat-pending') || null;
       var t = sessionStorage.getItem('np-chat-last');
       if (t) {
@@ -113,6 +115,15 @@
      quiere que pase algo. A la segunda, el bot deja de hablar y actúa. */
   var lastTopic = null;
   var repeats = 0;
+
+  /* ── LA SEMILLA ────────────────────────────────────────────
+     [FALLO CORREGIDO] El visitante decía "quiero construir un almacén",
+     el bot se ofrecía a tomar los datos, él decía "sí"… y el bot le
+     preguntaba QUÉ QUERÍA CONSTRUIR. Ya se lo había dicho.
+
+     Ahora se guarda lo último que contó sobre su obra, y al arrancar la
+     toma de datos se da por dicho. No se pregunta dos veces lo mismo. */
+  var seed = null;      // { work, city, when }  o  texto suelto
 
   var CITIES = ['toronto', 'ottawa', 'hamilton', 'mississauga', 'brampton', 'markham',
     'vaughan', 'london', 'kingston', 'windsor', 'sudbury', 'thunder bay', 'barrie',
@@ -485,7 +496,10 @@
   var ICO = {
     phone: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
     mail:  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>',
-    wa:    '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.8 5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.1c0 1.2.9 2.4 1 2.5.1.2 1.7 2.6 4.2 3.7 1.4.6 2 .6 2.7.5.4 0 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1z"/></svg>'
+    wa:    '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.8 5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.1c0 1.2.9 2.4 1 2.5.1.2 1.7 2.6 4.2 3.7 1.4.6 2 .6 2.7.5.4 0 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1z"/></svg>',
+    copy:  '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    check: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"/></svg>',
+    edit:  '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>'
   };
 
   function html(text) {
@@ -601,16 +615,94 @@
      está bien: hay quien llama y hay quien jamás llamaría pero sí
      escribe. Por eso se etiqueta por la ACCIÓN, no por el dato. Y el
      correo va abreviado: la dirección entera se partía contra el borde. */
+  /* Estilos de lo nuevo (copiar, editar). Se inyectan desde aquí para no
+     obligar a resubir los siete index.html solo por una regla de CSS.
+     Usan los mismos tokens del sitio: ningún color suelto. */
+  function injectStyles() {
+    if (document.getElementById('np-chat-extra')) return;
+    var s = document.createElement('style');
+    s.id = 'np-chat-extra';
+    s.textContent = [
+      '.np-chat__card{display:grid;grid-template-columns:1fr auto;gap:2px 6px;align-items:center}',
+      '.np-chat__card .np-chat__row{min-width:0}',
+      '.np-chat__card .np-chat__row em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}',
+      '.np-chat__copy{display:inline-flex;align-items:center;justify-content:center;',
+        'width:26px;height:26px;padding:0;border:1px solid var(--line,rgba(0,0,0,.14));',
+        'border-radius:6px;background:transparent;color:var(--cyan,#c9a227);cursor:pointer;',
+        'transition:background .2s ease,border-color .2s ease,opacity .2s ease}',
+      '.np-chat__copy:hover{background:color-mix(in srgb,var(--cyan,#c9a227) 12%,transparent)}',
+      '.np-chat__copy.is-done{color:var(--cyan,#c9a227);border-color:var(--cyan,#c9a227)}',
+      '.np-chat__copy--empty{border:0;background:none;pointer-events:none}',
+      '.np-chat__edit{display:inline-flex;align-items:center;gap:6px;margin-top:8px;',
+        'padding:6px 12px;border:1px solid var(--cyan,#c9a227);border-radius:999px;',
+        'background:transparent;color:var(--cyan,#c9a227);font:inherit;font-size:.74rem;',
+        'letter-spacing:.06em;text-transform:uppercase;cursor:pointer;',
+        'transition:background .2s ease}',
+      '.np-chat__edit:hover{background:color-mix(in srgb,var(--cyan,#c9a227) 12%,transparent)}',
+      '.np-chat__form{margin-top:10px;display:grid;gap:8px}',
+      '.np-chat__form label{display:grid;gap:3px;font-size:.7rem;letter-spacing:.06em;',
+        'text-transform:uppercase;color:var(--cyan,#c9a227)}',
+      '.np-chat__form input{width:100%;box-sizing:border-box;min-width:0;padding:8px 10px;',
+        'border:1px solid var(--line,rgba(0,0,0,.16));border-radius:8px;background:transparent;',
+        'color:inherit;font:inherit;font-size:.86rem}',
+      '.np-chat__form input:focus{outline:none;border-color:var(--cyan,#c9a227)}',
+      '.np-chat__save{margin-top:2px;padding:8px 14px;border:0;border-radius:999px;',
+        'background:var(--cyan,#c9a227);color:#0d1b2a;font:inherit;font-size:.74rem;',
+        'letter-spacing:.06em;text-transform:uppercase;font-weight:700;cursor:pointer}'
+    ].join('');
+    document.head.appendChild(s);
+  }
+
   function contactCard() {
     var c = document.createElement('div');
     c.className = 'np-chat__card';
+
+    /* [REESCRITA] Antes había una frase explicativa bajo cada línea
+       ("El mismo número, si prefiere escribirlo", "Abre tu aplicación de
+       correo"). Demasiado texto para un espacio tan pequeño, y peor aún
+       traducido. Ahora: el dato, y un botón para copiarlo. Nada más. */
     c.innerHTML =
-      '<a href="' + BOT.contact.phoneHref + '">' + ICO.phone +
+      '<a class="np-chat__row" href="' + BOT.contact.phoneHref + '">' + ICO.phone +
         '<span><b>Call</b><em>' + BOT.contact.phone + '</em></span></a>' +
-      '<a href="' + BOT.contact.whatsapp + '" target="_blank" rel="noopener">' + ICO.wa +
-        '<span><b>WhatsApp</b><em>Same number, if you prefer to write</em></span></a>' +
-      '<a href="mailto:' + BOT.contact.email + '">' + ICO.mail +
-        '<span><b>Email</b><em>Opens your mail app</em></span></a>';
+      '<button class="np-chat__copy" data-copy="' + BOT.contact.phone + '" ' +
+        'aria-label="Copy phone number" title="Copy">' + ICO.copy + '</button>' +
+
+      '<a class="np-chat__row" href="' + BOT.contact.whatsapp + '" target="_blank" rel="noopener">' +
+        ICO.wa + '<span><b>WhatsApp</b><em>' + BOT.contact.phone + '</em></span></a>' +
+      '<span class="np-chat__copy np-chat__copy--empty"></span>' +
+
+      '<a class="np-chat__row" href="mailto:' + BOT.contact.email + '">' + ICO.mail +
+        '<span><b>Email</b><em>' + BOT.contact.email + '</em></span></a>' +
+      '<button class="np-chat__copy" data-copy="' + BOT.contact.email + '" ' +
+        'aria-label="Copy email address" title="Copy">' + ICO.copy + '</button>';
+
+    /* Copiar al portapapeles. Con acuse visual: si no se ve, no se sabe
+       si ha funcionado, y el visitante lo pulsa cinco veces. */
+    c.addEventListener('click', function (e) {
+      var btn = e.target.closest('.np-chat__copy');
+      if (!btn || !btn.getAttribute('data-copy')) return;
+      e.preventDefault();
+      var val = btn.getAttribute('data-copy');
+      var ok = function () {
+        btn.classList.add('is-done');
+        btn.innerHTML = ICO.check;
+        setTimeout(function () {
+          btn.classList.remove('is-done');
+          btn.innerHTML = ICO.copy;
+        }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(val).then(ok, function () {});
+      } else {
+        var t = document.createElement('textarea');
+        t.value = val;
+        document.body.appendChild(t);
+        t.select();
+        try { document.execCommand('copy'); ok(); } catch (err) {}
+        document.body.removeChild(t);
+      }
+    });
+
     return c;
   }
 
@@ -639,6 +731,7 @@
         b.appendChild(a);
       }
       if (entry && entry.contactCard) b.appendChild(contactCard());
+      if (entry && entry.editButton && flow) editPanel(b);
       bottom();
     };
     if (animate === false) { b.innerHTML = html(text); tail(); }
@@ -703,7 +796,7 @@
   ══════════════════════════════════════════════════════════ */
   function ensureExit(text, entry) {
     if (String(text).indexOf('?') !== -1) return text;
-    if (entry && (entry.contactCard || entry.nav)) return text;
+    if (entry && (entry.contactCard || entry.nav || entry.editButton)) return text;
     return text + '\n\n' + pickVariant(BOT.nudges, 'nudge');
   }
 
@@ -1066,7 +1159,74 @@
   function askConfirm(done) {
     var def = flowDef();
     speak(pickVariant(def.confirm, flow.id + '#confirm') + '\n\n' + summary() +
-          '\n\n' + pickVariant(def.confirmAsk, flow.id + '#confirmAsk'), null, done);
+          '\n\n' + pickVariant(def.confirmAsk, flow.id + '#confirmAsk'),
+          { editButton: true }, done);
+  }
+
+  /* ── PANEL DE EDICIÓN ──────────────────────────────────────
+     Bajo el resumen, un botón "Edit". Corregir un dato escribiendo
+     "cambia el teléfono" funciona, pero es incómodo: se escribe, se
+     espera, se confirma. Un formulario con los datos ya puestos se
+     corrige en tres segundos. El envío, en cambio, NO lleva botón:
+     se confirma hablando, para no romper la conversación. */
+  function editPanel(bubble) {
+    var def = flowDef();
+    if (!def) return;
+
+    var btn = document.createElement('button');
+    btn.className = 'np-chat__edit';
+    btn.type = 'button';
+    btn.innerHTML = ICO.edit + '<span>Edit details</span>';
+
+    btn.addEventListener('click', function () {
+      if (!flowDef()) return;
+      var form = document.createElement('div');
+      form.className = 'np-chat__form';
+
+      def.steps.forEach(function (s) {
+        var label = document.createElement('label');
+        var name  = s.id.charAt(0).toUpperCase() + s.id.slice(1);
+        label.innerHTML = '<span>' + name + '</span>';
+        var input = document.createElement('input');
+        input.type  = 'text';
+        input.value = flow.data[s.id] || '';
+        input.setAttribute('data-field', s.id);
+        label.appendChild(input);
+        form.appendChild(label);
+      });
+
+      var save = document.createElement('button');
+      save.className = 'np-chat__save';
+      save.type = 'button';
+      save.textContent = 'Save changes';
+      save.addEventListener('click', function () {
+        if (!flowDef()) return;
+        var bad = null;
+        def.steps.forEach(function (s) {
+          var el = form.querySelector('[data-field="' + s.id + '"]');
+          var v  = (el.value || '').trim();
+          if (validate(s, v)) bad = s.id;      // la validación sigue vigente
+          else flow.data[s.id] = v;
+        });
+        saveFlow();
+        form.remove();
+        btn.style.display = '';
+        if (bad) {
+          addBot(pickVariant(DATA.flowTalk.invalidContact, 'invalidContact'), null, true);
+          return;
+        }
+        addBot(pickVariant(DATA.flowTalk.saved, 'saved') + '\n\n' + summary() +
+               '\n\n' + pickVariant(def.confirmAsk, flow.id + '#confirmAsk'),
+               { editButton: true }, true);
+      });
+
+      form.appendChild(save);
+      btn.style.display = 'none';
+      bubble.appendChild(form);
+      bottom();
+    });
+
+    bubble.appendChild(btn);
   }
 
   /* ¿El mensaje arranca un flujo por sí solo? */
@@ -1096,6 +1256,16 @@
     /* Se retiene lo que dice, siempre, aunque esté en mitad de un flujo. */
     remember(text);
 
+    /* Si está describiendo una obra, se guarda. Es lo que evitará
+       preguntarle otra vez lo que ya nos ha contado. */
+    if (!flow) {
+      var g0 = extract(text);
+      if (g0.work) seed = g0;
+      else if (isConstruction(text) && normalize(text).split(' ').length >= 3) {
+        seed = { work: text.trim(), city: g0.city, when: g0.when };
+      }
+    }
+
     /* 1. ¿Hay una toma de datos en marcha? Entonces se conduce. */
     if (flow) { handleFlow(text, release); return; }
 
@@ -1112,7 +1282,10 @@
     /* 2. ¿Se ofreció una y el visitante ha dicho que sí? */
     if (pendingFlow) {
       var n0 = normalize(text);
-      if (YES.test(n0)) { startFlow(pendingFlow, release); return; }
+      if (YES.test(n0)) {
+        startFlow(pendingFlow, release, seed && seed.work, seed);
+        return;
+      }
       if (DECLINE.test(n0) || CANCEL.test(n0)) {
         pendingFlow = null;
         savePending();
@@ -1125,7 +1298,7 @@
 
     /* 3. ¿Lo pide directamente? ("send my project") */
     var direct = flowTrigger(text);
-    if (direct) { startFlow(direct, release); return; }
+    if (direct) { startFlow(direct, release, seed && seed.work, seed); return; }
 
     /* 4. ¿Se ha ido de tema? Se comprueba ANTES de puntuar: si no, una
        ciudad suelta dentro de "¿qué tiempo hace en Toronto?" lo mandaba
@@ -1141,7 +1314,7 @@
        memoria, un "sí" nunca vuelve a repetir la respuesta anterior. */
     if (YES.test(normalize(text)) && normalize(text).split(' ').length <= 4 &&
         lastEntry && lastEntry.offerFlow && DATA.flows[lastEntry.offerFlow]) {
-      startFlow(lastEntry.offerFlow, release);
+      startFlow(lastEntry.offerFlow, release, seed && seed.work, seed);
       return;
     }
 
@@ -1181,7 +1354,7 @@
                 : got.when ? 'workWhen'
                 : 'workOnly';
 
-        var msg = pickVariant(DATA.reflect[tpl], 'reflect' + tpl)
+        var msg = pickVariant(BOT.reflect[tpl], 'reflect' + tpl)
                     .replace('{work}', got.work)
                     .replace('{city}', got.city || '')
                     .replace('{when}', got.when || '');
@@ -1370,6 +1543,7 @@
   /* ── Arranque ─────────────────────────────────────────── */
 
   function init() {
+    injectStyles();
     build();
     loadFlow();      // una toma de datos a medias sobrevive al cambio de página
     loadPending();   // y también el ofrecimiento en el aire

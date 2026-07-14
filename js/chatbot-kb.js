@@ -153,23 +153,23 @@ window.NP_BOT_KB = {
 
       need: {
         answer: [
-          'Understood. **What is the work, where is it, and when do you need it?**\n\nWith those three, a person can come back to you with something real.',
-          'That is what we are here for. **Tell me the work, the city and the timing** and I will pass it straight to the team.'
+          'Understood.\n\n**What is the work?** Once I have that, I will ask for the city and the date.',
+          'That is what we are here for.\n\n**Tell me what the work is** and I will take it from there.'
         ],
         offerFlow: 'project'
       },
 
       price: {
         answer: [
-          'I do not give numbers, and you should be wary of any assistant that does — construction pricing depends on scope, site and schedule.\n\nWhat I can do is get you a real figure from a person. **What is the project?**',
-          'No figures from me: an invented number helps nobody, least of all you.\n\nBut a person will give you a real one. **Tell me what the work is and where.**'
+          'I do not give numbers, and you should be wary of any assistant that does. Construction pricing depends on scope, site and schedule.\n\nA person can get you a real figure. **What is the project?**',
+          'No figures from me. An invented number helps nobody, least of all you.\n\nA person will give you a real one. **What is the work?**'
         ],
         offerFlow: 'project'
       },
 
       time: {
         answer: [
-          'Timelines depend on the scope and the site — anyone who gives you a date without seeing either is guessing.\n\n**What is the work, and when would you need it done?** A person can answer that properly.'
+          'Timelines depend on the scope and the site. Anyone who gives you a date without seeing either is guessing.\n\n**What is the work?** A person will give you a real answer.'
         ],
         offerFlow: 'project'
       },
@@ -199,8 +199,8 @@ window.NP_BOT_KB = {
       /* Algo está roto. Es una petición de obra, aunque no lleve verbo. */
       problem: {
         answer: [
-          'That sounds like something we repair — restoration and structural work is one of our ten areas.\n\n**Where is it, and how urgent is it?**',
-          'Damage of that kind is exactly what we deal with. Before anyone can tell you what it needs, they will want to know two things: **where is it, and how bad is it?**'
+          'That sounds like something we repair. Restoration and structural work is one of our ten areas.\n\n**Where is it?**',
+          'Damage of that kind is exactly what we deal with.\n\n**Whereabouts is it?**'
         ],
         offerFlow: 'project'
       },
@@ -208,8 +208,8 @@ window.NP_BOT_KB = {
       /* Alguien perdido. No se le abandona: se le hacen preguntas fáciles. */
       unsure: {
         answer: [
-          'Then let us work it out together — that is a perfectly normal place to start.\n\n**What do you have, and what would you like it to become?** Even a rough answer helps.',
-          'No problem at all. You do not need to know the technical side; that is our job.\n\n**Tell me what you have and what you are hoping for**, in plain words.'
+          'Then let us work it out together. That is a perfectly normal place to start.\n\n**What do you have?** A rough answer is fine.',
+          'You do not need to know the technical side. That is our job.\n\n**Tell me what you have**, in plain words.'
         ],
         offerFlow: 'project'
       },
@@ -231,10 +231,10 @@ window.NP_BOT_KB = {
        repite para que el visitante vea que se le ha escuchado, y pide
        solo lo que falta. {work} {city} {when} se sustituyen. */
     reflect: {
-      full:      ['So: **{work}**, in **{city}**, for **{when}**. Let me put that in front of a person.'],
-      workCity:  ['Understood: **{work}**, in **{city}**.\n\n**When would you need it done?**'],
+      full:      ['Understood: **{work}**, in **{city}**, for **{when}**.\n\nLet me take the last details and pass this to the team.'],
+      workCity:  ['Understood: **{work}**, in **{city}**.\n\n**By what date would you want the work completed?**'],
       workWhen:  ['Understood: **{work}**, for **{when}**.\n\n**Which city is it in?**'],
-      workOnly:  ['Understood: **{work}**.\n\n**Where is it, and when do you need it?**']
+      workOnly:  ['Understood: **{work}**.\n\n**Which city is it in?**']
     },
 
     quick: [
@@ -284,21 +284,21 @@ window.NP_BOT_KB = {
       ],
       /* Lo que dice el bot al ofrecerlo */
       offer: [
-        'I can take the details right now and send them straight to the team, if you would like me to.',
-        'If you like, I can take a few short details and put them in front of a person today.',
-        'Rather than send you to a form, I can take the details myself and pass them to the team.'
+        'Would you like me to take the details now and send them straight to the team?',
+        'Shall I take a few short details and put them in front of a person today?',
+        'Rather than send you to a form, shall I take the details myself and pass them to the team?'
       ],
       start: [
-        'Good. Four questions, plain words, no technical language needed.',
+        'Good. Four questions, in plain words. No technical language needed.',
         'Right. Four quick things and I will pass it on.',
-        'Let us do it. Four questions, and you can stop at any point.'
+        'Let us do it. Four questions, and you may stop at any point.'
       ],
       steps: [
         {
           id: 'what',
           type: 'text',
           ask: [
-            'First — what needs building, repairing or managing?',
+            'First: what needs building, repairing or managing?',
             'What is the work? Describe it in your own words.',
             'Tell me what the project involves. Plain language is fine.'
           ]
@@ -307,18 +307,18 @@ window.NP_BOT_KB = {
           id: 'where',
           type: 'place',      /* validación propia: un país no es un sitio */
           ask: [
-            'Where is it? The city is enough.',
-            'And whereabouts? City or town will do.',
-            'Which city is the project in?'
+            'Which city or town is the project in?',
+            'And the location. Which city is it in?',
+            'Where is the project? Please name the city.'
           ]
         },
         {
           id: 'when',
           type: 'text',
           ask: [
-            'When do you need it? A rough idea is fine — "this spring" works.',
-            'And the timing? Even "as soon as possible" is a useful answer.',
-            'When would you want this done? Approximate is fine.'
+            'By what date would you want the work completed? An approximate date is fine, and the team will confirm what is possible.',
+            'And the date. When would you like the work finished? The team will tell you what can be arranged.',
+            'What completion date do you have in mind? An estimate is enough at this stage.'
           ]
         },
         {
@@ -347,9 +347,9 @@ window.NP_BOT_KB = {
         'This is what I would send to the team:'
       ],
       confirmAsk: [
-        'Send it? Say **yes**, or tell me what to change ("change the phone").',
-        'Shall I send it? **Yes** to go ahead, or name what needs fixing.',
-        'Happy with that? **Yes** and it goes. Or tell me what to correct.'
+        'To send it, simply tell me it is correct. To change anything, use **Edit details** below.',
+        'If that is right, say so and it goes to the team. To correct anything, use **Edit details** below.',
+        'Confirm it and I will send it. If something is wrong, **Edit details** below will let you fix it.'
       ],
       success: [
         'Sent. It is in the office inbox now, and someone will come back to you.\n\nIf it is urgent, call **647 895 0939** and mention you spoke to me.',
@@ -411,8 +411,8 @@ window.NP_BOT_KB = {
         'Let me read it back:'
       ],
       confirmAsk: [
-        'Send it? **Yes**, or tell me what to change.',
-        'Shall I pass this on? **Yes** to go ahead.'
+        'If that is correct, say so and I will send it. To change anything, use **Edit details** below.',
+        'Confirm and it goes to the team. Otherwise, **Edit details** below.'
       ],
       success: [
         'Sent. Your details are with the team.\n\nIf you also want to send a résumé, use the Careers page — the form there takes a file.',
@@ -448,6 +448,12 @@ window.NP_BOT_KB = {
        No es un error suyo: es una respuesta razonable a una pregunta
        mal acotada. Un humano no la daría por buena — la afinaría. */
     /* El visitante ha insistido. Se deja de conversar y se actúa. */
+    /* Tras usar el botón de editar. */
+    saved: [
+      'Updated. Here is how it stands now:',
+      'Saved. This is what I have now:'
+    ],
+
     justStart: [
       'Understood. Let me take the details, then, and put this in front of a person.',
       'Right. I will stop asking and simply take what the team needs.',
@@ -726,10 +732,10 @@ window.NP_BOT_KB = {
         'tengo un proyecto', 'busco un contratista'
       ],
       answer: [
-        'That is exactly the kind of work we do.\n\n**Where is it, and when do you need it?**',
-        'We can do that. So the team can answer you properly: **where is the project, and what is your timeframe?**',
-        'Understood. **What city is it in, and when would the work need to start?**',
-        'That is our work. Two things and I can put it in front of a person: **the city, and the timing.**'
+        'That is exactly the kind of work we do.\n\n**Which city is it in?**',
+        'We can do that.\n\n**Where is the project?**',
+        'Understood.\n\n**What city is it in?**',
+        'That is our work.\n\n**Which city is the project in?**'
       ]
     },
 
@@ -1141,7 +1147,7 @@ window.NP_BOT_KB = {
       ],
       answer: [
         'A contractor you trust is worth keeping.\n\nWhere we usually come in is different: as an **Indigenous-owned partner** on bids that carry a procurement or participation requirement. That is not a replacement for your contractor; it sits alongside them.\n\nDoes that come up in your work?',
-        'Then you are better placed than most.\n\nThe question worth asking is a different one: when a tender requires Indigenous participation, who do you call? That is where we are useful — and it does not disturb what you already have.\n\nIs that a situation you run into?'
+        'Then you are better placed than most.\n\nThere is a different question worth asking. When a tender requires Indigenous participation, that is where we are useful, and it does not disturb what you already have.\n\nIs that a situation you run into?'
       ],
       nav: { label: 'How that works', href: '/indigenous-procurement' }
     },
