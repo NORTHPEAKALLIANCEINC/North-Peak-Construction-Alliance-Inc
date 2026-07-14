@@ -225,14 +225,114 @@
     'this that these those which who whom please tell give want need like just get got have has ' +
     'had about there here if so as also very really ok okay hi hello thanks thank some any').split(' ');
 
+  /* ══════════════════════════════════════════════════════════
+     CAPA DE TRADUCCIÓN  —  el arreglo estructural, no el parche.
+
+     EL FALLO DE RAÍZ: toda la base, todas las claves y todas las
+     intenciones estaban EN INGLÉS. Un visitante que escribe "reparaciones
+     de edificios" no existía para el motor: ni tema, ni intención, ni
+     construcción. Caía al vacío. Y en Canadá — bilingüe, con inmigración,
+     con medio mundo usando el traductor del navegador — eso no es un caso
+     raro: es la mitad de los visitantes.
+
+     LA SOLUCIÓN NO ES traducir 52 entradas a tres idiomas (inmantenible).
+     Es traducir la ENTRADA una sola vez, en el punto por el que pasa todo:
+     aquí. El motor sigue pensando en inglés, y el visitante escribe como
+     quiera. Un solo diccionario y funcionan TODAS las capas a la vez:
+     temas, intenciones, extracción, ciudades, urgencia y desvíos.
+  ══════════════════════════════════════════════════════════ */
+  var LEX = {
+    /* ── español ── */
+    reparacion: 'repair', reparaciones: 'repair', reparar: 'repair', reparo: 'repair',
+    arreglar: 'repair', arreglo: 'repair', reparando: 'repair',
+    construir: 'build', construccion: 'construction', construyendo: 'building',
+    edificio: 'building', edificios: 'building', edificacion: 'building',
+    obra: 'project', obras: 'project', proyecto: 'project', proyectos: 'project',
+    presupuesto: 'quote', precio: 'price', precios: 'price', costo: 'cost', coste: 'cost',
+    cuanto: 'how much', cuando: 'when', donde: 'where', quien: 'who', porque: 'why',
+    hacen: 'do you', haceis: 'do you', hace: 'do you', pueden: 'can you', podeis: 'can you',
+    puede: 'can you', ustedes: 'you', vosotros: 'you', tienen: 'do you have',
+    quiero: 'i want', queremos: 'we want', necesito: 'i need', necesitamos: 'we need',
+    busco: 'looking for', buscamos: 'looking for', tengo: 'i have', tenemos: 'we have',
+    saber: 'know', conocer: 'know', pregunta: 'question', duda: 'question',
+    techo: 'roof', tejado: 'roof', cubierta: 'roof', muro: 'wall', pared: 'wall',
+    paredes: 'wall', suelo: 'floor', piso: 'floor', cimientos: 'foundation',
+    cimentacion: 'foundation', hormigon: 'concrete', cemento: 'concrete',
+    ladrillo: 'brick', ladrillos: 'brick', albanileria: 'masonry', mamposteria: 'masonry',
+    almacen: 'warehouse', nave: 'warehouse', bodega: 'warehouse', galpon: 'warehouse',
+    escuela: 'school', colegio: 'school', hospital: 'hospital', puente: 'bridge',
+    carretera: 'road', calle: 'road', estacionamiento: 'parking', aparcamiento: 'parking',
+    empresa: 'company', compania: 'company', contratista: 'contractor',
+    contratistas: 'contractor', trabajo: 'work', trabajos: 'work', empleo: 'job',
+    curriculum: 'resume', vacante: 'job', puesto: 'job', oficio: 'trade',
+    seguro: 'insurance', seguros: 'insurance', certificado: 'certificate',
+    certificacion: 'certification', licitacion: 'tender', licitaciones: 'tender',
+    oferta: 'bid', concurso: 'tender', requisito: 'requirement',
+    urgente: 'urgent', urgencia: 'urgent', manana: 'tomorrow', hoy: 'today',
+    semana: 'week', mes: 'month', ano: 'year', plazo: 'deadline', fecha: 'date',
+    persona: 'person', llamar: 'call', telefono: 'phone', correo: 'email',
+    indigena: 'indigenous', indigenas: 'indigenous',
+    mantenimiento: 'maintenance', remodelacion: 'renovation', reforma: 'renovation',
+    renovar: 'renovate', demoler: 'demolish', instalar: 'install', ampliar: 'extend',
+    pintar: 'paint', gestion: 'management', direccion: 'management',
+    residencial: 'residential', comercial: 'commercial', industrial: 'industrial',
+    danado: 'damaged', roto: 'broken', grieta: 'crack', grietas: 'crack',
+    agrietado: 'cracked', filtracion: 'leak', gotera: 'leak', humedad: 'damp',
+    entiendo: 'understand', entender: 'understand', respondes: 'answer',
+    responsabilidad: 'liability', civil: 'civil', cobertura: 'coverage',
+    respondiendo: 'answering', respuesta: 'answer', responder: 'answer',
+    sentido: 'sense', claro: 'clear', pregunte: 'asked', preguntando: 'asking',
+    solicitando: 'asking', dije: 'said', explique: 'explained',
+    /* ── francés ── */
+    reparation: 'repair', reparations: 'repair', batiment: 'building',
+    travaux: 'work', devis: 'quote', combien: 'how much', quand: 'when',
+    pouvez: 'can you', faites: 'do you', besoin: 'need', entreprise: 'company',
+    beton: 'concrete', toit: 'roof', mur: 'wall', chantier: 'site',
+    renovation: 'renovation', urgence: 'urgent'
+  };
+
+  /* Frases hechas. Palabra a palabra no basta: "por qué" son dos
+     palabras, "no tiene sentido" son tres. Se traducen antes. */
+  var PHRASES = [
+    [/\bno entiendo por que\b/g, 'i do not understand why'],
+    [/\bno entiendo\b/g,          'i do not understand'],
+    [/\bpor que\b/g,              'why'],
+    [/\bno tiene sentido\b/g,     'that does not make sense'],
+    [/\bno me (respondiste|has respondido|estas respondiendo)\b/g, 'you did not answer'],
+    [/\bno me estas (escuchando|entendiendo)\b/g, 'you are not listening'],
+    [/\beso no es lo que (pregunte|dije)\b/g, 'that is not what i asked'],
+    [/\bfui (bastante )?claro\b/g, 'i was clear'],
+    [/\bte (estoy )?(preguntando|solicitando)\b/g, 'i asked you'],
+    [/\bresponsabilidad civil\b/g, 'liability'],
+    [/\bcuanto cuesta\b/g,        'how much'],
+    [/\bcuanto vale\b/g,          'how much'],
+    [/\bquiero saber\b/g,         'i want to know'],
+    [/\bme gustaria\b/g,          'i would like'],
+    [/\bhablar con (alguien|una persona)\b/g, 'speak to a person'],
+    [/\bpuedo hablar\b/g,         'can i speak'],
+    [/\bque tipo de\b/g,          'what kind of'],
+    [/\bde que manera\b/g,        'how'],
+    [/\bhace falta\b/g,           'is needed'],
+    [/\bse cayo\b/g,              'collapsed'],
+    [/\bse rompio\b/g,            'broke']
+  ];
+
   function normalize(str) {
     var s = String(str || '').toLowerCase();
     CONTRACTIONS.forEach(function (c) { s = s.replace(c[0], c[1]); });
-    return s
+    s = s
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^\w\s?%]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
+
+    /* Frases hechas primero, luego palabra a palabra. El motor sigue
+       pensando en inglés; el visitante escribe como quiera. */
+    PHRASES.forEach(function (p) { s = s.replace(p[0], p[1]); });
+
+    return s.split(' ').map(function (w) {
+      return LEX[w] || w;
+    }).join(' ');
   }
 
   function stem(w) {
@@ -801,6 +901,10 @@
   }
 
   function speak(text, entry, done) {
+    /* Red de última hora: un mensaje vacío es lo peor que puede pasar
+       (el visitante ve una burbuja con un signo suelto y nada más).
+       Si por lo que sea el texto viene vacío, se hace triaje. */
+    if (!String(text || '').trim()) text = pickVariant(BOT.triage, 'triage');
     text = ensureExit(text, entry);
     showTyping();
     setTimeout(function () {

@@ -61,6 +61,17 @@ window.NP_BOT_KB = {
       'And **{topic}**:'
     ],
 
+    /* ── TRIAJE ───────────────────────────────────────────────
+       Cuando no ha entendido, decir "no lo sé" y soltar un teléfono deja
+       al visitante sintiéndose despachado. Un buen empleado acota: tres
+       puertas, y que elija. El bot nunca pierde el control, ni siquiera
+       cuando no entiende nada. */
+    triage: [
+      'I want to point you the right way rather than guess.\n\nIs this about **a project**, about **working with us**, or about **the company**?',
+      'Let me narrow this down.\n\nAre you here about **a project you need built**, about **a job**, or for **information about the company**?',
+      'I did not follow that, and I do not want to leave you stuck.\n\nWhich is nearest: **a project**, **a job**, or **information**?'
+    ],
+
     /* ── Cuando no sabe. Cinco variantes, todas honestas. ── */
     fallback: [
       'I would rather be useful than quick, and I do not have that one.\n\nA person will:',
@@ -667,7 +678,8 @@ window.NP_BOT_KB = {
     {
       topic: 'restoration',
       offerFlow: 'project',
-      keys: ['restoration', 'rehabilitation', 'refurbish', 'repair building', 'renovation', 'restore', 'heritage'],
+      keys: ['restoration', 'rehabilitation', 'refurbish', 'repair', 'repairs', 'repair building',
+        'building repair', 'fix a building', 'renovation', 'renovate', 'restore', 'heritage', 'refurbishment'],
       answer: [
         'Yes — restoration and rehabilitation of existing structures.\n\nWhat kind of building is it?',
         'We do. Bringing an existing structure back is a different craft from building new, and we treat it that way.'
@@ -1205,6 +1217,36 @@ window.NP_BOT_KB = {
         'Thank you. Now, what can I help you with?',
         'That is kind of you. I am more useful on construction questions, though. Try me.'
       ]
+    },
+
+
+    /* ══════════════════════════════════════════════════════════
+       LA QUEJA — la última oportunidad de salvar al cliente.
+
+       Cuando alguien dice "no me has respondido" o "eso no tiene sentido",
+       es que hemos fallado. Tratarlo como un mensaje incomprensible más y
+       despacharlo con un teléfono es perderlo para siempre.
+
+       Se reconoce el fallo, se pide disculpa una vez (sin arrastrarse), y
+       se RETOMA la conversación por donde iba.
+    ══════════════════════════════════════════════════════════ */
+    {
+      topic: 'you did not answer me',
+      boost: 2.2,
+      keys: [
+        'you did not answer', 'you have not answered', 'that is not what i asked',
+        'not what i asked', 'i asked you', 'answer my question', 'you are not listening',
+        'that does not make sense', 'does not make sense', 'makes no sense',
+        'i was clear', 'i was quite clear', 'do not understand why', 'why are you answering',
+        'that is not an answer', 'you did not understand', 'read my question',
+        'no answer', 'wrong answer', 'i said'
+      ],
+      answer: [
+        'You are right, and I apologise. I did not answer what you actually asked.\n\nLet me do it properly. **In one line: what do you need to know?**',
+        'That is a fair complaint. I missed your question.\n\n**Ask me again, plainly, and I will give you a direct answer** — or tell me to fetch a person and I will.',
+        'My mistake, and I will not repeat it.\n\n**Tell me the question again** and you will get a straight answer, or the number of someone who can give you one.'
+      ],
+      contactCard: true
     },
 
     /* ══ RESIDENCIAL ════════════════════════════════════════ */
