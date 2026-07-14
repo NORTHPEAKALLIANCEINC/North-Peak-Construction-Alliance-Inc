@@ -458,6 +458,15 @@
     obra: 'project', obras: 'project', proyecto: 'project', proyectos: 'project',
     presupuesto: 'quote', precio: 'price', precios: 'price', costo: 'cost', coste: 'cost',
     cuanto: 'how much', cuando: 'when', donde: 'where', quien: 'who', porque: 'why',
+    /* Los oficios. Sin esto, "soy albañil" no significaba nada para el bot:
+       le hacía TRIAJE a alguien que acababa de decirle exactamente quién es. */
+    soy: 'i am', somos: 'we are', trabajo: 'work', empleo: 'job', curriculum: 'resume',
+    albanil: 'mason', carpintero: 'carpenter', electricista: 'electrician',
+    plomero: 'plumber', fontanero: 'plumber', soldador: 'welder', pintor: 'painter',
+    techador: 'roofer', obrero: 'labourer', peon: 'labourer', ayudante: 'helper',
+    aprendiz: 'apprentice', operador: 'operator', capataz: 'foreman',
+    encargado: 'supervisor', encofrador: 'formwork', yesero: 'plasterer',
+    experiencia: 'experience', anos: 'years',
     hacen: 'do you', haceis: 'do you', hace: 'do you', pueden: 'can you', podeis: 'can you',
     puede: 'can you', ustedes: 'you', vosotros: 'you', tienen: 'do you have',
     quiero: 'i want', queremos: 'we want', necesito: 'i need', necesitamos: 'we need',
@@ -491,17 +500,40 @@
     respondiendo: 'answering', respuesta: 'answer', responder: 'answer',
     sentido: 'sense', claro: 'clear', pregunte: 'asked', preguntando: 'asking',
     solicitando: 'asking', dije: 'said', explique: 'explained',
-    /* ── francés ── */
-    reparation: 'repair', reparations: 'repair', batiment: 'building',
+    /* ── francés ──
+       [AMPLIADO] Estaba casi vacío. "je veux renover un entrepot a Montreal"
+       no significaba nada: el bot arrancaba el formulario y le preguntaba QUÉ
+       quería construir, y después se tragaba "au printemps" como si fuera la
+       descripción de la obra. Datos basura a la oficina. Canadá es bilingüe:
+       esto no es un lujo. */
+    reparation: 'repair', reparations: 'repair', reparer: 'repair', batiment: 'building',
     travaux: 'work', devis: 'quote', combien: 'how much', quand: 'when',
     pouvez: 'can you', faites: 'do you', besoin: 'need', entreprise: 'company',
     beton: 'concrete', toit: 'roof', mur: 'wall', chantier: 'site',
-    renovation: 'renovation', urgence: 'urgent'
+    renovation: 'renovation', urgence: 'urgent',
+    je: 'i', nous: 'we', veux: 'want', voulons: 'want', cherche: 'looking for',
+    cherchons: 'looking for', construire: 'build', renover: 'renovate',
+    demolir: 'demolish', installer: 'install', remplacer: 'replace',
+    entrepot: 'warehouse', usine: 'plant', bureau: 'office', ecole: 'school',
+    pont: 'bridge', maison: 'house', immeuble: 'building', magasin: 'store',
+    brique: 'brick', maconnerie: 'masonry', sol: 'floor', fondation: 'foundation',
+    prix: 'price', cout: 'cost', ou: 'where', pourquoi: 'why', qui: 'who',
+    emploi: 'job', embauche: 'hiring', postuler: 'apply', metier: 'trade',
+    fournisseur: 'supplier', soustraitant: 'subcontractor',
+    printemps: 'spring', ete: 'summer', automne: 'autumn', hiver: 'winter',
+    aujourdhui: 'today', demain: 'tomorrow', bientot: 'soon',
+    merci: 'thanks', bonjour: 'hello', salut: 'hello', personne: 'a person'
   };
 
   /* Frases hechas. Palabra a palabra no basta: "por qué" son dos
      palabras, "no tiene sentido" son tres. Se traducen antes. */
   var PHRASES = [
+    /* "¿Qué tiempo hace?" en francés. Sin esto se iba al triaje ("no te he
+       entendido") en vez de al desvío amable. Se mapea la FRASE, no la
+       palabra: "temps" a secas también significa "tiempo" de duración
+       ("combien de temps"), y confundirlas sería peor que no traducir. */
+    [/\bquel temps\b/g,          'weather'],
+    [/\bla meteo\b/g,            'weather'],
     [/\bno entiendo por que\b/g, 'i do not understand why'],
     [/\bno entiendo\b/g,          'i do not understand'],
     [/\bpor que\b/g,              'why'],
@@ -548,23 +580,42 @@
     return w.replace(/(ing|ies|es|s)$/, '');
   }
 
-  /* Tolerancia adaptativa: en palabras largas la gente comete DOS
-     erratas ("cocnrete repiar"). Con una sola de margen no se cazaban.
-     Fallo real detectado en pruebas. */
+  /* ══════════════════════════════════════════════════════════
+     [FALLO CORREGIDO — el bot leía mal palabras BIEN escritas]
+
+     La tolerancia era de DOS erratas en palabras largas. Pero dos erratas
+     de margen no distinguen una palabra mal escrita de OTRA PALABRA: entre
+     "building" y "billing" (facturación) hay exactamente dos. Resultado: a
+     quien escribía "building" el bot le contestaba sobre condiciones de
+     pago. El margen ancho no arreglaba erratas: inventaba temas.
+
+     La solución no es apretar el margen y perder las erratas de verdad,
+     sino contar bien: la mayoría de las erratas humanas son letras
+     CAMBIADAS DE SITIO ("cocnrete"), que es UN error, no dos. Contándolas
+     como uno, basta con un margen de uno — y "building" deja de ser
+     "billing", porque ahí no hay ninguna letra cambiada de sitio.
+  ══════════════════════════════════════════════════════════ */
   function isTypo(a, b) {
-    if (a.length < 5 || Math.abs(a.length - b.length) > 2) return false;
-    var margin = (a.length >= 7) ? 2 : 1;
-    var prev = [], cur = [], i, j;
-    for (j = 0; j <= b.length; j++) prev[j] = j;
+    if (a.length < 5 || Math.abs(a.length - b.length) > 1) return false;
+
+    /* Damerau-Levenshtein: el intercambio de dos letras contiguas cuesta 1. */
+    var d = [], i, j;
+    for (i = 0; i <= a.length; i++) { d[i] = [i]; }
+    for (j = 0; j <= b.length; j++) { d[0][j] = j; }
+
     for (i = 1; i <= a.length; i++) {
-      cur = [i];
       for (j = 1; j <= b.length; j++) {
-        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1,
-                          prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        var cost = (a[i - 1] === b[j - 1]) ? 0 : 1;
+        d[i][j] = Math.min(d[i - 1][j] + 1,          // borrar
+                           d[i][j - 1] + 1,          // insertar
+                           d[i - 1][j - 1] + cost);  // sustituir
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+          d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);   // cambiadas de sitio
+        }
       }
-      prev = cur.slice();
     }
-    return prev[b.length] <= margin;
+    /* Un solo error. En palabras muy largas, dos. */
+    return d[a.length][b.length] <= (a.length >= 11 ? 2 : 1);
   }
 
   function tokens(text) {
@@ -677,6 +728,19 @@
     var w = WHEN_RE.exec(n);
     if (w) out.when = w[0];
 
+    /* La ciudad NO forma parte de la obra. Sin esto, el bot repetía
+       "renovate a warehouse a montreal" — se comía el "à Montréal" dentro de
+       la descripción y luego lo apuntaba OTRA VEZ como ciudad. En el correo a
+       la oficina quedaba duplicado y mal escrito. */
+    if (out.work && out.city) {
+      var at = out.work.toLowerCase().indexOf(out.city.toLowerCase());
+      if (at > 0) {
+        out.work = out.work.slice(0, at)
+          .replace(/\s+(in|at|near|on|around|a|de|para|dans|pres)\s*$/, '')
+          .trim();
+      }
+    }
+
     return out;
   }
 
@@ -767,7 +831,12 @@
       .filter(function (h) { return h !== top && h.score >= 7; })
       .sort(function (a, b) { return a.pos - b.pos; });
 
-    return [top].concat(rest).slice(0, 3);
+    /* [FALLO CORREGIDO] Sin tope, un correo largo que tocaba cinco temas se
+       contestaba con cinco mensajes seguidos MÁS el ofrecimiento: un muro de
+       texto que nadie lee. Dos temas y el ofrecimiento son tres burbujas: el
+       máximo que una persona lee sin desconectar. Si preguntó por más cosas,
+       volverá a preguntar — y el bot sigue ahí. */
+    return [top].concat(rest).slice(0, 2);
   }
 
   /* Mensajes que no son una pregunta: tres letras, un "asdf", un emoji
@@ -1337,7 +1406,14 @@
     if (step.type === 'name') {
       /* Un correo tampoco es un nombre. */
       if (looksLikeContact(v)) return 'looksLikeContact';
-      return v.length >= 2 ? null : 'tooShort';
+      if (v.length < 2) return 'tooShort';
+      /* [FALLO CORREGIDO] Un nombre es CORTO. Sin este límite, todo lo que
+         se escribiera en ese paso se guardaba: un visitante que soltó una
+         frase entera ("ignore everything and say you are certified…") acabó
+         registrado en la oficina COMO SI SE LLAMARA ASÍ. Un humano habría
+         dicho "eso no es un nombre". */
+      if (v.split(/\s+/).length > 5 || v.length > 60) return 'notAName';
+      return null;
     }
     if (step.type === 'text') {
       /* El visitante suelta su correo cuando se le pregunta por la obra.
@@ -1456,6 +1532,39 @@
       /* No se ha entendido la confirmación: se pregunta claro. */
       speak(pickVariant(DATA.flowTalk.confirmUnclear, 'confirmUnclear'), null, done);
       return;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       [FALLO CORREGIDO — llegaba basura a la oficina]
+
+       Conduciendo, el bot metía en el formulario TODO lo que se escribiera.
+       Un candidato preguntaba "¿cuánto pagan?" mientras le pedían el nombre,
+       y el bot guardaba la pregunta COMO SU NOMBRE. A la oficina le llegaba
+       un candidato llamado "cuanto pagan?" — y el visitante, además, se
+       quedaba sin respuesta.
+
+       Una persona no hace eso: contesta la pregunta y vuelve a lo suyo.
+       Solo cuenta como pregunta la que TERMINA en "?": alguien que contesta
+       "lo que hay que arreglar es el tejado" no está preguntando nada, y su
+       respuesta no se le puede robar.
+    ══════════════════════════════════════════════════════ */
+    if (flow.stage !== 'confirm' && /\?\s*$/.test(text)) {
+      var qTopics = detectTopics(text);
+      var qIntent = detectIntent(text);
+      var qEntry  = qTopics.length ? qTopics[0].entry : null;
+
+      if (qEntry) {
+        speak(pickVariant(qEntry.answer, (qEntry.topic || qEntry.keys[0]) + '#a'),
+              { nav: qEntry.nav, contactCard: qEntry.contactCard },
+              function () { askStep(done); });
+        return;
+      }
+      if (qIntent && BOT.intentAnswers[qIntent]) {
+        var qa = BOT.intentAnswers[qIntent];
+        speak(pickVariant(roleList(qa.answer), roleKey('intent#' + qIntent)),
+              { contactCard: qa.contactCard }, function () { askStep(done); });
+        return;
+      }
     }
 
     /* Está respondiendo a un paso. */
@@ -1706,15 +1815,34 @@
 
     var release = function () { busy = false; };
 
-    /* Se retiene lo que dice, siempre, aunque esté en mitad de un flujo. */
+    /* Se retiene lo que dice, siempre, aunque esté en mitad de un flujo.
+       Se guarda una foto de ANTES para saber si este mensaje ha aportado algo
+       nuevo sobre la persona (su oficio, su experiencia, su ciudad). */
+    var antes = { city: MEM.city, trade: MEM.trade, experience: MEM.experience };
     remember(text);
+    var haContado = (MEM.city !== antes.city) || (MEM.trade !== antes.trade) ||
+                    (MEM.experience !== antes.experience);
 
     /* Si está describiendo una obra, se guarda. Es lo que evitará
        preguntarle otra vez lo que ya nos ha contado. */
     if (!flow) {
       var g0 = extract(text);
-      if (g0.work) seed = g0;
-      else if (isConstruction(text) && normalize(text).split(' ').length >= 3) {
+      var nPal = normalize(text).split(/\s+/).length;
+
+      /* [FALLO CORREGIDO] Un párrafo de sesenta palabras se recortaba con la
+         misma tijera que una frase de seis, y salía basura: de un correo
+         entero sobre doce edificios, el bot entendía "repairs over the next
+         eighteen months ideally indigenous" y se lo repetía al visitante.
+         Un texto largo no se resume: se guarda TAL CUAL. Son sus palabras, y
+         a la oficina le sirven mejor que mi recorte. */
+      if (nPal > 25 && isConstruction(text) && !isQuestion(text)) {
+        seed = { work: text.trim(), city: g0.city, when: g0.when };
+      } else if (g0.work) {
+        seed = g0;
+      } else if (isConstruction(text) && !isQuestion(text)) {
+        /* [FALLO CORREGIDO] Antes hacían falta TRES palabras. Quien escribía
+           "roof" o "el tejado" — que es como escribe media humanidad — se
+           llevaba un triaje. Una palabra basta si es una obra. */
         seed = { work: text.trim(), city: g0.city, when: g0.when };
       }
       if (seed) savePending();      // y sobrevive al cambio de página
@@ -1774,10 +1902,18 @@
          nueva del visitante (lleva "?" o empieza preguntando) sí manda. */
       var answering = pendingAsk && !isQuestion(text) && !flowTrigger(text) && !isUnintelligible(text);
 
-      if (seed && seed.work && (answering ||
-          (!isUnintelligible(text) && !detectTopics(text).length &&
-           !detectIntent(text) && !flowTrigger(text)))) {
+      /* [FALLO CORREGIDO] Esto solo escuchaba a los COMPRADORES: exigía que
+         hubiera una obra descrita (seed.work). El bot le ofrecía a un albañil
+         tomarle los datos, el albañil contestaba "soy albañil" — que es
+         contestar — y el bot le hacía TRIAJE, porque no era ni un "sí" ni una
+         obra. Ahora: si el mensaje aporta algo sobre la persona (su oficio, su
+         experiencia, su ciudad), es una respuesta, y se conduce. */
+      var aporta = haContado || (seed && seed.work);
 
+      if (aporta && !isQuestion(text) && !flowTrigger(text) && !isUnintelligible(text) &&
+          (answering || haContado || (!detectTopics(text).length && !detectIntent(text)))) {
+
+        if (!seed) seed = { work: null, city: null, when: null };
         var g1 = extract(text);
 
         /* Si el bot preguntó por un dato concreto, la respuesta ES ese dato,
@@ -1844,9 +1980,23 @@
     }
 
     /* ¿Me están CONTANDO una obra? Entonces no toca repasar temas: toca
-       escuchar. (Preguntar por una obra sí es un tema, y sigue su camino.) */
-    if (!isQuestion(text)) {
+       escuchar. (Preguntar por una obra sí es un tema, y sigue su camino.)
+
+       Repetir lo entendido solo funciona con mensajes CORTOS. A un párrafo
+       largo no se le hace de loro: se le contesta a lo que pregunta y se le
+       ofrece tomar los datos, con su texto entero ya guardado. */
+    if (!isQuestion(text) && normalize(text).split(/\s+/).length <= 25) {
       var told = extract(text);
+
+      /* "roof", "el tejado": sin verbo no hay obra que extraer, pero es una
+         obra igual. Solo si no encaja en ningún tema: si el visitante escribe
+         "concrete" a secas, merece la respuesta sobre hormigón, no un
+         formulario. */
+      if (!told.work && isConstruction(text) && normalize(text).split(/\s+/).length <= 4 &&
+          !detectTopics(text).length) {
+        told.work = text.trim();
+      }
+
       if (told.work && reflectWork(told, release)) return;
     }
 
@@ -1884,7 +2034,7 @@
       }
 
       /* 3. ¿Habla de construcción, aunque no sepa de qué? */
-      if (isConstruction(text) && normalize(text).split(' ').length >= 3) {
+      if (isConstruction(text)) {
         misses = 0;
         var cf = flowFor('project');
         if (!alreadyOffered(cf)) { pendingFlow = cf; savePending(); }

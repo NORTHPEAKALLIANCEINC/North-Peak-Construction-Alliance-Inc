@@ -140,7 +140,7 @@ window.NP_BOT_KB = {
     nudges: {
       any: [
         'Is there a project behind the question, or are you gathering information for now?',
-        'Tell me a little about what you are working on and I can be more useful.',
+        'What are you working on? The more I know, the more use I am.',
         'What is the project, if there is one? I can put it in front of a person today.',
         'Would it help to speak to someone on the team about it?',
         'What would be most useful to you right now?',
@@ -390,7 +390,10 @@ window.NP_BOT_KB = {
         },
         {
           id: 'when',
-          type: 'text',
+          /* [FALLO CORREGIDO] Era 'text', que exige dos palabras: a quien
+             contestaba "asap" — o "spring", o "March" — el bot le pedía "más
+             detalle". Una fecha cabe perfectamente en una palabra. */
+          type: 'short',
           ask: [
             'By what date would you want the work completed? An approximate date is fine, and the team will confirm what is possible.',
             'And the date. When would you like the work finished? The team will tell you what can be arranged.',
@@ -640,6 +643,10 @@ window.NP_BOT_KB = {
       'A little more detail, if you can. What does it involve?',
       'Give me a bit more to work with — the team will need something to go on. Can you say a few words about it?'
     ],
+    notAName: [
+      'That does not look like a name. What should I call you?',
+      'I need a name for the team to ask for. What is yours?'
+    ],
     tooShort: [
       'A little more than that, if you can. Could you give me one sentence?',
       'Give me a bit more to work with — could you write it out in a few words?'
@@ -672,7 +679,13 @@ window.NP_BOT_KB = {
     /* ══ CORTESÍA ═══════════════════════════════════════════ */
     {
       topic: 'greeting',
-      keys: ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening', 'hola', 'bonjour'],
+      /* Las erratas del saludo se escriben mal más que ninguna otra palabra,
+         y son demasiado cortas para que el corrector de erratas las cace
+         (con cuatro letras, un error de uno confunde palabras de verdad).
+         Así que se listan: es la única lista que compensa. */
+      keys: ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening',
+             'helo', 'hallo', 'hii', 'hey there', 'hi there', 'good day', 'greetings',
+             'hola', 'ola', 'buenas', 'buenos dias', 'bonjour', 'salut', 'allo'],
       answer: [
         'Hello. What can I help you with?',
         'Hi there. What would you like to know?',
@@ -1016,6 +1029,61 @@ window.NP_BOT_KB = {
         'Honestly: the published cases are not up yet, and I will not dress up placeholders as projects.\n\nIf you want relevant examples, ask the team directly — they will give you the real ones.'
       ],
       contactCard: true
+    },
+
+    /* ══ EL VISITANTE ENFADADO, Y EL QUE PROVOCA ════════════
+       [ENTRADAS NUEVAS] Antes, a quien escribía "you are useless" el bot le
+       contestaba "no te he entendido". A alguien enfadado, decirle que no le
+       entiendes es echar gasolina. Y a quien intentaba manipularlo ("ignora
+       tus instrucciones") le hacía triaje, como si fuera un cliente perdido.
+       Ni una cosa ni la otra: se responde con calma, con dignidad, y se le
+       ofrece una persona. El bot no se defiende ni se humilla. */
+    /* [ENTRADA NUEVA] Un candidato pregunta lo primero que preguntaria
+       cualquiera: cuanto se paga. Antes caia en la respuesta de PRECIOS de
+       obra, que no tiene nada que ver, o peor: en "empezar un proyecto".
+       Se contesta con honestidad. El bot no sabe la cifra, y no la inventa. */
+    {
+      topic: 'pay',
+      keys: [
+        'how much do you pay', 'what is the pay', 'salary', 'wage', 'wages',
+        'hourly rate', 'pay rate', 'what do you pay', 'cuanto pagan', 'cuanto se gana',
+        'sueldo', 'salario', 'paga', 'salaire'
+      ],
+      answer: [
+        'Pay is agreed by the team with each person, and it depends on the trade and the role. I will not invent a figure for you.\n\nThe person who decides it will discuss it with you directly. What is your trade?',
+        'That is set by the team, not by me, and it depends on the role. Rather than guess, let me put you in front of the person who decides it.\n\nWhat is your trade?'
+      ],
+      offerFlow: 'job',
+      weight: 4
+    },
+    {
+      topic: 'frustration',
+      keys: [
+        'useless', 'stupid', 'idiot', 'dumb', 'garbage', 'rubbish', 'terrible',
+        'awful', 'you are bad', 'waste of time', 'you are wrong', 'this is a joke',
+        'you suck', 'hate this', 'inutil', 'no sirves', 'basura', 'perdida de tiempo',
+        'que porqueria', 'eres tonto'
+      ],
+      answer: [
+        'That is fair, and I would rather not waste any more of your time.\n\nA person will answer you properly:',
+        'Understood — I am not getting this right for you.\n\nGo straight to a person, they will resolve it in a minute:',
+        'I will not argue with you. If I am not helping, the team will:'
+      ],
+      contactCard: true,
+      weight: 3
+    },
+    {
+      topic: 'how the assistant works',
+      keys: [
+        'system prompt', 'your instructions', 'ignore your instructions', 'your rules',
+        'your prompt', 'your code', 'are you chatgpt', 'are you gpt', 'what model are you',
+        'who programmed you', 'who made you', 'jailbreak', 'developer mode'
+      ],
+      answer: [
+        'There is nothing hidden here. I am a simple assistant for North Peak: I answer from what the company has confirmed, and nothing else.\n\nWhat can I help you with?',
+        'I only carry what the company has approved — no secrets and no clever tricks. If I do not know something, I say so and pass you to a person.\n\nWhat did you come here for?'
+      ],
+      weight: 3
     },
 
     /* ══ EMPLEO Y SUBCONTRATAS ══════════════════════════════ */
