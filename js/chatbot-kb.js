@@ -131,6 +131,112 @@ window.NP_BOT_KB = {
       'If it is urgent, please call **647 895 0939** immediately. That is faster than anything I can do.\n\nShall I take the details as well, so that nothing is lost?'
     ],
 
+    /* ── RESPUESTAS POR INTENCIÓN ─────────────────────────────
+       La red que impide caer al vacío.
+
+       Cuando el TEMA es desconocido (y siempre habrá temas desconocidos:
+       no se puede listar el mundo), el bot todavía reconoce la FORMA de
+       la pregunta. No sabe de qué le hablan, pero sabe que le están
+       preguntando por un precio, por un plazo, por un papel, o si pueden
+       hacer algo. Y a eso SÍ puede responder con honestidad y utilidad.
+
+       Esto es lo que sustituye a "no te he entendido". */
+    intentAnswers: {
+
+      capability: {
+        answer: [
+          'The honest answer is that it depends on the specifics, and I would rather not guess on your behalf.\n\nTell me what the job involves and where it is — if it is ours, you will get a straight yes.',
+          'Possibly — we cover ten areas, from general contracting to concrete and masonry.\n\nDescribe the work and I will tell you whether it is a fit, or put you with someone who can.'
+        ],
+        offerFlow: 'project'
+      },
+
+      need: {
+        answer: [
+          'Understood. **What is the work, where is it, and when do you need it?**\n\nWith those three, a person can come back to you with something real.',
+          'That is what we are here for. **Tell me the work, the city and the timing** and I will pass it straight to the team.'
+        ],
+        offerFlow: 'project'
+      },
+
+      price: {
+        answer: [
+          'I do not give numbers, and you should be wary of any assistant that does — construction pricing depends on scope, site and schedule.\n\nWhat I can do is get you a real figure from a person. **What is the project?**',
+          'No figures from me: an invented number helps nobody, least of all you.\n\nBut a person will give you a real one. **Tell me what the work is and where.**'
+        ],
+        offerFlow: 'project'
+      },
+
+      time: {
+        answer: [
+          'Timelines depend on the scope and the site — anyone who gives you a date without seeing either is guessing.\n\n**What is the work, and when would you need it done?** A person can answer that properly.'
+        ],
+        offerFlow: 'project'
+      },
+
+      place: {
+        answer: [
+          'We are based in Toronto and work across Ontario and Canada.\n\n**Where is your project?** Name the city and you will get a straight answer.'
+        ],
+        offerFlow: 'project'
+      },
+
+      person: {
+        answer: [
+          'Of course. Here is how to reach one:',
+          'That is easily arranged. Any of these reaches a person:'
+        ],
+        contactCard: true
+      },
+
+      proof: {
+        answer: [
+          'Documents — insurance, certifications, prequalification — come from a person who can sign them, not from an assistant. I will not state a certification I cannot verify.\n\nSend the office what you need and it comes back completed:'
+        ],
+        contactCard: true
+      },
+
+      /* Algo está roto. Es una petición de obra, aunque no lleve verbo. */
+      problem: {
+        answer: [
+          'That sounds like something we repair — restoration and structural work is one of our ten areas.\n\n**Where is it, and how urgent is it?**',
+          'Damage of that kind is exactly what we deal with. Before anyone can tell you what it needs, they will want to know two things: **where is it, and how bad is it?**'
+        ],
+        offerFlow: 'project'
+      },
+
+      /* Alguien perdido. No se le abandona: se le hacen preguntas fáciles. */
+      unsure: {
+        answer: [
+          'Then let us work it out together — that is a perfectly normal place to start.\n\n**What do you have, and what would you like it to become?** Even a rough answer helps.',
+          'No problem at all. You do not need to know the technical side; that is our job.\n\n**Tell me what you have and what you are hoping for**, in plain words.'
+        ],
+        offerFlow: 'project'
+      },
+
+      explain: {
+        answer: [
+          'I may not have that exact detail, but I would rather find out than invent it.\n\n**Can you tell me a bit more about what you are trying to establish?** If it is something the company must answer, I will point you to a person.'
+        ]
+      },
+
+      compare: {
+        answer: [
+          'The short version: we are Indigenous-owned **and** we do the construction ourselves. Most firms offer one or the other.\n\n**Is that the comparison you are making, or something else?**'
+        ]
+      }
+    },
+
+    /* Cuando ha entendido QUÉ, DÓNDE o CUÁNDO de una frase suelta, lo
+       repite para que el visitante vea que se le ha escuchado, y pide
+       solo lo que falta. {work} {city} {when} se sustituyen. */
+    reflect: {
+      full:      ['So: **{work}**, in **{city}**, for **{when}**. Let me put that in front of a person.'],
+      workCity:  ['Understood: **{work}**, in **{city}**.\n\n**When would you need it done?**'],
+      workWhen:  ['Understood: **{work}**, for **{when}**.\n\n**Which city is it in?**'],
+      workOnly:  ['Understood: **{work}**.\n\n**Where is it, and when do you need it?**']
+    },
+
     quick: [
       { label: 'What you do',      q: 'What services do you offer?' },
       { label: 'Indigenous',       q: 'What is your Indigenous participation?' },

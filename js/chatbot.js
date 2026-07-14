@@ -108,6 +108,12 @@
      Ahora retiene lo que le has dicho, y lo usa. */
   var MEM = { city: null, role: null };
 
+  /* ── REPETICIÓN ────────────────────────────────────────────
+     Si el visitante insiste en lo mismo, no quiere más conversación:
+     quiere que pase algo. A la segunda, el bot deja de hablar y actúa. */
+  var lastTopic = null;
+  var repeats = 0;
+
   var CITIES = ['toronto', 'ottawa', 'hamilton', 'mississauga', 'brampton', 'markham',
     'vaughan', 'london', 'kingston', 'windsor', 'sudbury', 'thunder bay', 'barrie',
     'oshawa', 'kitchener', 'waterloo', 'guelph', 'niagara', 'north bay', 'peterborough',
@@ -261,6 +267,97 @@
         }
       });
     });
+    return out;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     1-BIS. CAPA DE INTENCIÓN  —  la que evita listar el mundo entero
+
+     PROBLEMA DE FONDO: una base de conocimiento solo entiende lo que
+     está escrito en ella. Si el visitante usa otras palabras, no existe.
+     Y no se pueden escribir todas las frases del mundo: siempre habrá
+     otra piedra en el camino.
+
+     SOLUCIÓN: no reconocer el TEMA, sino la FORMA de la frase. Una
+     pregunta tiene forma de pregunta ("¿podéis…?", "¿cuánto…?", "¿dónde…?")
+     con independencia de lo que se pregunte. Así, aunque el asunto sea
+     completamente desconocido, el bot sabe QUÉ TIPO de respuesta debe dar
+     y nunca se queda mudo.
+  ════════════════════════════════════════════════════════ */
+
+  var INTENTS = [
+    { id: 'proof',      re: /\b(certif\w*|insur\w*|licen\w*|bond\w*|reference|prequal\w*|wsib|liability|compliance|accredit\w*)\b/ },
+    { id: 'price',      re: /\b(how much|price\w*|pricing|cost\w*|quote|estimate|budget\w*|ballpark|figure|rate|rates|fee|fees|charge|indicative)\b/ },
+    { id: 'time',       re: /\b(when|how long|how soon|deadline|timeline|timeframe|schedule|start date|availability|lead time)\b/ },
+    { id: 'place',      re: /\b(where|which city|what city|do you work in|do you cover|do you serve|do you travel|area)\b/ },
+    { id: 'person',     re: /\b(who|speak to|talk to|call someone|contact|human|a person|manager|owner|director)\b/ },
+    { id: 'capability', re: /\b(do you|can you|could you|would you|are you able|do you handle|do you offer|are you able to)\b/ },
+    { id: 'need',       re: /\b(i need|we need|i want|we want|i require|we require|i am looking|we are looking|looking for|i would like|we would like|need someone|needs? (a|an|the|new|another|additional|second)|requires? (a|an)|planning|plan to|proposing|shortlist\w*|considering|tendering)\b/ },
+    { id: 'problem',    re: /\b(crack\w*|leak\w*|collaps\w*|broken|damag\w*|failing|failed|crumbl\w*|rotten|rusted|sink\w*|subsid\w*|spall\w*|delaminat\w*|honeycomb\w*|heaving|pothole\w*|falling apart|deteriorat\w*|needs? (repair|fixing|attention|sorting|work)|in bad shape|unsafe|agriet\w*|roto|dañad\w*)\b/ },
+    { id: 'unsure',     re: /\b(no idea|not sure what|do not know what|do not know where|what should i|what would you|advice|guidance|help me decide|inherited|no se que|no tengo idea)\b/ },
+    { id: 'explain',    re: /\b(what is|what are|what does|explain|tell me about|how does|how do you|why)\b/ },
+    { id: 'compare',    re: /\b(better|different|compare|versus|vs|instead of|competitor|why you)\b/ }
+  ];
+
+  function detectIntent(text) {
+    var n = normalize(text);
+    for (var i = 0; i < INTENTS.length; i++) {
+      if (INTENTS[i].re.test(n)) return INTENTS[i].id;
+    }
+    return null;
+  }
+
+  /* ── EXTRACCIÓN DE DATOS ───────────────────────────────────
+     Sacar de una frase suelta QUÉ, DÓNDE y CUÁNDO, sin que esas palabras
+     estén en ninguna lista. "Necesito rehacer el tejado de una nave en
+     Sudbury para la primavera" → obra: rehacer el tejado de una nave ·
+     ciudad: Sudbury · plazo: primavera.
+
+     Esto es lo que permite que el bot REPITA lo que ha entendido y solo
+     pregunte lo que falta. No hay que listar "almacén", ni "tejado", ni
+     "pabellón": se captura lo que venga detrás del verbo. */
+
+  var VERBS = 'build|construct|erect|renovate|refurbish|repair|fix|restore|replace|install|' +
+              'demolish|expand|extend|upgrade|remodel|convert|pave|excavate|' +
+              'construir|levantar|reparar|reformar|rehacer|instalar|demoler';
+
+  var WHEN_RE = new RegExp('\\b(' + [
+    'asap', 'as soon as possible', 'immediately', 'urgent',
+    'next (week|month|year|spring|summer|fall|autumn|winter)',
+    'this (week|month|year|spring|summer|fall|autumn|winter)',
+    'in \\d+ (days|weeks|months|years)',
+    'january|february|march|april|may|june|july|august|september|october|november|december',
+    'q[1-4]', '20\\d\\d',
+    'spring|summer|autumn|fall|winter'
+  ].join('|') + ')\\b');
+
+  function extract(text) {
+    var raw = String(text);
+    var n   = normalize(raw);
+    var out = { work: null, city: null, when: null };
+
+    /* QUÉ: lo que sigue al verbo de obra, sea lo que sea. */
+    /* Los verbos, en cualquier forma: "converting", "repaired", "builds".
+       Sin esto, "we are converting an old bank" no se reconocía. */
+    var m = new RegExp('\\b(?:' + VERBS + ')(?:ing|ed|es|s)?\\s+' +
+                       '(?:a|an|the|our|my|some|two|three|new|old|el|la|un|una)?\\s*' +
+                       '([\\w\\s-]{3,50})').exec(n);
+    if (m) {
+      out.work = m[0].split(/\s+/).slice(0, 8).join(' ').trim();
+    }
+
+    /* DÓNDE */
+    for (var i = 0; i < CITIES.length; i++) {
+      if (new RegExp('\\b' + CITIES[i] + '\\b').test(n)) {
+        out.city = CITIES[i].charAt(0).toUpperCase() + CITIES[i].slice(1);
+        break;
+      }
+    }
+
+    /* CUÁNDO */
+    var w = WHEN_RE.exec(n);
+    if (w) out.when = w[0];
+
     return out;
   }
 
@@ -596,7 +693,22 @@
     return 480 + Math.min(String(text).length * 5, 850);
   }
 
+  /* ══════════════════════════════════════════════════════════
+     REGLA DE ORO — un solo sitio, sin excepciones que se olviden.
+
+     Ningún mensaje del bot puede terminar sin una salida: o pregunta, o
+     tarjeta de contacto, o botón que lleva a algún sitio. Un mensaje sin
+     salida es un visitante que cierra la pestaña sin saber qué escribir.
+     Se aplica AQUÍ, a todo lo que diga el bot, venga de donde venga.
+  ══════════════════════════════════════════════════════════ */
+  function ensureExit(text, entry) {
+    if (String(text).indexOf('?') !== -1) return text;
+    if (entry && (entry.contactCard || entry.nav)) return text;
+    return text + '\n\n' + pickVariant(BOT.nudges, 'nudge');
+  }
+
   function speak(text, entry, done) {
+    text = ensureExit(text, entry);
     showTyping();
     setTimeout(function () {
       hideTyping();
@@ -698,12 +810,23 @@
 
   function flowDef() { return flow && DATA.flows[flow.id]; }
 
-  function startFlow(id, done) {
+  function startFlow(id, done, prefillWhat, got) {
     var def = DATA.flows[id];
     if (!def) { if (done) done(); return; }
     flow = { id: id, step: 0, data: {}, stage: 'asking' };
     pendingFlow = null;
     savePending();
+
+    /* Todo lo que el visitante YA nos ha dicho se da por dicho. No se le
+       pregunta dos veces lo mismo: eso es lo que delata a una máquina. */
+    if (prefillWhat && def.steps[0] && def.steps[0].id === 'what') {
+      flow.data.what = prefillWhat;
+    }
+    if (got) {
+      if (got.city) flow.data.where = got.city;
+      if (got.when) flow.data.when  = got.when;
+    }
+    while (def.steps[flow.step] && flow.data[def.steps[flow.step].id]) flow.step++;
     saveFlow();
     speak(pickVariant(def.start, id + '#start'), null, function () {
       askStep(done);
@@ -1035,20 +1158,81 @@
 
     var topics = detectTopics(text);
 
+    /* ══════════════════════════════════════════════════════════
+       LA CASCADA — lo que hace que no haga falta listar el mundo entero.
+
+       Sin tema conocido, se intenta en orden:
+         1. EXTRAER la obra de la frase (cualquier obra, aunque nunca la
+            haya visto) → se la repito y pido solo lo que falta.
+         2. Reconocer la FORMA de la pregunta (precio, plazo, papeles,
+            algo roto, alguien perdido) → respondo a la forma.
+         3. ¿Habla de construcción? → es una petición, aunque no sepa cuál.
+         4. TRIAJE: tres puertas. Nunca "no lo sé" a secas.
+    ══════════════════════════════════════════════════════════ */
     if (!topics.length) {
+
+      /* 1. ¿Hay una obra descrita ahí dentro? */
+      var got = extract(text);
+      if (got.work) {
+        misses = 0;
+        lastEntry = null;
+        var tpl = (got.city && got.when) ? 'full'
+                : got.city ? 'workCity'
+                : got.when ? 'workWhen'
+                : 'workOnly';
+
+        var msg = pickVariant(DATA.reflect[tpl], 'reflect' + tpl)
+                    .replace('{work}', got.work)
+                    .replace('{city}', got.city || '')
+                    .replace('{when}', got.when || '');
+
+        if (tpl === 'full') {          /* lo sabe todo: no marea, actúa */
+          markOffered('project');
+          speak(msg, null, function () {
+            startFlow('project', release, got.work, got);
+          });
+          return;
+        }
+        pendingFlow = 'project';
+        savePending();
+        speak(msg, null, release);
+        return;
+      }
+
+      /* 2. ¿Reconozco la forma de la pregunta? */
+      var intent = detectIntent(text);
+      if (intent && BOT.intentAnswers[intent]) {
+        misses = 0;
+        var ia = BOT.intentAnswers[intent];
+        if (ia.offerFlow && !alreadyOffered(ia.offerFlow)) {
+          pendingFlow = ia.offerFlow;
+          savePending();
+        }
+        speak(pickVariant(ia.answer, 'intent#' + intent),
+              { contactCard: ia.contactCard }, release);
+        return;
+      }
+
+      /* 3. ¿Habla de construcción, aunque no sepa de qué? */
+      if (isConstruction(text) && normalize(text).split(' ').length >= 3) {
+        misses = 0;
+        if (!alreadyOffered('project')) { pendingFlow = 'project'; savePending(); }
+        speak(pickVariant(BOT.intentAnswers.need.answer, 'intent#need'), null, release);
+        return;
+      }
+
+      /* 4. No se ha entendido. Pero no se abandona: se hace TRIAJE. */
       lastEntry = null;
       misses++;
 
-      /* Escalada en tres tiempos. */
       var text2, extra;
 
       if (misses === 1 && isUnintelligible(text)) {
-        /* No lo he entendido: no es que no lo sepa. */
         text2 = pickVariant(BOT.clarify, 'clarify');
         extra = null;
       } else if (misses === 1) {
-        text2 = pickVariant(BOT.fallback, 'fallback');
-        extra = { contactCard: true, nav: { label: 'Contact page', href: BOT.contact.page } };
+        text2 = pickVariant(BOT.triage, 'triage');
+        extra = null;
       } else if (misses === 2) {
         text2 = pickVariant(BOT.retry, 'retry');
         extra = { contactCard: true };
@@ -1065,6 +1249,24 @@
     misses = 0;                  // ha entendido: cuenta a cero
     lastEntry = topics[0].entry;
     savePending();
+
+    var topEntry = topics[0].entry;
+    var topName  = topEntry.topic || topEntry.keys[0];
+
+    /* ¿Vuelve sobre lo mismo? Basta de charla: se actúa. Y se da por
+       dicho lo que ya nos contó. */
+    if (topName === lastTopic) repeats++; else repeats = 0;
+    lastTopic = topName;
+
+    if (repeats >= 1 && topEntry.offerFlow && DATA.flows[topEntry.offerFlow]) {
+      repeats = 0;
+      markOffered(topEntry.offerFlow);
+      var seed = extract(text);
+      speak(pickVariant(DATA.flowTalk.justStart, 'justStart'), null, function () {
+        startFlow(topEntry.offerFlow, release, seed.work || (isConstruction(text) ? text : null), seed);
+      });
+      return;
+    }
     var multi = topics.length > 1;
     var i = 0;
 
