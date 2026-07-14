@@ -292,6 +292,13 @@ window.NP_BOT_KB = {
         ]
       },
 
+      intro: {
+        answer: [
+          'Good to know, thank you.\n\nWhat brings you to North Peak today?',
+          'Understood, and welcome.\n\nWhat can I help you with?'
+        ]
+      },
+
       compare: {
         answer: [
           'The short version: we are Indigenous-owned **and** we do the construction ourselves. Most firms offer one or the other.\n\n**Is that the comparison you are making, or something else?**'
@@ -715,7 +722,9 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'the assistant',
-      keys: ['who are you', 'what are you exactly', 'are you a robot', 'are you human', 'your name', 'are you a bot', 'am i talking to a person', 'are you real', 'ai'],
+      keys: ['who are you', 'what are you exactly', 'are you a robot', 'are you human', 'your name', 'are you a bot', 'am i talking to a person', 'are you real', 'ai',
+        'robot', 'bot', 'eres un robot', 'are you a real robot', 'chatbot'
+      ],
       answer: [
         'I am **Kodiak**, an assistant — not a person. I only tell you what the company has confirmed, and I never make things up.\n\nIf you would rather talk to someone real, say the word.',
         'I am Kodiak, an automated assistant. I am software, and I will not pretend otherwise.\n\nIf you would prefer a person, simply ask.',
@@ -1031,6 +1040,66 @@ window.NP_BOT_KB = {
       contactCard: true
     },
 
+    /* [ENTRADA NUEVA] Sostenibilidad, LEED, residuos, eficiencia energética.
+       Lo preguntan los consultores y las administraciones, y el bot no tenía
+       NADA: se iba al triaje. No se puede afirmar una certificación que la
+       empresa no ha confirmado — así que se dice lo que se hace y se pasa a
+       una persona.
+       ⚠️ PENDIENTE: si la empresa tiene LEED, gestión de residuos documentada
+       o cualquier credencial verde, esta respuesta hay que reescribirla. */
+    {
+      topic: 'sustainability',
+      keys: [
+        'leed', 'sustainability', 'sustainable', 'green building', 'energy efficiency',
+        'energy efficient', 'environmental', 'carbon', 'waste management',
+        'construction waste', 'recycling', 'net zero', 'esg'
+      ],
+      answer: [
+        'I will not claim a green certification the company has not confirmed to me — that is the sort of claim that ends badly for everyone.\n\nWhat the team can tell you is what they actually do on site, and how they handle waste and materials on a given project. Would you like me to put that question to a person?',
+        'Honestly: I do not have a verified answer on certifications or targets, and I will not invent one.\n\nA person can tell you exactly what is done on site and what can be committed to in writing. Shall I pass this to them?',
+        'That is a question for a person who can put their name to the answer, not for me.\n\nThe office will tell you what is done and what can be documented. What is the project, so they can answer for that one?'
+      ],
+      contactCard: true,
+      weight: 3
+    },
+
+    /* [ENTRADA NUEVA] Un niño. Llega por curiosidad, y antes recibía un
+       triaje comercial ("¿esto es un proyecto, un empleo o información?").
+       A un niño no se le vende nada y no se le piden datos: ni nombre, ni
+       teléfono, ni correo. Se le trata bien y se le manda a un adulto si de
+       verdad hay una obra detrás. Por eso esta entrada NO tiene offerFlow. */
+    {
+      topic: 'a child',
+      keys: [
+        'i am 9', 'i am 10', 'i am 11', 'i am 12', 'i am 13', 'im 9', 'im 10', 'im 11',
+        'i am a kid', 'im a kid', 'i am a child', 'tengo 9 anos', 'tengo 10 anos',
+        'tengo 11 anos', 'soy un nino', 'soy una nina', 'my mum', 'my mom', 'my dad'
+      ],
+      answer: [
+        'Thanks for telling me. I will not ask you for any details, then.\n\nThis is the assistant of a construction company, so there is not much here for you — but if you are curious about how buildings are actually made, ask me and I will tell you.',
+        'Good to know, and I will not be asking you for a name or a phone number.\n\nIf there is a real building job at home, the best thing is for an adult to call the company. And if you are just curious about construction, ask away.'
+      ],
+      weight: 4
+    },
+
+    /* [ENTRADA NUEVA] "lol", "ok", "jaja", "ugh". Ni una pregunta ni un
+       galimatías: es alguien haciendo tiempo. Antes recibía "no te he
+       entendido", que es la peor forma de perder a alguien que aún no ha
+       dicho a qué viene. */
+    {
+      topic: 'small talk',
+      keys: [
+        'lol', 'haha', 'hahaha', 'jaja', 'jajaja', 'hmm', 'ugh', 'meh', 'cool',
+        'nice', 'alright', 'i see', 'right', 'yo', 'sup', 'wow', 'oh'
+      ],
+      answer: [
+        'What can I help you with?',
+        'Is there something specific you came for?',
+        'What would you like to know?'
+      ],
+      weight: 2
+    },
+
     /* ══ EL VISITANTE ENFADADO, Y EL QUE PROVOCA ════════════
        [ENTRADAS NUEVAS] Antes, a quien escribía "you are useless" el bot le
        contestaba "no te he entendido". A alguien enfadado, decirle que no le
@@ -1121,7 +1190,8 @@ window.NP_BOT_KB = {
       keys: [
         'safety', 'health and safety', 'accidents', 'safe', 'wsib', 'wsib coverage', 'insurance',
         'insurance coverage', 'insured', 'certified', 'certification', 'licence', 'license',
-        'liability', 'bonded', 'compliance', 'prequalification'
+        'liability', 'bonded', 'compliance', 'prequalification',
+        'iso 9001', 'iso', 'trif', 'incident rate', 'safety record', 'safety statistics', 'cor certified', 'health and safety', 'accident rate'
       ],
       /* ⚠️ PENDIENTE: seguros, WSIB y certificaciones. NO afirmar nada. */
       answer: [
@@ -1181,7 +1251,8 @@ window.NP_BOT_KB = {
       keys: [
         'are you legitimate', 'are you real', 'is this a real company', 'can i trust you',
         'are you registered', 'is this legit', 'scam', 'how do i know you are real',
-        'proof', 'verify', 'incorporated', 'corporation number', 'legal name'
+        'proof', 'verify', 'incorporated', 'corporation number', 'legal name',
+        'prove it', 'proof', 'why should i trust you', 'i do not trust', 'sounds like a scam', 'is this a scam', 'give me facts', 'no marketing', 'i have heard that before', 'verifiable', 'references', 'i cannot find any projects online', 'nothing online'
       ],
       answer: [
         'Fair question, and here is the answer in plain terms.\n\n**North Peak Construction Alliance Inc.** is federally incorporated in Canada, Corporation No. **1521162-0**, with a physical office at **37 Kodiak Crescent, Unit 11, Toronto**.\n\nYou can call the office and speak to a person, or come by. Nothing here is a mailbox.',
@@ -1377,7 +1448,8 @@ window.NP_BOT_KB = {
       keys: [
         'just looking', 'just browsing', 'having a look', 'just curious', 'no reason',
         'nothing specific', 'just checking', 'window shopping', 'solo estoy mirando',
-        'solo miraba', 'por curiosidad'
+        'solo miraba', 'por curiosidad',
+        'uni assignment', 'university assignment', 'school project', 'thesis', 'homework', 'i am researching', 'just researching', 'not a customer', 'for my studies', 'writing an article', 'journalist', 'reporter'
       ],
       answer: [
         'That is perfectly fine. Most people are, the first time.\n\nIf it helps: the thing worth knowing about us is that we are Indigenous-owned **and** we do the construction ourselves. Most clients need one or the other. Some need both.\n\nAnything you want me to explain while you are here?',

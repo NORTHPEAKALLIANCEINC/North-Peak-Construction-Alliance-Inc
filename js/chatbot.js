@@ -377,24 +377,63 @@
      "movie", pero es una obra de verdad. Si aparece cualquier palabra de
      construcción, NO se desvía jamás. Perder un cliente por un filtro
      tonto es el peor error posible. */
-  var CONSTRUCTION = new RegExp('\\b(' + [
-    'build', 'building', 'construct', 'construction', 'renovate', 'renovation',
-    'repair', 'restore', 'restoration', 'demolish', 'fit out', 'fitout', 'refurbish',
-    'contractor', 'project', 'site', 'concrete', 'masonry', 'brick', 'roof', 'wall',
-    'floor', 'foundation', 'plant', 'facility', 'tender', 'bid', 'quote', 'crew',
-    'obra', 'construir', 'reforma', 'reparar', 'proyecto'
-  ].join('|') + ')\\b');
+  /* ══════════════════════════════════════════════════════════
+     [EL FALLO MÁS CARO DE TODOS, Y EL MÁS TONTO]
+
+     Esta lista buscaba las palabras EN SINGULAR: "brick", "wall", "mason".
+     La palabra "bricks" no existía para el bot. Ni "walls". Ni "masons".
+
+     Resultado: "the bricks are falling off my garage" — el cliente
+     residencial más corriente que hay — NO era construcción. Y "6 MASONS for
+     tomorrow" tampoco. Se les hacía TRIAJE y la conversación se caía entera.
+     Eran clientes invisibles.
+
+     Ahora la terminación no importa: plural, gerundio o participio, la misma
+     palabra. Y la lista se ha llenado con lo que la gente dice de verdad
+     (garaje, escalera, sótano, gotera, grieta), no con lo que dice un pliego.
+  ══════════════════════════════════════════════════════════ */
+  var CONSTRUCTION_WORDS = [
+    /* la obra */
+    'build', 'construct', 'construction', 'renovate', 'renovation', 'reno',
+    'repair', 'restore', 'restoration', 'demolish', 'demolition', 'fit out', 'fitout',
+    'refurbish', 'remodel', 'upgrade', 'extend', 'extension', 'install', 'replace',
+    'fix', 'sort out', 'take care of', 'look at',
+    'pave', 'paving', 'excavate', 'do it up', 'fix up', 'redo',
+    /* quién y dónde */
+    'contractor', 'subcontractor', 'builder', 'crew', 'trade', 'labour', 'labor',
+    'mason', 'bricklayer', 'project', 'site', 'jobsite', 'plant', 'facility',
+    'warehouse', 'garage', 'shop', 'store', 'unit', 'office', 'school', 'hospital',
+    'clinic', 'bridge', 'road', 'parking', 'driveway', 'sidewalk',
+    /* de qué está hecho */
+    'concrete', 'cement', 'masonry', 'brick', 'block', 'stone', 'mortar', 'steel',
+    'rebar', 'roof', 'wall', 'floor', 'slab', 'foundation', 'footing', 'column',
+    'beam', 'ceiling', 'basement', 'stair', 'window', 'door', 'facade', 'tile',
+    /* qué le pasa */
+    'crack', 'leak', 'collapse', 'damage', 'damaged', 'broken', 'falling', 'crumbling',
+    'rotten', 'sinking', 'spalling', 'unsafe',
+    /* comercial */
+    'tender', 'bid', 'quote', 'estimate',
+    /* español */
+    'obra', 'construir', 'reforma', 'reparar', 'proyecto', 'ladrillo', 'pared',
+    'muro', 'techo', 'tejado', 'suelo', 'grieta', 'gotera', 'cemento', 'hormigon'
+  ];
+
+  /* La terminación no manda: "brick", "bricks", "bricking" son lo mismo. */
+  var CONSTRUCTION = new RegExp('\\b(' + CONSTRUCTION_WORDS.join('|') +
+                                ')(s|es|ed|ing)?\\b');
 
   function isConstruction(text) {
     return CONSTRUCTION.test(normalize(text));
   }
 
+  /* Mismo problema aquí: "jokes" y "movies" no existían. */
   var OFFTOPIC = new RegExp('\\b(' + [
     'weather', 'raining', 'snowing', 'hockey', 'soccer', 'football', 'basketball',
     'joke', 'music', 'movie', 'film', 'politics', 'election', 'religion',
     'girlfriend', 'boyfriend', 'married', 'birthday', 'vacation', 'horoscope',
+    'lego', 'mars', 'moon', 'banana', 'pizza', 'favourite colour', 'favorite color',
     'clima', 'futbol', 'chiste', 'pelicula'
-  ].join('|') + ')\\b');
+  ].join('|') + ')(s|es)?\\b');
 
   /* ════════════════════════════════════════════════════════
      1. LENGUA
@@ -514,6 +553,7 @@
     je: 'i', nous: 'we', veux: 'want', voulons: 'want', cherche: 'looking for',
     cherchons: 'looking for', construire: 'build', renover: 'renovate',
     demolir: 'demolish', installer: 'install', remplacer: 'replace',
+    entrepreneur: 'contractor', soustraiter: 'subcontract', soustraitant: 'subcontractor',
     entrepot: 'warehouse', usine: 'plant', bureau: 'office', ecole: 'school',
     pont: 'bridge', maison: 'house', immeuble: 'building', magasin: 'store',
     brique: 'brick', maconnerie: 'masonry', sol: 'floor', fondation: 'foundation',
@@ -661,12 +701,17 @@
     { id: 'time',       re: /\b(when|how long|how soon|deadline|timeline|timeframe|schedule|start date|availability|lead time)\b/ },
     { id: 'place',      re: /\b(where|which city|what city|do you work in|do you cover|do you serve|do you travel|area)\b/ },
     { id: 'person',     re: /\b(who|speak to|talk to|call someone|contact|human|a person|manager|owner|director)\b/ },
-    { id: 'capability', re: /\b(do you|can you|could you|would you|are you able|do you handle|do you offer|are you able to)\b/ },
+    { id: 'capability', re: /\b(do you|can you|could you|would you|are you able|do you handle|do you offer|is that something|is this something|do you fix|can you fix|do you take on)\b/ },
     { id: 'need',       re: /\b(i need|we need|i want|we want|i require|we require|i am looking|we are looking|looking for|i would like|we would like|need someone|needs? (a|an|the|new|another|additional|second)|requires? (a|an)|planning|plan to|proposing|shortlist\w*|considering|tendering)\b/ },
     { id: 'problem',    re: /\b(crack\w*|leak\w*|collaps\w*|broken|damag\w*|failing|failed|crumbl\w*|rotten|rusted|sink\w*|subsid\w*|spall\w*|delaminat\w*|honeycomb\w*|heaving|pothole\w*|falling apart|deteriorat\w*|needs? (repair|fixing|attention|sorting|work)|in bad shape|unsafe|agriet\w*|roto|dañad\w*)\b/ },
-    { id: 'unsure',     re: /\b(no idea|not sure what|do not know what|do not know where|what should i|what would you|advice|guidance|help me decide|inherited|no se que|no tengo idea)\b/ },
+    { id: 'unsure',     re: /\b(no idea|not sure|do not know|dont know|i do not know the words|what should i|what would you|advice|guidance|help me decide|inherited|no se|no tengo idea)\b/ },
     { id: 'explain',    re: /\b(what is|what are|what does|explain|tell me about|how does|how do you|why)\b/ },
-    { id: 'compare',    re: /\b(better|different|compare|versus|vs|instead of|competitor|why you)\b/ }
+    { id: 'compare',    re: /\b(better|different|compare|versus|vs|instead of|competitor|why you)\b/ },
+    /* [NUEVO] Una PRESENTACIÓN no es una pregunta, pero tampoco es ruido.
+       "I am a consulting structural engineer." recibía un triaje: el bot le
+       decía "no te he entendido" a alguien que se estaba presentando. Se
+       acusa recibo y se le devuelve la palabra. */
+    { id: 'intro',      re: /^(i am a|i am an|im a|im an|i work as|i represent|my name is|this is)\b/ }
   ];
 
   function detectIntent(text) {
@@ -854,13 +899,24 @@
       /^(yes|yeah|yep|sure|okay|ok|please|go on|tell me more|more|continue|and)\b/.test(n);
   }
 
+  /* [MEJORADO] Antes solo se recordaba la ÚLTIMA frase usada. Con tres
+     variantes y cuatro preguntas seguidas sobre el mismo tema, el bot repetía
+     igual — y sonaba a disco rayado justo cuando alguien insistía, que es
+     cuando peor sienta. Ahora recuerda las DOS últimas: con tres variantes ya
+     no puede repetirse en tres turnos. */
   function pickVariant(list, memoKey) {
     if (!Array.isArray(list)) return list;
     if (list.length === 1) return list[0];
-    var last = lastVariant[memoKey], i, guard = 0;
-    do { i = Math.floor(Math.random() * list.length); guard++; }
-    while (i === last && guard < 10);
-    lastVariant[memoKey] = i;
+
+    var usadas = lastVariant[memoKey] || [];
+    var libres = [];
+    for (var j = 0; j < list.length; j++) {
+      if (usadas.indexOf(j) === -1) libres.push(j);
+    }
+    if (!libres.length) libres = [usadas[0]];      // lista muy corta: se recicla
+
+    var i = libres[Math.floor(Math.random() * libres.length)];
+    lastVariant[memoKey] = [i].concat(usadas).slice(0, Math.min(2, list.length - 1));
     return list[i];
   }
 
@@ -1941,8 +1997,17 @@
         return;
       }
 
-      pendingFlow = null;   // ha cambiado de tema: se sigue como siempre
-      pendingAsk  = null;
+      /* [FALLO CORREGIDO — perdía clientes ya ganados] Aquí se BORRABA el
+         ofrecimiento en cuanto el visitante decía cualquier otra cosa. El bot
+         ofrecía tomar los datos, la persona preguntaba una cosa más ("¿y eso
+         lo arregláis?"), y el ofrecimiento se evaporaba: su "sí" de después
+         ya no encontraba nada a lo que decir que sí, y acababa en "esto
+         necesita una persona". Un cliente con la fachada cayéndose, perdido
+         por hacer una pregunta.
+
+         Un ofrecimiento sigue en pie hasta que se acepta o se rechaza. Solo
+         una negativa explícita lo retira. */
+      pendingAsk = null;
       savePending();
     }
 
