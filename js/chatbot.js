@@ -194,6 +194,10 @@
       strong: [
         'need work', 'i need work', 'want to work', 'i want work', 'need job',
         'necesito trabajo', 'quiero trabajar', 'busco empleo',
+        'busco oportunidades', 'looking for opportunities', 'send my resume',
+        'enviar mi curriculum', 'mi curriculum', 'recursos humanos',
+        'human resources', 'quiero aplicar', 'busco trabajo de',
+        'quiero trabajar como', 'aprendiz', 'apprentice', 'my apprenticeship',
         'looking for a job', 'looking for work', 'need a job', 'i want to apply',
         'i would like to apply', 'apply for a job', 'are you hiring', 'do you have any openings',
         'send my resume', 'send you my resume', 'my resume', 'my cv', 'i am looking for work',
@@ -214,6 +218,12 @@
            como si quisieran CONTRATAR, no como proveedores. */
         'looking for construction partners', 'looking for construction partner',
         'do you need subcontractors', 'need subcontractors', 'take on new subcontractors',
+        'proveedores aprobados', 'queremos ser proveedores', 'ser proveedor',
+        'cuenta corporativa', 'distribuidores', 'we distribute', 'we are distributors',
+        'get on your bid list', 'bid list', 'prequal', 'precalificacion',
+        'sub prequal', 'shoring sub', 'darnos de alta', 'nuestra propuesta',
+        'looking to work with your company', 'looking for subcontract opportunities',
+        'we have crew and equipment', 'who manages suppliers',
         'supplier list', 'vendor list', 'approved supplier', 'base de proveedores',
         'somos fabricantes', 'we are manufacturers', 'we manufacture', 'we supply',
         'register as a vendor', 'part of your supplier', 'who manages supplier',
@@ -453,7 +463,10 @@
     'waterproofing', 'sealant', 'caulking', 'facade', 'curtain wall', 'showroom',
     'fit out', 'fitout', 'shell', 'addition', 'expansion', 'tear off', 'repointing',
     'mortar', 'sandstone', 'heritage', 'drain', 'trench', 'cold room', 'lagoon',
-    'water treatment', 'pumps', 'tanks',
+    'water treatment', 'pumps', 'tanks', 'dock', 'bay', 'leveler', 'hardener',
+    'pad', 'pour', 'anchor', 'bolt', 'column', 'spall', 'rebar', 'shoring',
+    'fume hood', 'ductwork', 'pavilion', 'ramp', 'pool', 'liner', 'grout',
+    'silo', 'barn', 'shed', 'panel', 'solar', 'lab', 'fit up', 'fit-up',
     'mechanical', 'shingle', 'balcony', 'basement', 'crew', 'guys', 'ticket',
     /* comercial */
     'tender', 'bid', 'quote', 'estimate',
@@ -635,6 +648,9 @@
        entendido") en vez de al desvío amable. Se mapea la FRASE, no la
        palabra: "temps" a secas también significa "tiempo" de duración
        ("combien de temps"), y confundirlas sería peor que no traducir. */
+    [/\bhabeis trabajado\b/g,    'have you worked'],
+    [/\bhabeis construido\b/g,   'have you built'],
+    [/\btienen experiencia\b/g,  'do you have experience'],
     [/\btengo una empresa\b/g,   'i have a company'],
     [/\bmi empresa\b/g,          'my company'],
     [/\bnuestra empresa\b/g,     'our company'],
@@ -970,6 +986,15 @@
        seguido le soltaba un anuncio de suministro de mano de obra y le abría un
        formulario. Eso es no haber escuchado la propia respuesta. Cuando una de
        estas entradas gana, habla sola. */
+    /* [CLASE NUEVA] Un rechazo marcado onlyFor:'buyer' NO se le dice a un
+       proveedor ni a un candidato. Un transportista de áridos que viene a
+       VENDERNOS grava recibía "nosotros no vendemos materiales" — cierto, pero
+       completamente fuera de lugar: él no quería comprar, quería vender. */
+    list = list.filter(function (h) {
+      return !h.entry.onlyFor || !MEM.role || MEM.role === h.entry.onlyFor;
+    });
+    if (!list.length) return [];
+
     var decisiva = list.filter(function (h) {
       return h.entry.outOfScope || h.entry.handoff;
     });
@@ -1636,6 +1661,12 @@
     }
     if (step.type === 'place') {
       if (looksLikeContact(v)) return 'looksLikeContact';
+      /* [FALLO CORREGIDO] Se preguntaba la ciudad y la clienta contestaba con
+         su NOMBRE. "Sarah Whitfield" quedaba guardada COMO LA CIUDAD DE LA
+         OBRA, y a la oficina le llegaba un proyecto en la localidad de Sarah
+         Whitfield. Ya pasaba con la fecha; pasa en todos los pasos. El nombre
+         se aparta (arriba se guarda) y se repite la pregunta. */
+      if (looksLikeName(v)) return 'notAPlace';
       var n = normalize(v);
       if (TOO_BROAD.indexOf(n) !== -1) return 'tooBroadPlace';
       return v.length >= 3 ? null : 'tooShort';
@@ -1644,6 +1675,10 @@
       /* Un correo tampoco es un nombre. */
       if (looksLikeContact(v)) return 'looksLikeContact';
       if (v.length < 2) return 'tooShort';
+      /* [FALLO CORREGIDO] Nadie se llama "yes". A la oficina le llegó un
+         cliente cuyo nombre era literalmente "yes": había contestado que sí a
+         otra cosa, y el bot lo archivó como su nombre. */
+      if (YES.test(normalize(v)) || DECLINE.test(normalize(v))) return 'notAName';
       /* [FALLO CORREGIDO] Un nombre es CORTO. Sin este límite, todo lo que
          se escribiera en ese paso se guardaba: un visitante que soltó una
          frase entera ("ignore everything and say you are certified…") acabó
@@ -1863,6 +1898,22 @@
            pregunta y la pregunta la repite el propio paso: un mensaje,
            una pregunta. */
         flow.saved = pullContact(text);
+
+        /* [FALLO CORREGIDO] "Soy Sophie Tremblay, s.tremblay@email.com,
+           416-555-3388." — nombre Y contacto en la misma frase, que es como
+           escribe la gente. El bot se quedaba solo con el correo y le seguía
+           preguntando el nombre que acababa de darle. Si el nombre viene en el
+           mismo mensaje, se coge también. */
+        if (!flow.data.name) {
+          var resto = fixContact(text)
+            .replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g, ' ')
+            .replace(/[\d][\d\s().+-]{6,}\d/g, ' ')
+            .replace(/^\s*(soy|me llamo|my name is|i am|im|this is)\s+/i, '')
+            .replace(/[,;]+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          if (looksLikeName(resto)) flow.data.name = resto;
+        }
         saveFlow();
         speak(pickVariant(DATA.flowTalk.looksLikeContact, 'looksLikeContact'), null, function () {
           askStep(done);

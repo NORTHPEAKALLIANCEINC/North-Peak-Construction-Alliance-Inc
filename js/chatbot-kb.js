@@ -693,6 +693,10 @@ window.NP_BOT_KB = {
       'Without a way to reach you there is nothing I can send, and I am not going to keep asking.\n\nWrite to the office yourself and it lands in the same inbox:',
       'I will stop asking. If you would rather not leave a contact, here is the office directly — it goes to the same people:'
     ],
+    notAPlace: [
+      'I have noted your name, thank you. But I still need the place: which city or town is the work in?',
+      'Got the name. Now the place — which city is the project in?'
+    ],
     notADate: [
       'I meant the date. Roughly when would you want the work finished?',
       'Sorry — I need a date, even an approximate one. When would you want it done?'
@@ -1253,14 +1257,23 @@ window.NP_BOT_KB = {
        rápido y con una salida, es más honesto y más útil. */
     {
       topic: 'we do not sell materials',
+      onlyFor: 'buyer',   /* [CLASE NUEVA] Solo se le dice esto a quien COMPRA o ALQUILA. A un proveedor que viene a VENDERNOS áridos, decirle 'no vendemos materiales' es absurdo — y lo pierde. */
       outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
+      /* [MINA RETIRADA] Estas claves eran palabras SUELTAS: 'gravel',
+         'aggregate', 'sand'. Un transportista escribió "somos Northern
+         AGGREGATES" — el NOMBRE DE SU EMPRESA — y el bot le contestó "nosotros
+         no vendemos materiales" antes de que dijera nada. Venía a vendernos a
+         nosotros.
+         Ahora todas las claves exigen intención de COMPRAR. Nombrar un material
+         no es querer comprarlo. */
       keys: [
-        'need stone', 'buy stone', 'clear stone', 'gravel', 'aggregate', 'sand',
-        'do you sell', 'sell materials', 'buy materials', 'contractor discount',
-        'price per sheet', 'sheets of drywall', 'planchas', '2x4', 'lumber yard',
+        'need stone', 'buy stone', 'clear stone', 'need gravel', 'buy gravel',
+        'need sand', 'buy sand', 'screened sand', 'do you sell', 'sell materials',
+        'buy materials', 'contractor discount', 'price per sheet',
+        'sheets of drywall', 'planchas de drywall', 'lumber yard',
         'pick it up from your yard', 'do you deliver materials', 'material prices',
-        'comprar materiales', 'descuento de contratista',
-        '2x4s', 'yds', 'yards of', 'tonnes of', 'planchas de drywall'
+        'comprar materiales', 'descuento de contratista', 'how much for 50',
+        'cuanto cuesta 50', 'y como 100'
       ],
       answer: [
         'We do not sell materials. We are a construction company, not a supply yard — no stone, no sand, no drywall, no lumber, and no counter to buy them at.\n\nA building supply yard is what you want. Is there any actual construction work I can help you with?'
@@ -1269,6 +1282,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'we do not rent equipment',
+      onlyFor: 'buyer',   /* [CLASE NUEVA] Solo se le dice esto a quien COMPRA o ALQUILA. A un proveedor que viene a VENDERNOS áridos, decirle 'no vendemos materiales' es absurdo — y lo pierde. */
       outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
       keys: [
         'rent a machine', 'rent equipment', 'machine rental', 'equipment rental',
@@ -1359,6 +1373,7 @@ window.NP_BOT_KB = {
        que marear a alguien durante ocho mensajes. */
     {
       topic: 'moving and storage',
+      onlyFor: 'buyer',   /* [CLASE NUEVA] Solo se le dice esto a quien COMPRA o ALQUILA. A un proveedor que viene a VENDERNOS áridos, decirle 'no vendemos materiales' es absurdo — y lo pierde. */
       outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
       keys: [
         'move furniture', 'moving company', 'movers', 'storage', 'move my couch',
@@ -1374,12 +1389,18 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'real estate',
+      onlyFor: 'buyer',   /* [CLASE NUEVA] Solo se le dice esto a quien COMPRA o ALQUILA. A un proveedor que viene a VENDERNOS áridos, decirle 'no vendemos materiales' es absurdo — y lo pierde. */
       outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
       keys: [
         'properties available', 'listings', 'do you have listings', 'send listings',
         'do you sell houses', 'homes for sale', 'homes coming soon', 'realtor',
         'real estate agent', 'buy a property', 'looking to buy in', 'inmobiliaria',
-        'units left', 'any units', 'two bedroom', '2 bedroom', 'condo', 'condos',
+        'units left', 'any units', 'two bedroom', '2 bedroom',
+        'buy a condo', 'rent a condo', 'condo for sale', 'condo unit available',
+        /* [MINA RETIRADA] Aquí estaban 'condo' y 'condos' a secas. La
+           administradora de "Harbor View Condos" — que venía con seis columnas
+           de hormigón descascaradas — recibía "se ha equivocado de empresa".
+           El nombre del edificio no es una intención de compra. */
         'virtual tour', 'pets allowed', 'unidades de 2 habitaciones',
         'mascotas en el edificio', 'link del tour'
         /* [MINA RETIRADA] Aquí había la clave 'piso'. El motor TRADUCE las
