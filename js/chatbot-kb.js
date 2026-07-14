@@ -50,16 +50,24 @@ window.NP_BOT_KB = {
 
     /* ── Conectores para cuando hay VARIOS temas en un mismo mensaje.
           {topic} se sustituye por la etiqueta del tema.               ── */
-    connectors: [
-      'On **{topic}** —',
-      'About **{topic}**:',
-      'As for **{topic}** —',
-      'Taking **{topic}** first:',
-      'Then there is **{topic}** —',
-      'On the **{topic}** side:',
-      'Regarding **{topic}** —',
-      'And **{topic}**:'
-    ],
+    /* [REESCRITOS] Había "Taking **{topic}** first:", que el navegador
+       traducía como "Primero, toma en mente un proyecto:". Sin sentido en
+       español. Se quedan solo las formas que sobreviven a una traducción. */
+    connectors: {
+      /* El PRIMER bloque abre; los siguientes continúan. Mezclarlos hacía que
+         una respuesta empezara por "Y la cobertura:" — empezar por una
+         conjunción, sin nada delante a lo que unirse. */
+      first: [
+        'On **{topic}**:',
+        'About **{topic}**:',
+        'Regarding **{topic}**:'
+      ],
+      next: [
+        'And **{topic}**:',
+        'As for **{topic}**:',
+        'On **{topic}**:'
+      ]
+    },
 
     /* ── TRIAJE ───────────────────────────────────────────────
        Cuando no ha entendido, decir "no lo sé" y soltar un teléfono deja
@@ -135,16 +143,13 @@ window.NP_BOT_KB = {
         'Tell me a little about what you are working on and I can be more useful.',
         'What is the project, if there is one? I can put it in front of a person today.',
         'Would it help to speak to someone on the team about it?',
-        'Where are you in the process — early thinking, or a live tender?',
-        'Is this for something you are planning now, or further out?',
         'What would be most useful to you right now?',
         'Anything specific I can dig into for you?'
       ],
       buyer: [
         'What is the project? I can put it in front of a person today.',
-        'Where are you in the process — early thinking, or a live tender?',
         'Would it help to speak to someone on the team about it?',
-        'Tell me what the work involves and I can be more useful.',
+        'What does the work involve? The more I know, the more use I am.',
         'Is there a date you are working towards?'
       ],
       /* Nada de licitaciones aquí. A quien busca trabajo se le pregunta
@@ -357,10 +362,12 @@ window.NP_BOT_KB = {
       ],
       /* {n} lo sustituye el motor por las preguntas que QUEDAN de verdad:
          si el visitante ya ha contado la obra, no son cuatro, son tres. */
+      /* [REESCRITO] Decía "cuatro cosas rápidas y se lo paso": frío y sin
+         explicar para qué. Se dice qué se va a hacer y por qué. */
       start: [
-        'Good. {n} questions, in plain words. No technical language needed.',
-        'Right. {n} quick things and I will pass it on.',
-        'Let us do it. {n} questions, and you may stop at any point.'
+        'Perfect. I will ask you {n} short questions, and your details go straight to the team.',
+        'Very good. {n} questions and a person from the team will get back to you.',
+        'Excellent. {n} questions, in plain words, and I pass it all to the team.'
       ],
       steps: [
         {
@@ -393,10 +400,14 @@ window.NP_BOT_KB = {
         {
           id: 'name',
           type: 'name',
+          /* [FALLO CORREGIDO] Aquí había un "Who should the team ask for?".
+              El navegador lo traducía como "¿a quién debería pedir ayuda el
+              equipo?" — un disparate. La regla del proyecto es inglés llano,
+              sin modismos: se pregunta el nombre, y ya. */
           ask: [
             'Almost there. What is your name?',
             'And your name?',
-            'Who should the team ask for?'
+            'What name should I put on this?'
           ]
         },
         {
@@ -441,8 +452,8 @@ window.NP_BOT_KB = {
         'If you like, I can take your trade and your contact and put them in front of the right person.'
       ],
       start: [
-        'Good. {n} quick questions.',
-        'Right — {n} things and I will pass it on.'
+        'Perfect. I will ask you {n} short questions, and your details go to the team.',
+        'Very good. {n} questions, and a person will get back to you.'
       ],
       steps: [
         {
@@ -516,8 +527,8 @@ window.NP_BOT_KB = {
         'Shall I take your company, your trade and your coverage, and pass them to the team?'
       ],
       start: [
-        'Good. {n} questions about your company.',
-        'Right — {n} short questions and I will pass it on.'
+        'Perfect. {n} short questions about your company, and it goes to the team.',
+        'Very good. I will ask you {n} things and pass them to the team.'
       ],
       steps: [
         {
@@ -547,7 +558,7 @@ window.NP_BOT_KB = {
         {
           id: 'name',
           type: 'name',
-          ask: ['And your name?', 'Who should the team ask for?']
+          ask: ['And your name?', 'What name should I put on this?']
         },
         {
           id: 'contact',

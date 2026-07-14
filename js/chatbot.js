@@ -446,6 +446,11 @@
   ══════════════════════════════════════════════════════════ */
   var LEX = {
     /* ── español ── */
+    /* Los artículos. Sin esto, el bot le repetía al visitante "build **un**
+       warehouse": había traducido el verbo y el sustantivo, y dejaba el
+       artículo español en medio de la frase inglesa. */
+    un: 'a', una: 'a', unos: 'some', unas: 'some',
+    el: 'the', la: 'the', los: 'the', las: 'the',
     reparacion: 'repair', reparaciones: 'repair', reparar: 'repair', reparo: 'repair',
     arreglar: 'repair', arreglo: 'repair', reparando: 'repair',
     construir: 'build', construccion: 'construction', construyendo: 'building',
@@ -1626,6 +1631,69 @@
     return found;
   }
 
+  /* ══════════════════════════════════════════════════════════
+     DESCRIBIR UNA OBRA NO ES PREGUNTAR POR UN TEMA
+
+     [FALLO CORREGIDO — el que se veía en pantalla]
+     "Quiero construir un almacén" hacía que el motor puntuara TEMAS: le
+     encajaban tres a la vez ("un proyecto en mente", "construcción
+     comercial", "cobertura") y el bot soltaba tres mensajes con tres
+     preguntas — dos de ellas la misma ("¿en qué ciudad?") y otra
+     preguntando QUÉ tipo de edificio era, cuando se lo acababan de decir.
+     Un empleado no hace eso: escucha, repite lo que ha entendido, y pide
+     lo que le falta. UNA cosa.
+
+     La causa no era ninguna frase: era el ORDEN. El motor buscaba temas
+     antes de darse cuenta de que le estaban contando una obra. Ahora, si
+     alguien DESCRIBE una obra (no si PREGUNTA por ella), esto va primero.
+  ══════════════════════════════════════════════════════════ */
+
+  /* Preguntar no es contar. "¿Construís almacenes?" es una pregunta sobre
+     la empresa; "quiero construir un almacén" es un encargo. La diferencia
+     está en la forma, no en las palabras — y la forma sí se puede leer. */
+  function isQuestion(text) {
+    if (String(text).indexOf('?') !== -1) return true;
+    return /^(do|does|did|can|could|are|is|will|would|should|have|has|what|where|when|how|why|who|which|tell me|explain)\b/
+             .test(normalize(text));
+  }
+
+  function reflectWork(got, release) {
+    if (!got || !got.work) return false;
+
+    misses = 0;
+    lastEntry = null;
+
+    var tpl = (got.city && got.when) ? 'full'
+            : got.city ? 'workCity'
+            : got.when ? 'workWhen'
+            : 'workOnly';
+
+    var msg = pickVariant(BOT.reflect[tpl], 'reflect' + tpl)
+                .replace('{work}', got.work)
+                .replace('{city}', got.city || '')
+                .replace('{when}', got.when || '');
+
+    pendingAsk = (tpl === 'workCity') ? 'when'
+               : (tpl === 'workWhen' || tpl === 'workOnly') ? 'where'
+               : null;
+
+    var pf = flowFor('project');
+
+    /* Lo sabe todo Y quien habla es quien encarga: no marea más, conduce.
+       Si NO es un comprador, describir una obra no es encargarla: se le
+       ofrece su flujo y decide él. */
+    if (tpl === 'full' && pf === 'project') {
+      markOffered('project');
+      speak(msg, null, function () { startFlow('project', release, got.work, got); });
+      return true;
+    }
+
+    pendingFlow = pf;
+    savePending();
+    speak(msg, null, release);
+    return true;
+  }
+
   function send(raw) {
     var text = String(raw || '').trim();
     if (!text || busy) return;
@@ -1698,8 +1766,17 @@
          caso de equivocarse aquí es una pregunta de más. El peor caso de
          no hacerlo es un cliente que se va.
       ══════════════════════════════════════════════════════ */
-      if (seed && seed.work && !isUnintelligible(text) &&
-          !detectTopics(text).length && !detectIntent(text) && !flowTrigger(text)) {
+      /* Si el bot preguntó por un dato concreto ("¿en qué ciudad?"), la
+         respuesta manda sobre CUALQUIER tema que pudiera encajar. Sin esto,
+         el visitante contestaba "Toronto" y el bot le soltaba un folleto
+         sobre su cobertura geográfica y volvía a preguntarle la ciudad:
+         había hecho una pregunta y no aceptaba la respuesta. Una pregunta
+         nueva del visitante (lleva "?" o empieza preguntando) sí manda. */
+      var answering = pendingAsk && !isQuestion(text) && !flowTrigger(text) && !isUnintelligible(text);
+
+      if (seed && seed.work && (answering ||
+          (!isUnintelligible(text) && !detectTopics(text).length &&
+           !detectIntent(text) && !flowTrigger(text)))) {
 
         var g1 = extract(text);
 
@@ -1766,6 +1843,13 @@
       return;
     }
 
+    /* ¿Me están CONTANDO una obra? Entonces no toca repasar temas: toca
+       escuchar. (Preguntar por una obra sí es un tema, y sigue su camino.) */
+    if (!isQuestion(text)) {
+      var told = extract(text);
+      if (told.work && reflectWork(told, release)) return;
+    }
+
     var topics = detectTopics(text);
 
     /* ══════════════════════════════════════════════════════════
@@ -1782,40 +1866,7 @@
     if (!topics.length) {
 
       /* 1. ¿Hay una obra descrita ahí dentro? */
-      var got = extract(text);
-      if (got.work) {
-        misses = 0;
-        lastEntry = null;
-        var tpl = (got.city && got.when) ? 'full'
-                : got.city ? 'workCity'
-                : got.when ? 'workWhen'
-                : 'workOnly';
-
-        var msg = pickVariant(BOT.reflect[tpl], 'reflect' + tpl)
-                    .replace('{work}', got.work)
-                    .replace('{city}', got.city || '')
-                    .replace('{when}', got.when || '');
-
-        pendingAsk = (tpl === 'workCity') ? 'when'
-                   : (tpl === 'workWhen' || tpl === 'workOnly') ? 'where'
-                   : null;
-        var pf = flowFor('project');
-
-        /* Lo sabe todo Y es una obra de quien la encarga: no marea, actúa.
-           Si quien escribe NO es un comprador, describir una obra no es
-           encargarla: se ofrece su flujo y se le deja decidir. */
-        if (tpl === 'full' && pf === 'project') {
-          markOffered('project');
-          speak(msg, null, function () {
-            startFlow('project', release, got.work, got);
-          });
-          return;
-        }
-        pendingFlow = pf;
-        savePending();
-        speak(msg, null, release);
-        return;
-      }
+      if (reflectWork(extract(text), release)) return;
 
       /* 2. ¿Reconozco la forma de la pregunta? */
       var intent = detectIntent(text);
@@ -1911,7 +1962,8 @@
          que se le entendió TODO y sabe a qué contesta cada bloque. Los
          conectores rotan, así que nunca suena a plantilla. */
       if (multi) {
-        var lead = pickVariant(BOT.connectors, 'connector' + i);
+        var lead = pickVariant(i === 0 ? BOT.connectors.first : BOT.connectors.next,
+                               'connector' + (i === 0 ? 'A' : 'B'));
         out = lead.replace('{topic}', key) + '\n\n' + body;
       }
 
