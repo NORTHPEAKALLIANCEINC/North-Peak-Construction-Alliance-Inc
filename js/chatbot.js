@@ -122,6 +122,10 @@
      quiere que pase algo. A la segunda, el bot deja de hablar y actúa. */
   var lastTopic = null;
   var repeats = 0;
+  /* Si ya se le ha dicho que eso no es lo nuestro, se recuerda. */
+  var offScope = false;
+  /* Y si lo que ha preguntado solo lo puede contestar una persona, también. */
+  var handoff = false;
 
   /* ── LA SEMILLA ────────────────────────────────────────────
      [FALLO CORREGIDO] El visitante decía "quiero construir un almacén",
@@ -754,7 +758,7 @@
     { id: 'capability', re: /\b(do you|can you|could you|would you|are you able|do you handle|do you offer|is that something|is this something|do you fix|can you fix|do you take on)\b/ },
     { id: 'need',       re: /\b(i need|we need|i want|we want|i require|we require|i am looking|we are looking|looking for|i would like|we would like|need someone|needs? (a|an|the|new|another|additional|second)|requires? (a|an)|planning|plan to|proposing|shortlist\w*|considering|tendering)\b/ },
     { id: 'problem',    re: /\b(crack\w*|leak\w*|collaps\w*|broken|damag\w*|failing|failed|crumbl\w*|rotten|rusted|sink\w*|subsid\w*|spall\w*|delaminat\w*|honeycomb\w*|heaving|pothole\w*|falling apart|deteriorat\w*|needs? (repair|fixing|attention|sorting|work)|in bad shape|unsafe|agriet\w*|roto|dañad\w*)\b/ },
-    { id: 'unsure',     re: /\b(no idea|not sure|do not know|dont know|i do not know the words|what should i|what would you|advice|guidance|help me decide|inherited|no se|no tengo idea)\b/ },
+    { id: 'unsure',     re: /\b(no idea|not sure|do not know|dont know|need help|need advice|help me|what should i|what would you|advice|guidance|help me decide|inherited|can we continue|i was talking before|what (info|information) (do )?you need|no se|no tengo idea|necesito ayuda)\b/ },
     { id: 'explain',    re: /\b(what is|what are|what does|explain|tell me about|how does|how do you|why)\b/ },
     { id: 'compare',    re: /\b(better|different|compare|versus|vs|instead of|competitor|why you)\b/ },
     /* [NUEVO — el hueco más caro de esta ronda] "Have you built supermarkets
@@ -946,6 +950,20 @@
       return CORTESIA.indexOf(h.entry.topic) === -1;
     });
     if (reales.length) list = reales;
+
+    /* [FALLO CORREGIDO] Una respuesta que dice "esto no lo hacemos" o "esto lo
+       contesta una persona" es DEFINITIVA: no admite compañía. El bot le decía
+       a una consultora de amianto que no podía confirmar su licencia… y acto
+       seguido le soltaba un anuncio de suministro de mano de obra y le abría un
+       formulario. Eso es no haber escuchado la propia respuesta. Cuando una de
+       estas entradas gana, habla sola. */
+    var decisiva = list.filter(function (h) {
+      return h.entry.outOfScope || h.entry.handoff;
+    });
+    if (decisiva.length) {
+      decisiva.sort(function (a, b) { return b.score - a.score; });
+      return [decisiva[0]];
+    }
 
     /* El tema con más señal abre; los demás siguen por orden de
        aparición en la frase, y solo si tienen señal sólida. */
@@ -2313,6 +2331,26 @@
         return;
       }
 
+      /* [FALLO CORREGIDO] Ya se le había dicho "eso no lo hacemos", y él
+         seguía dando detalles de lo mismo ("3/4 clear", "40 yds"). El bot lo
+         trataba como a un recién llegado y le hacía un TRIAJE comercial. Se
+         le había olvidado su propia respuesta de hace dos mensajes. */
+      if (offScope) {
+        misses = 0;
+        speak(pickVariant(BOT.stillOffScope, 'offScope'), { contactCard: true }, release);
+        return;
+      }
+
+      /* Lo mismo con lo que solo puede contestar una persona (una licencia, un
+         convenio, una Nación). El visitante insiste — es su derecho — y el bot
+         no va a fingir que ahora sí lo sabe, ni le va a preguntar si busca
+         trabajo. Se mantiene donde estaba: en la puerta de una persona. */
+      if (handoff) {
+        misses = 0;
+        speak(pickVariant(BOT.escalate, 'escalate'), { contactCard: true }, release);
+        return;
+      }
+
       /* 4. No se ha entendido. Pero no se abandona: se hace TRIAJE. */
       lastEntry = null;
       misses++;
@@ -2340,6 +2378,8 @@
 
     misses = 0;                  // ha entendido: cuenta a cero
     lastEntry = topics[0].entry;
+    offScope = !!topics[0].entry.outOfScope;   // ¿le acabo de decir que no?
+    handoff  = !!topics[0].entry.handoff;      // ¿esto solo lo contesta una persona?
     savePending();
 
     var topEntry = topics[0].entry;
@@ -2355,7 +2395,7 @@
        preguntaba por la cobertura y luego por el alcance geográfico —
        informarse, que es a lo que había venido — acababa metido en una toma de
        datos que no había pedido. Insistir es preguntar lo mismo TRES veces. */
-    var repeatFlow = topEntry.offerFlow && flowFor(topEntry.offerFlow);
+    var repeatFlow = !topEntry.outOfScope && topEntry.offerFlow && flowFor(topEntry.offerFlow);
     if (repeats >= 2 && repeatFlow && DATA.flows[repeatFlow]) {
       repeats = 0;
       markOffered(repeatFlow);

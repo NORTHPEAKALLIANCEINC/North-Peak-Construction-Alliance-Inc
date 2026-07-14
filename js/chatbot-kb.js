@@ -131,6 +131,16 @@ window.NP_BOT_KB = {
       'I will not pretend otherwise: this needs a person. They will resolve it in a minute:'
     ],
 
+    /* [NUEVO] Ya se le ha dicho que no es lo nuestro, y él sigue dando
+       detalles ("3/4 clear", "40 yds", "50 stalls"). Antes el bot le hacía un
+       TRIAJE comercial, como si acabara de llegar: "¿esto es un proyecto, un
+       empleo o información?". Se le había olvidado que acababa de decirle que
+       no. Ahora se mantiene en su sitio, sin humillarlo y sin marearlo. */
+    stillOffScope: [
+      'It is still not us, and no amount of detail is going to change that — I would rather be useless quickly than useless slowly.\n\nA person can point you to the right trade if you want. Here is the office:',
+      'I have not misunderstood you: this simply is not work we do. I am not going to take your details for something we cannot deliver.\n\nIf you want a person to point you the right way, here they are:'
+    ],
+
     /* ── EMPUJONES ────────────────────────────────────────────
        El fallo más silencioso del bot: contestaba… y se callaba. El
        visitante se quedaba mirando la pantalla sin saber qué hacer, y
@@ -1175,7 +1185,168 @@ window.NP_BOT_KB = {
       weight: 2
     },
 
+    /* ══════════════════════════════════════════════════════════
+       LO QUE NO SE PUEDE CONFIRMAR — Y LO QUE JAMÁS SE INVENTA
+
+       [LA ENTRADA MÁS IMPORTANTE DE TODA LA BASE]
+       Una oficial de participación indígena preguntó: "¿con qué Nación
+       concreta estáis asociados? ¿Es la Mississaugas of the Credit?".
+       Si el bot NOMBRA una Nación que no puede verificar, no es un error de
+       chatbot: es apropiación, y hunde a la empresa en cualquier licitación
+       y en la comunidad. El bot no nombra ninguna. Nunca.
+       ⚠️ PENDIENTE: la empresa debe confirmar por escrito su afiliación,
+       su protocolo y su responsable de comunidad. Hasta entonces, esto NO
+       se toca. */
+    {
+      topic: 'Indigenous specifics',
+      handoff: true,   /* esto lo contesta una persona, no yo: se mantiene ahí */
+      keys: [
+        'which first nation', 'what first nation', 'which nation', 'which band',
+        'mississaugas', 'six nations', 'is it the', 'site blessing', 'blessing ceremony',
+        'community liaison', 'engagement policy', 'engagement plan', 'protocol',
+        'traditional territory', 'land acknowledgement', 'which community',
+        'specific first nation', 'first nation is your', 'first nations is your', 'nation is your partner', 'name of the nation', 'partner nation'
+      ],
+      answer: [
+        'I am not going to name a Nation, a community or a protocol that I cannot verify. On this subject in particular, a wrong answer from an assistant is worse than no answer at all — and you would be right to hold it against us.\n\nThis has to come from a person, in writing, with their name on it. Here is how to reach them:',
+        'That question deserves a person, not me. I will not put a Nation\'s name in a chat window to sound good.\n\nAsk the directors directly and they will answer for it properly:'
+      ],
+      contactCard: true,
+      weight: 6
+    },
+
+    /* [ENTRADA NUEVA] Certificaciones, licencias, equipos, convenios: todo
+       lo que exige un papel firmado. Amianto (O.Reg 278/05), medidor nuclear
+       Troxler, AASHTO, convenio sindical, ficheros BIM. El bot no lo sabe y
+       no lo va a suponer. */
+    {
+      topic: 'technical credentials',
+      handoff: true,   /* esto lo contesta una persona, no yo: se mantiene ahí */
+      keys: [
+        'abatement', 'asbestos', 'lead paint', 'o reg 278', 'friable',
+        'troxler', 'nuclear gauge', 'density test', 'aashto', 'astm', 'compaction report',
+        'signatory', 'collective agreement', 'cba', 'union', 'local 183', 'moa',
+        'pension hours', 'bim', 'revit', 'ifc', 'rvt', 'dwg', 'clash detection',
+        'waste disposal permit', 'hl-3', 'mill test cert',
+        'are you signatory', 'phase ii esa', 'esa report', 'scale on site', 'truck scale', 'gate width', 'tri-axle', 'end dump',
+        'credentials', 'technicians credentials', 'moisture content', 'ftp link', 'send me the model', 'site plan', 'written scope', 'ba', 'business agent', 'monday slot', 'reply with dimensions', 'dimensions'
+      ],
+      answer: [
+        'I will not tell you we hold a licence, an accreditation or an agreement that I cannot verify — and on this kind of question, a confident guess from a bot is worse than silence.\n\nThis needs a person who can put it in writing and sign it. Straight to them:',
+        'Honestly: I do not have that confirmed, and inventing it would waste your time and ours. Ask the office and you will get a written answer or an honest no:'
+      ],
+      contactCard: true,
+      weight: 6
+    },
+
     /* ══ LO QUE LA EMPRESA NO HACE ══════════════════════════
+       [ENTRADAS NUEVAS — la ronda de las fichas literales]
+       Cinco visitantes seguidos querían COMPRAR piedra, ALQUILAR una
+       minicargadora, PINTAR líneas, ENTREGAR rebar o DENUNCIAR al vecino.
+       El bot les abría un formulario de obra: a la oficina le llegaban
+       clientes falsos, y a ellos les daba a entender que sí. Decir que no,
+       rápido y con una salida, es más honesto y más útil. */
+    {
+      topic: 'we do not sell materials',
+      outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
+      keys: [
+        'need stone', 'buy stone', 'clear stone', 'gravel', 'aggregate', 'sand',
+        'do you sell', 'sell materials', 'buy materials', 'contractor discount',
+        'price per sheet', 'sheets of drywall', 'planchas', '2x4', 'lumber yard',
+        'pick it up from your yard', 'do you deliver materials', 'material prices',
+        'comprar materiales', 'descuento de contratista',
+        '2x4s', 'yds', 'yards of', 'tonnes of', 'planchas de drywall'
+      ],
+      answer: [
+        'We do not sell materials. We are a construction company, not a supply yard — no stone, no sand, no drywall, no lumber, and no counter to buy them at.\n\nA building supply yard is what you want. Is there any actual construction work I can help you with?'
+      ],
+      weight: 6
+    },
+    {
+      topic: 'we do not rent equipment',
+      outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
+      keys: [
+        'rent a machine', 'rent equipment', 'machine rental', 'equipment rental',
+        'skid steer', 'minicargadora', 'bobcat', 'rent an excavator', 'day rate for the machine',
+        'alquilar la maquina', 'alquiler de maquinaria', 'tarifa por dia', 'hire a machine'
+      ],
+      answer: [
+        'We do not rent out machinery. We are a construction company — we use our equipment on our own jobs, we do not hire it out.\n\nAn equipment rental firm is what you need. Is there construction work I can help you with instead?'
+      ],
+      weight: 6
+    },
+    {
+      topic: 'not one of our areas',
+      outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
+      keys: [
+        'line painting', 'line striping', 'striping', 'parking lot stripes', 'sealcoat',
+        'cleaning after construction', 'post construction cleaning', 'final clean',
+        'snow clearing for me', 'landscaping only', 'pest control', 'window cleaning'
+      ],
+      answer: [
+        'That is not one of the ten areas we work in, and I am not going to pretend otherwise so that you fill in a form.\n\nA specialist in that trade will serve you far better. If there is real construction or repair work alongside it, that I can help with. Is there?'
+      ],
+      weight: 6
+    },
+    {
+      topic: 'deliveries and site access',
+      outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
+      keys: [
+        'i am at the gate', 'gate code', 'the gate code', 'i have a delivery',
+        'delivering', 'pallets', 'unload', 'where do i drop', 'truck scale', 'a scale on site',
+        'gate width', 'back in', 'dispatch', 'phone of the super', 'movil del encargado',
+        'estoy en la puerta', 'entrega en obra'
+      ],
+      answer: [
+        'I cannot help with a delivery in progress — I have no access to sites, gates or crews, and guessing would only make it worse for you.\n\nCall the office right now, they will put you through to the right site:'
+      ],
+      contactCard: true,
+      weight: 6
+    },
+    {
+      topic: 'we are not the city',
+      outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
+      keys: [
+        'complaint', 'formal complaint', 'report a neighbour', 'building inspector',
+        'inspection department', 'without a permit', 'unauthorized construction',
+        'property line', 'bylaw', 'the mayor', 'denuncia', 'queja formal', 'inspector',
+        'ayuntamiento', 'sin permiso',
+        'departamento de inspeccion', 'linea de propiedad', 'alcalde', 'municipal', 'no autorizada', 'send an inspector', 'stop this construction'
+      ],
+      answer: [
+        'You have the wrong people, and I would rather tell you now than let you write three more messages. We are a private construction company. We are not the City, we are not the building department, and we cannot send an inspector or stop anyone\'s work.\n\nFor a complaint about unpermitted work in Toronto, the number is **311**. That is the right door, and I am sorry it is not this one.',
+        'No — and I understand the confusion, but I will not let it cost you any more time. We build. We are a private company. We have no power to inspect anything, to stop any work, or to send anyone to your street.\n\nThe City of Toronto takes these complaints on **311**. That is who you need, and they will take it seriously.'
+      ],
+      weight: 6
+    },
+    {
+      topic: 'selling to us',
+      keys: [
+        'i want to sell you', 'do you buy', 'salvaged brick', 'reclaimed brick',
+        'surplus material', 'i have material to sell', 'who handles purchasing',
+        'quien maneja la compra', 'vender material'
+      ],
+      answer: [
+        'Buying materials is a decision a person makes, not me, and I am not going to say yes or no on their behalf.\n\nWrite to the office with what you have and what condition it is in. If it is useful to them, they will come back to you:'
+      ],
+      contactCard: true,
+      weight: 5
+    },
+    {
+      topic: 'students and placements',
+      keys: [
+        'intern', 'interns', 'internship', 'co-op', 'coop', 'placement', 'work experience',
+        'i am a student', 'architecture student', 'construction student', 'school hours',
+        'practicas', 'estudiante', 'becario'
+      ],
+      answer: [
+        'I do not have a confirmed placement or co-op programme to point you to, and I will not invent one.\n\nWhat I can do is pass your details to a person, with your school, your hours and what you are studying — they will tell you straight if there is room. Shall I do that?'
+      ],
+      offerFlow: 'job',
+      weight: 5
+    },
+
+    /* ══ LO QUE LA EMPRESA NO HACE (viejas) ═════════════════
        [ENTRADAS NUEVAS] Cuatro visitantes llegaron pidiendo cosas que North
        Peak no hace, y el bot NO SABÍA DECIRLO: les hacía triaje comercial, o
        peor, intentaba tomarles los datos de una obra que no existe. Decir "no
@@ -1183,6 +1354,7 @@ window.NP_BOT_KB = {
        que marear a alguien durante ocho mensajes. */
     {
       topic: 'moving and storage',
+      outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
       keys: [
         'move furniture', 'moving company', 'movers', 'storage', 'move my couch',
         'move a couch', 'moving truck', 'do you have a truck', 'mudanza', 'muebles',
@@ -1197,10 +1369,13 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'real estate',
+      outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
       keys: [
         'properties available', 'listings', 'do you have listings', 'send listings',
         'do you sell houses', 'homes for sale', 'homes coming soon', 'realtor',
-        'real estate agent', 'buy a property', 'looking to buy in', 'inmobiliaria'
+        'real estate agent', 'buy a property', 'looking to buy in', 'inmobiliaria',
+        'units left', 'any units', 'two bedroom', '2 bedroom', 'condo', 'condos', 'virtual tour', 'pets allowed', 'price per square foot', 'unidades', 'piso',
+        'pets', 'mascotas', 'stalls'
       ],
       answer: [
         'I think you may have the wrong company, and I will not pretend otherwise. We do not sell or list property — we are a construction company. We build what someone else has bought.\n\nIf you have land or a building and something needs doing to it, that I can help with. Do you?'
@@ -1222,6 +1397,7 @@ window.NP_BOT_KB = {
     },
     {
       topic: 'building maintenance',
+      outOfScope: true,   /* ya se le ha dicho que no: no se le vuelve a triar */
       keys: [
         'property manager', 'property management', 'my landlord', 'my building manager',
         'send a plumber', 'send someone to fix', 'my condo', 'my apartment is leaking',
@@ -1296,7 +1472,8 @@ window.NP_BOT_KB = {
       keys: [
         'job', 'jobs', 'careers', 'work with you', 'hiring', 'vacancy', 'apply', 'employment',
         'send my resume', 'resume', 'looking for work', 'i need a job', 'position', 'recruiting',
-        'hire', 'u hire', 'you hire', 'are you hiring', 'need workers', 'need guys', 'looking for workers', 'need a job', 'need work', 'any work', 'got work', 'hire guys', 'do you hire'
+        'hire', 'u hire', 'you hire', 'are you hiring', 'need workers', 'need guys', 'looking for workers', 'need a job', 'need work', 'any work', 'got work', 'hire guys', 'do you hire',
+        're-hire', 'rehire', 'get my job back', 'i used to work', 'ex employee', 'former employee', 'reactivate my profile', 'quiero mi trabajo de vuelta', 'consultant', 'fractional', 'retainer', 'day rate for consultants'
       ],
       answer: [
         'Good. We take on site and trades people, and technical and management roles.\n\nSend your trade and your experience through the Careers page — it takes two minutes.',
