@@ -1090,8 +1090,14 @@
          Antes contestaba y se callaba: el visitante se quedaba mirando la
          pantalla sin saber qué hacer, y se iba. Nunca se cede el turno sin
          devolver la pelota. */
+      /* [CORREGIDO] Antes se saltaba el empujón cuando la entrada tenía
+         offerFlow. Pero si el ofrecimiento YA se había hecho, la respuesta
+         moría sin pregunta y el visitante se quedaba sin saber qué escribir.
+         Ahora: sin pregunta, no se cede el turno. */
       var isLast = (i >= topics.length);
-      if (isLast && out.indexOf('?') === -1 && !entry.contactCard && !entry.offerFlow) {
+      var willOffer = entry.offerFlow && DATA.flows[entry.offerFlow] &&
+                      !alreadyOffered(entry.offerFlow);
+      if (isLast && out.indexOf('?') === -1 && !entry.contactCard && !willOffer) {
         out += '\n\n' + pickVariant(BOT.nudges, 'nudge');
       }
 

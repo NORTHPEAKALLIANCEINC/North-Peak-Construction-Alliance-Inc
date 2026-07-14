@@ -341,6 +341,13 @@ window.NP_BOT_KB = {
     /* El visitante contesta "Canadá" cuando se le pregunta la ciudad.
        No es un error suyo: es una respuesta razonable a una pregunta
        mal acotada. Un humano no la daría por buena — la afinaría. */
+    /* El visitante ha insistido. Se deja de conversar y se actúa. */
+    justStart: [
+      'Understood. Let me take the details, then, and put this in front of a person.',
+      'Right. I will stop asking and simply take what the team needs.',
+      'Then let us do this properly. A few short questions and it goes to the team.'
+    ],
+
     tooBroadPlace: [
       'Canada is a big country. Which province, and which city or town?',
       'That covers a very large area. Which province, and which city?',
@@ -613,9 +620,10 @@ window.NP_BOT_KB = {
         'tengo un proyecto', 'busco un contratista'
       ],
       answer: [
-        'That is exactly the kind of work we do.\n\nTell me a little more and I can pass it straight to the team.',
-        'That sounds like our work. Let me take the basics and put them in front of a person who can answer you properly.',
-        'Understood. The fastest route from here is a person, and I can get you one.'
+        'That is exactly the kind of work we do.\n\n**Where is it, and when do you need it?**',
+        'We can do that. So the team can answer you properly: **where is the project, and what is your timeframe?**',
+        'Understood. **What city is it in, and when would the work need to start?**',
+        'That is our work. Two things and I can put it in front of a person: **the city, and the timing.**'
       ]
     },
 
