@@ -881,7 +881,8 @@ window.NP_BOT_KB = {
       offerFlow: 'project',
       keys: [
         'services', 'what do you do', 'what you do', 'what do you offer', 'offer', 'work you do',
-        'capabilities', 'what can you build', 'trades', 'what type of work', 'lines of work', 'scope'
+        'capabilities', 'what can you build', 'trades', 'what type of work', 'lines of work', 'scope',
+        'servicios', 'que servicios', 'que servicios ofrecen', 'que ofrecen', 'a que se dedican', 'a que se dedica', 'a que te dedicas', 'que tipo de trabajo', 'en que trabajan', 'que hacen ustedes', 'areas de trabajo'
       ],
       answer: [
         'We can run your project, act as your general contractor, or send you the crew. Add commercial, institutional and infrastructure work, plus masonry, concrete and restoration.\n\nWhich is closest to what you need?',
@@ -1144,7 +1145,8 @@ window.NP_BOT_KB = {
       keys: [
         'leed', 'sustainability', 'sustainable', 'green building', 'energy efficiency',
         'energy efficient', 'environmental', 'carbon', 'waste management',
-        'construction waste', 'recycling', 'net zero', 'esg'
+        'construction waste', 'recycling', 'net zero', 'esg',
+        'materiales sostenibles', 'trabajan con materiales sostenibles', 'edificios sostenibles', 'construccion sostenible', 'sostenibilidad', 'leed', 'certificaciones leed'
       ],
       answer: [
         'I will not claim a green certification the company has not confirmed to me — that is the sort of claim that ends badly for everyone.\n\nWhat the team can tell you is what they actually do on site, and how they handle waste and materials on a given project. Would you like me to put that question to a person?',
@@ -1201,11 +1203,25 @@ window.NP_BOT_KB = {
        verdad hay una obra detrás. Por eso esta entrada NO tiene offerFlow. */
     {
       topic: 'a child',
-      noNudge: true,   /* [CORREGIDO] Recibía un empujón de venta pegado detrás. A la cortesía no se le vende — y a un niño, menos que a nadie. */
+      noNudge: true,
+      minor: true,     /* [CLASE NUEVA] detiene cualquier toma de datos */
+      /* [FALLO CORREGIDO] Solo cubría hasta los 13. Un MENOR es cualquiera
+         bajo 18 (14, 15, 16 y 17 incluidos). "Tengo 17 años" pasaba de largo y
+         el bot le abría un formulario a una menor. Ahora el rango llega a 17,
+         en los dos idiomas y en varias formas de decir la edad. */
+      /* [FALLO CORREGIDO] Las claves numéricas ("i am 10", "tengo 12 anos")
+         daban falsos positivos brutales: "I have 10 years in masonry" — un
+         candidato con diez años de OFICIO — casaba con "i am 10" y recibía la
+         respuesta de menor. La edad se detecta ahora en el motor con una regex
+         que distingue EDAD de EXPERIENCIA. Aquí quedan solo las frases
+         inequívocas, que no chocan con años de experiencia. */
       keys: [
-        'i am 9', 'i am 10', 'i am 11', 'i am 12', 'i am 13', 'im 9', 'im 10', 'im 11',
-        'i am a kid', 'im a kid', 'i am a child', 'tengo 9 anos', 'tengo 10 anos',
-        'tengo 11 anos', 'soy un nino', 'soy una nina', 'my mum', 'my mom', 'my dad'
+        'i am a kid', 'im a kid', 'i am a child', 'im a child',
+        'i am a minor', 'im a minor', 'i am underage', 'im underage',
+        'im a student in high school', 'high school student', 'im in high school',
+        'im still in school', 'soy un nino', 'soy una nina', 'soy menor',
+        'soy menor de edad', 'estoy en el instituto', 'estoy en secundaria',
+        'my mum', 'my mom', 'my dad', 'mis padres', 'mi mama', 'mi papa'
       ],
       answer: [
         'Thanks for telling me. I will not ask you for any details, then.\n\nThis is the assistant of a construction company, so there is not much here for you — but if you are curious about how buildings are actually made, ask me and I will tell you.',
@@ -1284,6 +1300,164 @@ window.NP_BOT_KB = {
       ],
       contactCard: true,
       weight: 6
+    },
+
+    /* [ENTRADAS NUEVAS — preguntas de negocio que hace todo cliente serio]
+       Garantías, calidad, plazos/retrasos, trayectoria, presupuesto, referencias,
+       cómo se informa al cliente. El bot las contestaba con "no te he entendido".
+       Ahora responde con lo que puede decir honestamente y lleva a una persona
+       cuando hace falta un compromiso por escrito. */
+    {
+      topic: 'quality and guarantees',
+      keys: [
+        'quality', 'guarantee', 'guarantees', 'warranty', 'warranties', 'standards',
+        'how do you ensure quality', 'quality control', 'who checks the work',
+        'garantia', 'garantias', 'como garantizan la calidad', 'calidad', 'control de calidad',
+        'quien supervisa la calidad', 'que garantias ofrecen', 'garantias contractuales'
+      ],
+      answer: [
+        'Fair question, and an important one. Quality on site is the responsibility of the people running the job, and the specific guarantees — what is warranted, and for how long — belong in writing, in the contract, from a person who can commit to them.\n\nI will not invent a warranty period. Tell me about the project and I will get you to someone who can put it in writing. What are you building?',
+        'The honest answer is that guarantees are a contract matter, and I am not going to make one up. A person will set out exactly what is covered.\n\nWhat is the project? I will make sure the right person follows up.'
+      ],
+      offerFlow: 'project',
+      contactCard: true,
+      weight: 3
+    },
+    {
+      topic: 'delays and schedule',
+      keys: [
+        'delays', 'how do you handle delays', 'behind schedule', 'on time', 'deadline',
+        'timeline', 'how long does it take', 'how fast can you start', 'lead time',
+        'retrasos', 'como manejan los retrasos', 'plazos', 'a tiempo', 'cuanto tardan',
+        'que tan rapido pueden empezar', 'pueden comenzar este mes', 'entregan a tiempo',
+        'pueden cumplir plazos'
+      ],
+      answer: [
+        'Schedule is one of the first things a project manager pins down, and it depends entirely on the job — its size, the permits, the season. I am not going to promise you a start date I cannot verify.\n\nGive me the project and a person will talk you through a realistic timeline. What is it, and where?',
+        'A straight answer on timing has to come from someone who has seen the scope — anything I say would be a guess.\n\nTell me what you need built and by when, and I will get it to a person who can commit. What is the work?'
+      ],
+      offerFlow: 'project',
+      contactCard: true,
+      weight: 3
+    },
+    {
+      topic: 'company track record',
+      keys: [
+        'how long have you been', 'how many years', 'years in business', 'established',
+        'since when', 'how old is the company', 'references', 'referrals', 'case studies',
+        'success stories', 'testimonials',
+        'cuantos anos', 'cuantos anos lleva', 'desde cuando', 'trayectoria', 'referencias',
+        'casos de exito', 'pueden mostrar casos', 'puedo conocer referencias', 'verificables',
+        'propuesta tecnica', 'preparar una propuesta', 'podrian preparar una propuesta', 'han trabajado con industrias', 'experiencia con industrias', 'trabajado con industrias', 'mayor desafio', 'cual ha sido su mayor desafio', 'proyecto favorito', 'proyecto mas grande'
+      ],
+      answer: [
+        'North Peak Construction Alliance Inc. is incorporated in Ontario (Corporation No. 1521162-0). For verifiable references and case studies, that is something a person should send you directly — with names and permission — rather than me listing them here.\n\nShall I put you in touch so they can share them properly?',
+        'The company is a registered Ontario corporation, and the right way to get references is from a person who can share them with the client\'s consent. I will not post them in a chat window.\n\nWant me to connect you?'
+      ],
+      contactCard: true,
+      weight: 3
+    },
+    {
+      topic: 'client communication',
+      keys: [
+        'how do you keep the client informed', 'progress reports', 'how do you report',
+        'kept up to date', 'updates during', 'stay informed', 'main contact', 'point of contact',
+        'como mantienen informado', 'como reportan', 'reportan el avance', 'informado durante la obra',
+        'contacto principal', 'quien seria mi contacto', 'punto de contacto', 'como reportan el avance',
+        'como solucionan conflictos', 'solucionan conflictos', 'conflictos con clientes', 'como manejan conflictos', 'disputas', 'como resuelven problemas', 'quejas'
+      ],
+      answer: [
+        'On a live project you get a named contact — usually the project manager — and regular progress updates. Exactly how often and in what form is something they agree with you at the start.\n\nWhat is the project? I will get you to the person who would run it.',
+        'You are not left in the dark — there is a point of contact and regular reporting, set up at the start of the job. A person can walk you through how it works on a project like yours.\n\nWhat are you planning?'
+      ],
+      offerFlow: 'project',
+      contactCard: true,
+      weight: 3
+    },
+    {
+      topic: 'meeting request',
+      keys: [
+        'video call', 'videollamada', 'video llamada', 'zoom', 'teams call', 'schedule a call',
+        'set up a meeting', 'coordinar una videollamada', 'reunion', 'reunion con mi equipo',
+        'aceptan reuniones virtuales', 'reuniones virtuales', 'programar una reunion',
+        'meeting with my team', 'coordinar una llamada'
+      ],
+      answer: [
+        'A meeting is exactly the right next step, and it is a person who sets that up, not me. If you leave your details, the team will reach out to arrange a call at a time that suits you.\n\nShall I take them now?',
+        'Happy to move this to a real conversation. I will pass your details to the team and they will arrange the call.\n\nWhat is the project, and how do they reach you?'
+      ],
+      offerFlow: 'project',
+      contactCard: true,
+      weight: 3
+    },
+
+    {
+      topic: 'who we work with',
+      keys: [
+        'what kind of clients', 'what type of clients', 'who are your clients',
+        'que tipo de clientes', 'que clientes atienden', 'con que clientes',
+        'work internationally', 'international clients', 'foreign investors',
+        'inversionistas extranjeros', 'trabajan con inversionistas', 'distintos paises',
+        'multiple projects', 'multiples proyectos', 'capacidad anual', 'gestionar multiples'
+      ],
+      answer: [
+        'The work is mostly commercial, institutional and infrastructure, plus supporting general contractors — for private owners, businesses and public bodies across Ontario and Canada.\n\nFor anything about capacity, international arrangements or handling several projects at once, that is a conversation for a person. What are you looking to build?'
+      ],
+      offerFlow: 'project',
+      contactCard: true,
+      weight: 3
+    },
+    {
+      topic: 'what makes you different',
+      keys: [
+        'what makes you better', 'why you', 'why should i choose you', 'what makes you different',
+        'difference from other', 'que los hace mejores', 'que los hace diferentes',
+        'que diferencia tienen', 'por que elegirlos', 'que valores', 'valores representan',
+        'strategic partner', 'socio estrategico', 'alianza permanente', 'largo plazo',
+        'como seleccionan a sus socios', 'abiertos a una alianza'
+      ],
+      answer: [
+        'What I can tell you plainly: this is an Indigenous-participation construction company that does the work with its own crews rather than signing it away, and you deal with the people who run it, not a call centre.\n\nThe rest — what sets them apart on your specific job, and whether a long-term partnership makes sense — is a conversation worth having with a person. What are you planning?'
+      ],
+      offerFlow: 'project',
+      contactCard: true,
+      weight: 3
+    },
+    {
+      topic: 'methods and technology',
+      keys: [
+        'what methodology', 'how do you manage projects', 'project management method',
+        'que metodologia', 'como administran', 'smart buildings', 'edificios inteligentes',
+        'what technology', 'que tecnologia', 'que tecnologias', 'confidential information',
+        'informacion confidencial', 'como protegen la informacion', 'how flexible',
+        'que tan flexible', 'flexible es su equipo', 'como optimizan los costos', 'optimizan costos',
+        'como controlan el presupuesto', 'como gestionan los riesgos', 'gestionan riesgos',
+        'que sucede si surge un imprevisto', 'imprevisto', 'sin detener mis operaciones',
+        'trabajar sin detener'
+      ],
+      answer: [
+        'These are exactly the questions a project manager should answer for your specific job — methodology, budget control, risk, keeping your operations running, any technology involved. I would rather connect you to that person than give you a generic line.\n\nTell me what the project is and I will make sure it reaches them. What are you building, and where?'
+      ],
+      offerFlow: 'project',
+      contactCard: true,
+      weight: 2
+    },
+
+    {
+      topic: 'coverage area',
+      keys: [
+        'where do you work', 'what areas', 'which regions', 'do you work in',
+        'coverage', 'do you cover', 'only in ontario', 'across canada', 'work internationally',
+        'donde trabajan', 'en que provincias', 'que provincias', 'en que regiones',
+        'que zonas', 'cobertura', 'trabajan en canada', 'trabajan solo en', 'en que zonas operan',
+        'en que provincias operan', 'donde operan'
+      ],
+      answer: [
+        'The base is Toronto, Ontario, and the work spans Ontario and across Canada depending on the project.\n\nFor a job outside the usual area, a person will tell you straight whether it is feasible. Where is yours?'
+      ],
+      offerFlow: 'project',
+      contactCard: true,
+      weight: 3
     },
 
     /* ══ LO QUE LA EMPRESA NO HACE ══════════════════════════
@@ -1562,7 +1736,8 @@ window.NP_BOT_KB = {
          oficina le llegaba como candidato. Ahora tiene el suyo. */
       offerFlow: 'supplier',
       keys: ['subcontractor', 'subcontract', 'supplier', 'vendor', 'register as supplier', 'work as a sub', 'partner with you',
-        'subs', 'subtrade', 'vendor application', 'crew ready', 'have crew', 'looking for framers', 'need crews', 'who handles subs', 'my crew', 'my company'],
+        'subs', 'subtrade', 'vendor application', 'crew ready', 'have crew', 'looking for framers', 'need crews', 'who handles subs', 'my crew', 'my company',
+        'trabajan con subcontratistas', 'trabajan con subcontratista', 'requisitos exigen', 'que requisitos', 'aceptan empresas nuevas', 'especialidades necesitan', 'como seleccionan a sus subcontratistas', 'como seleccionan a sus proveedores', 'con quien puedo hablar sobre alianzas', 'tienen proyectos proximos', 'aceptan empresas', 'presentar nuestro equipo'],
       answer: [
         'Yes, we register subcontractors and suppliers. Send your trade, your area and your credentials, and you stay on file for upcoming work.',
         'We do use subcontractors. Register through the Careers page — trade, coverage, credentials.'
@@ -1577,7 +1752,8 @@ window.NP_BOT_KB = {
         'safety', 'health and safety', 'accidents', 'safe', 'wsib', 'wsib coverage', 'insurance',
         'insurance coverage', 'insured', 'certified', 'certification', 'licence', 'license',
         'liability', 'bonded', 'compliance', 'prequalification',
-        'iso 9001', 'iso', 'trif', 'incident rate', 'safety record', 'safety statistics', 'cor certified', 'health and safety', 'accident rate'
+        'iso 9001', 'iso', 'trif', 'incident rate', 'safety record', 'safety statistics', 'cor certified', 'health and safety', 'accident rate',
+        'estan asegurados', 'estan asegurado', 'tienen seguro', 'seguro', 'seguros', 'que licencias', 'licencias', 'estan licenciados', 'aseguent', 'poliza', 'seguridad laboral', 'como garantizan la seguridad'
       ],
       /* ⚠️ PENDIENTE: seguros, WSIB y certificaciones. NO afirmar nada. */
       answer: [
@@ -1659,14 +1835,37 @@ window.NP_BOT_KB = {
       contactCard: true
     },
     {
+      /* [ENTRADA NUEVA — faltaba lo más elemental]
+         "¿Cómo se llama tu empresa?" recibía un "no te he entendido", y "what
+         is the name of the company?" un "no tengo ese dato". Absurdo: es lo
+         primero que un asistente debe saber. Aquí están el nombre completo,
+         dónde está, desde cuándo y qué hace. Todo confirmado, nada inventado. */
+      topic: 'company identity',
+      keys: [
+        'what is the name of the company', 'name of the company', 'company name',
+        'what company is this', 'what company', 'who are you', 'what is this company',
+        'what is your company called', 'your company name', 'full company name',
+        'what are you called', 'tell me about the company', 'about the company',
+        'about your company', 'what do you do', 'what does the company do',
+        'como se llama la empresa', 'como se llama tu empresa', 'nombre de la empresa',
+        'que empresa es esta', 'quien sois', 'quienes son', 'que hacen', 'sobre la empresa'
+      ],
+      answer: [
+        'This is **North Peak Construction Alliance Inc.**, an Indigenous-participation construction company based in Toronto, Ontario.\n\nThe company builds and repairs across ten areas — from project management and general contracting to concrete, masonry and infrastructure. What can I help you with?',
+        'You are speaking with the assistant of **North Peak Construction Alliance Inc.**, a construction company in Toronto with Indigenous participation.\n\nWe cover ten areas of building and repair. What brings you here today?'
+      ],
+      nav: { label: 'About the company', href: '/about' },
+      weight: 5
+    },
+    {
       topic: 'the directors',
       keys: [
         'who runs the company', 'owner', 'owners', 'directors', 'director', 'management',
         'who is in charge', 'leadership', 'founder', 'ceo', 'boss', 'principals'
       ],
       answer: [
-        'The company\'s directors are **Riley Birkett** and **Pavel Portelles Rivas**.\n\nIf you want to speak to leadership directly rather than through me, the office will put you through.',
-        'Two directors: **Riley Birkett** and **Pavel Portelles Rivas**. It is not a faceless outfit — you can talk to the people who run it.'
+        'North Peak Construction Alliance Inc. is led by two directors: **Riley Birkett** and **Pavel Portelles Rivas**.\n\nYou can reach Pavel directly at **pavel@northalliancegroup.ca**, or the office at **admin@northalliancegroup.ca** / **647 895 0939**. It is not a faceless outfit — you can talk to the people who run it.',
+        'The company is run by its two directors, **Riley Birkett** and **Pavel Portelles Rivas**.\n\nTo reach leadership directly: **pavel@northalliancegroup.ca**, or the main office on **647 895 0939**.'
       ],
       contactCard: true,
       nav: { label: 'About the company', href: '/about' }

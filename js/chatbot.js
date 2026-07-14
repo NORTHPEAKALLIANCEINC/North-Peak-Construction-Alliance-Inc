@@ -118,6 +118,8 @@
      y disponible. Un cliente que acaba de decir que sí no es un desconocido al
      que hay que triar. */
   var closed = false;
+  var _lastWasQuestion = false;
+  var arranqueOK = false;
 
   /* ── MEMORIA DE LA CONVERSACIÓN ────────────────────────────
      Hasta ahora el bot trataba cada mensaje como si acabara de conocerte.
@@ -695,6 +697,12 @@
     s = s
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^\w\s?%]/g, ' ')
+      /* [FALLO CORREGIDO] El "?" se conservaba PEGADO a la palabra: "empresa?"
+         no casaba con la clave "empresa", así que TODA pregunta en español que
+         terminara en signo fallaba ("¿cómo se llama tu empresa?" → "no te he
+         entendido"). El "?" se separa con espacios: se conserva como señal de
+         que hay una pregunta, pero deja de ensuciar la última palabra. */
+      .replace(/\?/g, ' ? ')
       .replace(/\s+/g, ' ')
       .trim();
 
@@ -983,7 +991,7 @@
        conector: "Regarding **greeting**:". Usar la etiqueta interna del tema
        como si fuera un asunto del que hablar es absurdo. La cortesía acompaña,
        no compite: si hay algo real que contestar, el saludo sobra. */
-    var CORTESIA = ['greeting', 'thanks', 'goodbye', 'small talk', 'how are you'];
+    var CORTESIA = ['greeting', 'thanks', 'goodbye', 'small talk', 'how are you', 'company identity'];
     var reales = list.filter(function (h) {
       return CORTESIA.indexOf(h.entry.topic) === -1;
     });
@@ -1800,6 +1808,17 @@
     var def = flowDef();
     var n = normalize(text);
 
+    /* [SEGURIDAD — MENORES, también dentro del formulario] Si a mitad de la
+       toma de datos la persona dice que es menor de edad, se para en seco: se
+       descarta el formulario y NO se guarda lo que acaba de escribir. Un menor
+       nunca completa el formulario, diga lo que diga después. */
+    var menorAhora = detectTopics(text).filter(function (h) { return h.entry.minor; });
+    if (menorAhora.length) {
+      clearFlow();
+      speak(pickVariant(menorAhora[0].entry.answer, 'a child#a'), null, done);
+      return;
+    }
+
     if (CANCEL.test(n) && flow.stage === 'asking') {
       clearFlow();
       speak(pickVariant(DATA.flowTalk.cancelled, 'cancel'), null, done);
@@ -2191,6 +2210,16 @@
   function reflectWork(got, release) {
     if (!got || !got.work) return false;
 
+    /* [FALLO CORREGIDO — el bot arrastraba a la gente al formulario]
+       "Estoy investigando para un proyecto familiar", "estoy evaluando
+       constructoras" no es una obra descrita: es alguien informándose. El bot
+       lo tomaba como encargo, activaba pendingAsk, y a partir de ahí trataba
+       CADA PREGUNTA siguiente como una respuesta del formulario ("¿qué
+       servicios?" se guardaba como la ciudad). Una frase de intención vaga no
+       arranca nada: se le deja preguntar. */
+    var vago = /\b(investigando|evaluando|averiguando|mirando|buscando informacion|researching|looking into|comparing|evaluating|exploring|just looking|proyecto familiar|for my family|for a thesis|para un proyecto)\b/i;
+    if (vago.test(got.work) && !got.city && !got.when) return false;
+
     misses = 0;
     lastEntry = null;
 
@@ -2214,6 +2243,7 @@
        Si NO es un comprador, describir una obra no es encargarla: se le
        ofrece su flujo y decide él. */
     if (tpl === 'full' && pf === 'project') {
+      arranqueOK = true;
       markOffered('project');
       /* [FALLO CORREGIDO] Aquí se arrancaba el flujo de OBRA a palo seco, sin
          mirar quién estaba escribiendo. Un fabricante de prefabricado que decía
@@ -2243,6 +2273,24 @@
 
     var release = function () { busy = false; };
 
+    /* [SEGURIDAD — MENORES, lo PRIMERO de todo] Antes de sembrar obra, de
+       handleFlow, de cualquier cosa: si alguien se declara menor de 18, se
+       cierra todo y no se le pide ni se le guarda nada. La detección es por
+       edad explícita ("tengo 17 años", "i am 16") O por el tema 'a child'. */
+    var _edadMenor = /\b(tengo|soy|i am|im|i'm)\s*(1[0-7]|[0-9])\s*(anos|años|years|year|yo)?\b/i.test(text) &&
+                     !/\b(1[89]|[2-9][0-9])\s*(anos|años|years)/i.test(text);
+    var _temaMenor = detectTopics(text).some(function (h) { return h.entry.minor; });
+    if (_edadMenor || _temaMenor) {
+      if (flow) clearFlow();
+      pendingFlow = null; pendingAsk = null; seed = null; closed = false;
+      savePending();
+      var _kid = detectTopics(text).filter(function (h) { return h.entry.minor; });
+      var _kidAns = _kid.length ? _kid[0].entry.answer
+        : ['Thanks for telling me. Since you are under eighteen, I will not ask you for any details.\n\nThis is the assistant of a construction company, so there is not much here for you — but if you are curious about how buildings are made, ask away.'];
+      speak(pickVariant(_kidAns, 'a child#a'), null, release);
+      return;
+    }
+
     /* Se retiene lo que dice, siempre, aunque esté en mitad de un flujo.
        Se guarda una foto de ANTES para saber si este mensaje ha aportado algo
        nuevo sobre la persona (su oficio, su experiencia, su ciudad). */
@@ -2256,6 +2304,17 @@
     if (!flow) {
       var g0 = extract(text);
       var nPal = normalize(text).split(/\s+/).length;
+
+      /* [FALLO CORREGIDO — el bot arrastraba al formulario a quien investigaba]
+         "Estoy investigando empresas para un proyecto familiar", "estoy
+         evaluando constructoras" NO es una obra: es alguien informándose. Si se
+         siembra como obra, el ofrecimiento queda armado y la siguiente pregunta
+         arranca el formulario. Una frase de investigación sin ciudad ni fecha
+         no siembra nada: se le contesta y se le deja preguntar. */
+      var investigando = /\b(investigando|evaluando|averiguando|comparando|mirando opciones|buscando informacion|researching|looking into|comparing|evaluating|exploring options|just looking|proyecto familiar|for my family|for a thesis|para la escuela|para un trabajo escolar)\b/i.test(text);
+      if (investigando && !g0.city && !g0.when) {
+        // no se siembra: baja a la cascada y se le responde la pregunta
+      } else
 
       /* [FALLO CORREGIDO] Un párrafo de sesenta palabras se recortaba con la
          misma tijera que una frase de seis, y salía basura: de un correo
@@ -2292,12 +2351,19 @@
     /* 2. ¿Se ofreció una y el visitante ha dicho que sí? */
     if (pendingFlow) {
       var n0 = normalize(text);
-      if (YES.test(n0)) {
+      /* [FALLO CORREGIDO — arrastraba al formulario a quien solo preguntaba]
+         Con un ofrecimiento en el aire, una PREGUNTA del visitante ("¿cuál ha
+         sido su proyecto favorito?", "¿qué es lo más difícil?") no es un "sí"
+         ni un dato: es una pregunta. Antes se colaba por las ramas de abajo y
+         acababa arrancando el formulario. Ahora, si pregunta, se sale de aquí
+         y se le contesta; el ofrecimiento se mantiene para más tarde. */
+      /* [FALLO CORREGIDO] "¿Qué servicios ofrecen EXACTAMENTE?" disparaba el
+         arranque porque YES reconoce "exacto/exactamente" como un sí (se añadió
+         como forma de confirmar). Pero dentro de una PREGUNTA no es un sí: es
+         parte de la pregunta. Un "sí" solo cuenta si el turno no es pregunta. */
+      if (YES.test(n0) && !isQuestion(text)) {
+        arranqueOK = true;
         pendingAsk = null;
-        /* [FALLO CORREGIDO] El ofrecimiento se guardaba ANTES de saber quién
-           era ("¿le tomo los datos?" → 'project'), y al aceptarlo se abría esa
-           puerta aunque para entonces ya se supiera que era un proveedor. La
-           puerta se decide al ABRIRLA, no al ofrecerla. */
         startFlow(flowFor(pendingFlow), release, seed && seed.work, seed);
         return;
       }
@@ -2332,6 +2398,13 @@
          sobre su cobertura geográfica y volvía a preguntarle la ciudad:
          había hecho una pregunta y no aceptaba la respuesta. Una pregunta
          nueva del visitante (lleva "?" o empieza preguntando) sí manda. */
+      /* Si había un dato pendiente pero el visitante PREGUNTA en vez de
+         contestarlo, se atiende la pregunta: no se traga como si fuera el dato.
+         Esto evita que "¿qué servicios?" acabe guardado como la ciudad. */
+      if (pendingAsk && isQuestion(text)) {
+        pendingAsk = null;
+        savePending();
+      }
       var answering = pendingAsk && !isQuestion(text) && !flowTrigger(text) && !isUnintelligible(text);
 
       /* [FALLO CORREGIDO] Esto solo escuchaba a los COMPRADORES: exigía que
@@ -2370,8 +2443,12 @@
         var pfNow = pendingFlow;
         markOffered(pfNow);
         savePending();
-        startFlow(flowFor(pfNow), release, seed.work, seed);
-        return;
+        /* [GUARDA] Si el turno es una pregunta, no se arranca el formulario: se
+           deja el ofrecimiento en pie y se baja a la cascada a contestar. Evita
+           que "¿qué servicios?" con un ofrecimiento en el aire abra el
+           formulario a quien solo investiga. */
+        if (isQuestion(text)) { pendingFlow = pfNow; savePending(); }
+        else { startFlow(flowFor(pfNow), release, seed.work, seed); return; }
       }
 
       /* [FALLO CORREGIDO — perdía clientes ya ganados] Aquí se BORRABA el
@@ -2458,7 +2535,14 @@
       savePending();
     }
 
+    _lastWasQuestion = isQuestion(text);
+    arranqueOK = false;          // cada turno empieza sin permiso de arranque
+
     var topics = detectTopics(text);
+
+    /* [SEGURIDAD — MENORES] Si alguien se identifica como menor de edad, se
+       cierra cualquier formulario abierto y no se le pide ningún dato. Va antes
+       que nada: por encima de convertir. */
 
     /* [FALLO CORREGIDO — el saludo tapaba la pregunta]
        "Hola, ¿necesitáis quitanieves para vuestras obras?" traía UN tema: el
@@ -2621,9 +2705,28 @@
          que se le entendió TODO y sabe a qué contesta cada bloque. Los
          conectores rotan, así que nunca suena a plantilla. */
       if (multi) {
-        var lead = pickVariant(i === 0 ? BOT.connectors.first : BOT.connectors.next,
-                               'connector' + (i === 0 ? 'A' : 'B'));
-        out = lead.replace('{topic}', key) + '\n\n' + body;
+        /* [FALLO CORREGIDO] El conector metía la ETIQUETA INTERNA del tema como
+           si fuera un asunto legible: "On **company identity**:", "Regarding
+           **greeting**:". Suena a máquina y delata las tripas del bot. Ahora
+           solo se usa el conector si el tema tiene una etiqueta presentable; si
+           no, la respuesta va directa, sin anunciarse. La primera respuesta
+           nunca lleva conector: entra limpia. */
+        var LABELS = {
+          'services': 'our services', 'quality and guarantees': 'quality',
+          'delays and schedule': 'timing', 'company track record': 'past work',
+          'coverage area': 'where we work', 'who we work with': 'our clients',
+          'what makes you different': 'what sets us apart', 'methods and technology': 'how we work',
+          'client communication': 'staying informed', 'meeting request': 'setting up a call',
+          'safety and insurance': 'insurance and safety', 'the directors': 'our directors',
+          'past projects': 'past work', 'subcontracting': 'working with us',
+          'careers': 'jobs', 'client communication': 'how we keep you informed',
+          'meeting request': 'setting up a call', 'sustainability': 'sustainability'
+        };
+        var etiqueta = LABELS[key];
+        if (i > 0 && etiqueta) {
+          var lead = pickVariant(BOT.connectors.next, 'connectorB');
+          out = lead.replace('{topic}', etiqueta) + '\n\n' + body;
+        }
       }
 
       i++;
