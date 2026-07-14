@@ -188,13 +188,15 @@
     /* Quien busca trabajo. */
     candidate: {
       strong: [
+        'need work', 'i need work', 'want to work', 'i want work', 'need job',
+        'necesito trabajo', 'quiero trabajar', 'busco empleo',
         'looking for a job', 'looking for work', 'need a job', 'i want to apply',
         'i would like to apply', 'apply for a job', 'are you hiring', 'do you have any openings',
         'send my resume', 'send you my resume', 'my resume', 'my cv', 'i am looking for work',
         'busco trabajo', 'busco empleo', 'quiero trabajar con ustedes', 'enviar mi curriculum'
       ],
       weak: [
-        'job', 'jobs', 'hiring', 'vacancy', 'vacancies', 'opening', 'openings',
+        'job', 'jobs', 'hire', 'hiring', 'vacancy', 'vacancies', 'opening', 'openings',
         'resume', 'cv', 'apply', 'employment', 'recruiting', 'apprentice', 'journeyman',
         'salary', 'wage', 'wages', 'shift', 'my trade', 'empleo', 'trabajo', 'curriculum'
       ]
@@ -203,6 +205,7 @@
        proveedor, socio. Ni compra, ni pide empleo. Hasta hoy no existía. */
     supplier: {
       strong: [
+        'i have a company', 'my company can', 'we have a company', 'our company can',
         'we are a subcontractor', 'i am a subcontractor', 'we are a supplier',
         'register as a supplier', 'register as a subcontractor', 'work as a subcontractor',
         'my company can', 'our company supplies', 'we supply', 'we can supply',
@@ -264,6 +267,14 @@
      comprador que dice "soy el jefe de obra del ayuntamiento" no se le
      apunta "jefe de obra" como oficio. */
   var TRADES = [
+    /* [AMPLIADO] Faltaban los oficios que MÁS se escriben: drywall, framing,
+       electrical, iron. "u hire drywall" y "I do framing" no significaban
+       nada, y quien se ofrecía a trabajar recibía un "no te he entendido". */
+    'drywall', 'drywaller', 'taper', 'framing', 'framer', 'electrical', 'hvac',
+    'plumbing', 'ironworker', 'iron', 'steel', 'roofing', 'masonry', 'concrete',
+    'forming', 'formwork', 'rebar', 'labour', 'labor', 'labourer', 'general labour',
+    'excavation', 'excavator', 'dozer', 'machine operator', 'snow removal',
+    'landscaping', 'demolition', 'cleaner', 'installer', 'fitter',
     'carpenter', 'framer', 'joiner', 'electrician', 'plumber', 'mason', 'bricklayer',
     'stonemason', 'welder', 'ironworker', 'rebar', 'concrete finisher', 'cement finisher',
     'labourer', 'laborer', 'operator', 'equipment operator', 'crane operator', 'foreman',
@@ -298,7 +309,12 @@
     }
 
     /* ── Oficio y experiencia: para no preguntar dos veces lo que ya dijo ── */
-    if (MEM.role === 'candidate' || MEM.role === 'supplier') {
+    /* [FALLO CORREGIDO] Solo se apuntaba el oficio si YA se sabía que era un
+       candidato. Pero muchas veces el oficio es lo ÚNICO que dice ("u hire
+       drywall"), y sin él no hay papel: la pescadilla que se muerde la cola.
+       Se apunta siempre, salvo a los compradores — que cuando nombran un
+       oficio están pidiendo uno, no ofreciéndose. */
+    if (MEM.role !== 'buyer') {
       var t = TRADE_RE.exec(n);
       if (t && !MEM.trade) MEM.trade = t[1];
       var e = EXP_RE.exec(n);
@@ -415,7 +431,13 @@
     'beam', 'ceiling', 'basement', 'stair', 'window', 'door', 'facade', 'tile',
     /* qué le pasa */
     'crack', 'leak', 'collapse', 'damage', 'damaged', 'broken', 'falling', 'crumbling',
-    'rotten', 'sinking', 'spalling', 'unsafe',
+    'rotten', 'sinking', 'spalling', 'unsafe', 'flooded', 'flooding', 'sagging',
+    /* lo que se dice en una obra de verdad */
+    'drywall', 'framing', 'iron', 'beam', 'plan', 'drawing', 'spec', 'blueprint',
+    'permit', 'excavation', 'dirt', 'soil', 'electrical', 'plumbing', 'hvac',
+    'labourer', 'laborer', 'framers', 'installer', 'truck',
+    'snow', 'snow removal', 'landscaping', 'cleaning', 'scaffolding',
+    'mechanical', 'shingle', 'balcony', 'basement', 'crew', 'guys', 'ticket',
     /* comercial */
     'tender', 'bid', 'quote', 'estimate',
     /* español */
@@ -511,6 +533,25 @@
     aprendiz: 'apprentice', operador: 'operator', capataz: 'foreman',
     encargado: 'supervisor', encofrador: 'formwork', yesero: 'plasterer',
     experiencia: 'experience', anos: 'years',
+    /* [AMPLIADO] Dictado, jerga y autocorrector. Sin esto: "peon" no era un
+       oficio, "mi balcon esta inundado" no era una obra, "quitanieves" no era
+       nada, y "sobrino" no existía. */
+    peon: 'labourer', peones: 'labourer', obrero: 'labourer',
+    quitanieves: 'snow removal', nieve: 'snow', sobrino: 'nephew',
+    balcon: 'balcony', inundado: 'flooded', inundada: 'flooded',
+    filtracion: 'leak', fuga: 'leak', gotera: 'leak', goteras: 'leak',
+    fontanero: 'plumber', plomeria: 'plumbing', electricidad: 'electrical',
+    delineante: 'draftsman', planos: 'drawings', plano: 'drawing',
+    permiso: 'permit', permisos: 'permits', licencia: 'permit',
+    sotano: 'basement', hierro: 'iron', acero: 'steel', madera: 'timber',
+    cotizacion: 'quote', cotizaciones: 'quotes', maquina: 'machine',
+    maquinas: 'machines', excavadora: 'excavator', tierra: 'soil',
+    mudanza: 'moving', muebles: 'furniture', sofa: 'couch',
+    inmobiliaria: 'real estate', propiedades: 'properties',
+    administrador: 'property manager', cuotas: 'fees', inquilino: 'tenant',
+    curriculum: 'resume', hundiendo: 'sagging', hundido: 'sagging',
+    empresa: 'company', empresas: 'companies', compania: 'company',
+    parchear: 'patch', parche: 'patch', tabique: 'drywall',
     hacen: 'do you', haceis: 'do you', hace: 'do you', pueden: 'can you', podeis: 'can you',
     puede: 'can you', ustedes: 'you', vosotros: 'you', tienen: 'do you have',
     quiero: 'i want', queremos: 'we want', necesito: 'i need', necesitamos: 'we need',
@@ -577,6 +618,10 @@
        entendido") en vez de al desvío amable. Se mapea la FRASE, no la
        palabra: "temps" a secas también significa "tiempo" de duración
        ("combien de temps"), y confundirlas sería peor que no traducir. */
+    [/\btengo una empresa\b/g,   'i have a company'],
+    [/\bmi empresa\b/g,          'my company'],
+    [/\bnuestra empresa\b/g,     'our company'],
+    [/\bmi sobrino\b/g,          'my nephew'],
     [/\bquel temps\b/g,          'weather'],
     [/\bla meteo\b/g,            'weather'],
     [/\bno entiendo por que\b/g, 'i do not understand why'],
@@ -723,7 +768,7 @@
        "I am a consulting structural engineer." recibía un triaje: el bot le
        decía "no te he entendido" a alguien que se estaba presentando. Se
        acusa recibo y se le devuelve la palabra. */
-    { id: 'intro',      re: /^(i am|im|i work|i lead|i run|i represent|we are|we run|we maintain|we operate|we manage|my name is|this is|retired|good day|good morning|good afternoon)\b/ }
+    { id: 'intro',      re: /\b(i am a|i am an|i am the|im a|im an|i work as|i work for|i lead|i run a|i represent|we are a|we are an|we run|we maintain|we operate|we manage|my name is|my company|our company|i have a company|retired)\b/ }
   ];
 
   function detectIntent(text) {
@@ -1461,9 +1506,36 @@
 
   /* Validación. Amable, pero no deja pasar un teléfono que no es un
      teléfono: un contacto que no se puede contactar no vale nada. */
+  /* [FALLO CORREGIDO — se perdían contactos enteros]
+     Quien DICTA su correo al móvil no dice "arroba": dice la palabra.
+     "carlos punto h arroba gmail punto com". Y quien escribe deprisa pone
+     "mike.ob at yahoo.com". El bot lo rechazaba como contacto inválido y
+     volvía a pedírselo, una y otra vez, hasta que la persona se iba.
+     Un humano lo habría entendido a la primera. */
+  function fixContact(v) {
+    return String(v)
+      .replace(/\s+(arroba|at)\s+/gi, '@')
+      .replace(/\s+(punto|dot)\s+/gi, '.')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /* De una frase entera se extrae el contacto, no la frase. Antes se guardaba
+     "espera no mi numero es 416-555-0199" tal cual, y luego se le ofrecía eso
+     de vuelta como si fuera su teléfono. */
+  function pullContact(v) {
+    var t = fixContact(v);
+    var mail = /[^\s@]+@[^\s@]+\.[^\s@]+/.exec(t);
+    if (mail) return mail[0];
+    var tel = /[\d][\d\s().+-]{6,}\d/.exec(t);
+    if (tel) return tel[0].trim();
+    return t;
+  }
+
   function looksLikeContact(v) {
-    var email = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(v);
-    var phone = (v.replace(/\D/g, '').length >= 7);
+    var t = fixContact(v);
+    var email = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(t);
+    var phone = (t.replace(/\D/g, '').length >= 7);
     return email || phone;
   }
 
@@ -1489,6 +1561,17 @@
     if (step.type === 'short') {
       if (looksLikeContact(v)) return 'looksLikeContact';
       return v.length >= 2 ? null : 'tooShort';
+    }
+    /* [FALLO CORREGIDO] Se preguntaba "¿cuánta experiencia tienes?" y el
+       visitante contestaba con su NOMBRE (la gente contesta fuera de orden).
+       El bot lo guardaba tal cual: a la oficina le llegaba un candidato con
+       "experiencia: tyler smith". Una experiencia se mide en tiempo. */
+    if (step.type === 'duration') {
+      if (looksLikeContact(v)) return 'looksLikeContact';
+      var n2 = normalize(v);
+      var tiene = /\d/.test(n2) ||
+                  /\b(year|years|month|months|decade|none|no experience|just (graduated|started)|apprentice|new|starting out|nuevo|ninguna|recien)\b/.test(n2);
+      return tiene ? null : 'notADuration';
     }
     if (step.type === 'place') {
       if (looksLikeContact(v)) return 'looksLikeContact';
@@ -1680,6 +1763,17 @@
       }
     }
 
+    /* [FALLO CORREGIDO] "este formulario es estupido" se guardaba COMO SU
+       NOMBRE. A la oficina le llegaba un candidato llamado así. Un enfado no
+       es un dato: se reconoce, se responde con calma, y se repite la pregunta. */
+    var enfado = detectTopics(text);
+    if (flow.stage !== 'confirm' && enfado.length && enfado[0].entry.topic === 'frustration') {
+      var fe = enfado[0].entry;
+      speak(pickVariant(fe.answer, 'frustration#a'), { contactCard: true },
+            function () { askStep(done); });
+      return;
+    }
+
     /* Está respondiendo a un paso. */
     var step = def.steps[flow.step];
 
@@ -1707,19 +1801,51 @@
            preguntaba por una obra que no tiene. Ahora el acuse no lleva
            pregunta y la pregunta la repite el propio paso: un mensaje,
            una pregunta. */
-        flow.saved = text.trim();
+        flow.saved = pullContact(text);
         saveFlow();
         speak(pickVariant(DATA.flowTalk.looksLikeContact, 'looksLikeContact'), null, function () {
           askStep(done);
         });
         return;
       }
-      speak(pickVariant(DATA.flowTalk[err], err), null, done);
+      /* [FALLO CORREGIDO — el formulario era una ratonera] Si el dato no
+         valía, el bot lo volvía a pedir. Y otra vez. Y otra. Quien no quiere
+         dar su teléfono, o quien escribe raro, quedaba atrapado en el bucle
+         hasta que cerraba la pestaña ("este formulario es estúpido").
+         A la segunda vez, se abre la puerta: el correo directo de la oficina,
+         encima de la mesa. Se sigue pudiendo contestar — pero ya no es una
+         ratonera. */
+      flow.badTries = (flow.badTries === undefined || flow.lastBad !== step.id) ? 1 : flow.badTries + 1;
+      flow.lastBad = step.id;
+      saveFlow();
+
+      /* [FALLO CORREGIDO — la ratonera] A la tercera, el bot deja de insistir.
+         Nadie tiene por qué dar un dato que no quiere dar. Si es el contacto,
+         no hay nada que hacer sin él: se le da el correo de la oficina y se
+         cierra con dignidad. Cualquier otro dato se deja EN BLANCO y se sigue:
+         un formulario con un hueco vale infinitamente más que un visitante que
+         cierra la pestaña. */
+      if (flow.badTries >= 3) {
+        if (step.type === 'contact') {
+          clearFlow();
+          speak(pickVariant(DATA.flowTalk.giveUpContact, 'giveUp'), { contactCard: true }, done);
+          return;
+        }
+        flow.data[step.id] = '(not given)';
+        flow.badTries = 0;
+        saveFlow();
+        speak(pickVariant(DATA.flowTalk.skipped, 'skipped'), null, function () { advance(done); });
+        return;
+      }
+
+      speak(pickVariant(DATA.flowTalk[err], err),
+            flow.badTries >= 2 ? { contactCard: true } : null, done);
       return;
     }
 
-    flow.data[step.id] = text.trim();
+    flow.data[step.id] = (step.type === 'contact') ? pullContact(text) : text.trim();
     flow.dodges = 0;              // ha contestado: la cuenta vuelve a cero
+    flow.badTries = 0;
 
     advance(done);
   }
@@ -2024,7 +2150,8 @@
          experiencia, su ciudad), es una respuesta, y se conduce. */
       var aporta = haContado || (seed && seed.work);
 
-      if (aporta && !isQuestion(text) && !flowTrigger(text) && !isUnintelligible(text) &&
+      if (aporta && !isQuestion(text) && !flowTrigger(text) &&
+          (haContado || !isUnintelligible(text)) &&
           (answering || haContado || (!detectTopics(text).length && !detectIntent(text)))) {
 
         if (!seed) seed = { work: null, city: null, when: null };
@@ -2124,6 +2251,19 @@
     }
 
     var topics = detectTopics(text);
+
+    /* [FALLO CORREGIDO — el saludo tapaba la pregunta]
+       "Hola, ¿necesitáis quitanieves para vuestras obras?" traía UN tema: el
+       saludo. Y como había tema, el motor contestaba al saludo y no llegaba
+       nunca a la cascada — la pregunta de verdad se perdía. La persona repetía,
+       el bot repetía el saludo, y a los tres mensajes acababa en "esto necesita
+       una persona". La cortesía acompaña; no puede tapar lo que se pregunta.
+       Si lo único que se ha reconocido es cortesía Y hay algo más escrito, se
+       sigue buscando. */
+    var soloCortesia = topics.length && topics.every(function (h) {
+      return ['greeting', 'thanks', 'goodbye', 'small talk'].indexOf(h.entry.topic) !== -1;
+    });
+    if (soloCortesia && tokens(text).length >= 3) topics = [];
 
     /* ══════════════════════════════════════════════════════════
        LA CASCADA — lo que hace que no haga falta listar el mundo entero.

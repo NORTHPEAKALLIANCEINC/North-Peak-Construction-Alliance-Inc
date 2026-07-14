@@ -495,7 +495,7 @@ window.NP_BOT_KB = {
         },
         {
           id: 'experience',
-          type: 'text',
+          type: 'duration',      /* una experiencia se mide en tiempo */
           ask: [
             'Roughly how much experience do you have in it?',
             'And how long have you been doing it?'
@@ -673,6 +673,19 @@ window.NP_BOT_KB = {
       'A little more detail, if you can. What does it involve?',
       'Give me a bit more to work with — the team will need something to go on. Can you say a few words about it?'
     ],
+    /* Cuando el visitante no quiere dar un dato: se deja en blanco y se sigue. */
+    skipped: [
+      'No matter — I will leave that one blank and the team can ask you directly.',
+      'We will leave that empty. It is not worth holding you up over.'
+    ],
+    giveUpContact: [
+      'Without a way to reach you there is nothing I can send, and I am not going to keep asking.\n\nWrite to the office yourself and it lands in the same inbox:',
+      'I will stop asking. If you would rather not leave a contact, here is the office directly — it goes to the same people:'
+    ],
+    notADuration: [
+      'I meant how long you have been doing it. Roughly how many years?',
+      'Sorry — I meant the time, not the name. How many years have you been at it?'
+    ],
     notAName: [
       'That does not look like a name. What should I call you?',
       'I need a name for the team to ask for. What is yours?'
@@ -746,7 +759,8 @@ window.NP_BOT_KB = {
     {
       topic: 'the assistant',
       keys: ['who are you', 'what are you exactly', 'are you a robot', 'are you human', 'your name', 'are you a bot', 'am i talking to a person', 'are you real', 'ai',
-        'robot', 'bot', 'eres un robot', 'are you a real robot', 'chatbot'
+        'robot', 'bot', 'eres un robot', 'are you a real robot', 'chatbot',
+        'kodiak', 'is this kodiak'
       ],
       answer: [
         'I am **Kodiak**, an assistant — not a person. I only tell you what the company has confirmed, and I never make things up.\n\nIf you would rather talk to someone real, say the word.',
@@ -1161,6 +1175,65 @@ window.NP_BOT_KB = {
       weight: 2
     },
 
+    /* ══ LO QUE LA EMPRESA NO HACE ══════════════════════════
+       [ENTRADAS NUEVAS] Cuatro visitantes llegaron pidiendo cosas que North
+       Peak no hace, y el bot NO SABÍA DECIRLO: les hacía triaje comercial, o
+       peor, intentaba tomarles los datos de una obra que no existe. Decir "no
+       hacemos eso" rápido y con una salida es más respetuoso — y más honesto —
+       que marear a alguien durante ocho mensajes. */
+    {
+      topic: 'moving and storage',
+      keys: [
+        'move furniture', 'moving company', 'movers', 'storage', 'move my couch',
+        'move a couch', 'moving truck', 'do you have a truck', 'mudanza', 'muebles',
+        'couch', 'sofa', 'furniture', 'truck', 'a bed'
+      ],
+      answer: [
+        'That is not us, and I would rather say so straight away than waste your afternoon. We are a construction company — we build and repair buildings. We do not do removals or storage.\n\nIs there anything on the construction side I can help with?',
+        'Still not us, I am afraid. No trucks, no removals, no storage — we put up buildings and repair them.\n\nYou will want a moving company for that. Anything I can help with on the building side?',
+        'I have to be straight with you: you are in the wrong place. We do not move furniture and we never have.\n\nIs there a building or a repair I can help you with instead?'
+      ],
+      weight: 5
+    },
+    {
+      topic: 'real estate',
+      keys: [
+        'properties available', 'listings', 'do you have listings', 'send listings',
+        'do you sell houses', 'homes for sale', 'homes coming soon', 'realtor',
+        'real estate agent', 'buy a property', 'looking to buy in', 'inmobiliaria'
+      ],
+      answer: [
+        'I think you may have the wrong company, and I will not pretend otherwise. We do not sell or list property — we are a construction company. We build what someone else has bought.\n\nIf you have land or a building and something needs doing to it, that I can help with. Do you?'
+      ],
+      weight: 5
+    },
+    {
+      topic: 'design and permits',
+      keys: [
+        'draw the plans', 'draw plans', 'drawings', 'blueprints', 'architect', 'designer',
+        'draftsman', 'do you do design', 'pull permits', 'get the permits', 'building permit',
+        'permit', 'permits', 'zoning', 'planos', 'permisos', 'delineante'
+      ],
+      answer: [
+        'We build. We do not produce the drawings and we do not pull the permits — that comes from a designer or an architect, and I am not going to pretend we do it.\n\nIf you already have drawings, or once you have them, the team takes it from there. Do you have any yet?',
+        'Straight answer: drawings and permits are not our work. We are the ones who build what the drawings say.\n\nTell me what you are trying to build and the team will tell you exactly what they need from you before they can start. What is it?'
+      ],
+      weight: 5
+    },
+    {
+      topic: 'building maintenance',
+      keys: [
+        'property manager', 'property management', 'my landlord', 'my building manager',
+        'send a plumber', 'send someone to fix', 'my condo', 'my apartment is leaking',
+        'i pay my fees', 'my balcony', 'maintenance call', 'administrador', 'inquilino'
+      ],
+      answer: [
+        'I think you have reached the wrong company, and you deserve to know that now rather than in ten minutes. We are a construction company. We are not your building manager and we cannot send anyone to your flat.\n\nWhoever manages the building is the one who has to send someone — that is what your fees pay for. If you are an owner and the building itself needs real repair work, that we do. Which is it?'
+      ],
+      contactCard: true,
+      weight: 5
+    },
+
     /* ══ EL VISITANTE ENFADADO, Y EL QUE PROVOCA ════════════
        [ENTRADAS NUEVAS] Antes, a quien escribía "you are useless" el bot le
        contestaba "no te he entendido". A alguien enfadado, decirle que no le
@@ -1222,7 +1295,8 @@ window.NP_BOT_KB = {
       offerFlow: 'job',
       keys: [
         'job', 'jobs', 'careers', 'work with you', 'hiring', 'vacancy', 'apply', 'employment',
-        'send my resume', 'resume', 'looking for work', 'i need a job', 'position', 'recruiting'
+        'send my resume', 'resume', 'looking for work', 'i need a job', 'position', 'recruiting',
+        'hire', 'u hire', 'you hire', 'are you hiring', 'need workers', 'need guys', 'looking for workers', 'need a job', 'need work', 'any work', 'got work', 'hire guys', 'do you hire'
       ],
       answer: [
         'Good. We take on site and trades people, and technical and management roles.\n\nSend your trade and your experience through the Careers page — it takes two minutes.',
@@ -1237,7 +1311,8 @@ window.NP_BOT_KB = {
          se le preguntaba su oficio y sus años de experiencia, y a la
          oficina le llegaba como candidato. Ahora tiene el suyo. */
       offerFlow: 'supplier',
-      keys: ['subcontractor', 'subcontract', 'supplier', 'vendor', 'register as supplier', 'work as a sub', 'partner with you'],
+      keys: ['subcontractor', 'subcontract', 'supplier', 'vendor', 'register as supplier', 'work as a sub', 'partner with you',
+        'subs', 'subtrade', 'vendor application', 'crew ready', 'have crew', 'looking for framers', 'need crews', 'who handles subs', 'my crew', 'my company'],
       answer: [
         'Yes, we register subcontractors and suppliers. Send your trade, your area and your credentials, and you stay on file for upcoming work.',
         'We do use subcontractors. Register through the Careers page — trade, coverage, credentials.'
