@@ -651,10 +651,25 @@
     return email || phone;
   }
 
+  /* Países y regiones enteras. Responder "Canadá" a "¿en qué ciudad?" no
+     es un error del visitante: es una respuesta razonable a una pregunta
+     mal acotada. Un humano no la daría por buena — la afinaría. */
+  var TOO_BROAD = [
+    'canada', 'usa', 'us', 'united states', 'america', 'mexico', 'europe',
+    'north america', 'everywhere', 'anywhere', 'all over', 'nationwide',
+    'canada wide', 'across canada', 'varios sitios', 'todo el pais'
+  ];
+
   function validate(step, value) {
     var v = value.trim();
     if (step.type === 'contact') {
       return looksLikeContact(v) ? null : 'invalidContact';
+    }
+    if (step.type === 'place') {
+      if (looksLikeContact(v)) return 'looksLikeContact';
+      var n = normalize(v);
+      if (TOO_BROAD.indexOf(n) !== -1) return 'tooBroadPlace';
+      return v.length >= 3 ? null : 'tooShort';
     }
     if (step.type === 'name') {
       /* Un correo tampoco es un nombre. */
@@ -662,11 +677,14 @@
       return v.length >= 2 ? null : 'tooShort';
     }
     if (step.type === 'text') {
-      /* [MEJORA] El visitante suelta su correo cuando se le pregunta por
-         la obra. Antes se tragaba y quedaba de descripción del proyecto.
-         Ahora se apunta como contacto y se le vuelve a preguntar. */
+      /* El visitante suelta su correo cuando se le pregunta por la obra.
+         Antes se tragaba y quedaba de descripción del proyecto. Ahora se
+         apunta como contacto y se le vuelve a preguntar. */
       if (looksLikeContact(v) && v.split(' ').length <= 3) return 'looksLikeContact';
-      return v.length >= 3 ? null : 'tooShort';
+      if (v.length < 3) return 'tooShort';
+      /* Una sola palabra no le sirve a nadie: ni al equipo, ni al cliente. */
+      if (v.split(/\s+/).length < 2 && v.length < 12) return 'tooVague';
+      return null;
     }
     return null;
   }

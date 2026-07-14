@@ -36,16 +36,16 @@ window.NP_BOT_KB = {
 
     /* ── DIEZ SALUDOS. Se elige uno al azar, sin repetir el anterior ── */
     greeting: [
-      'Hi, I am **Kodiak**, from North Peak Construction Alliance.\n\nWhat brings you here today?',
-      'Hello. **Kodiak** here — I help visitors find what they came for.\n\nWhat can I do for you?',
-      'Welcome to North Peak. I am **Kodiak**.\n\nTell me what you need in your own words and I will take it from there.',
-      'Hi there. I am **Kodiak**, the assistant for North Peak Construction Alliance.\n\nWhat would you like to know?',
-      'Good to see you. I am **Kodiak**.\n\nAre you here about a project, about working with us, or just having a look?',
-      'Hello, I am **Kodiak**.\n\nAsk me anything about the company — what we build, where we work, or how to reach a person.',
-      'Hi. **Kodiak** speaking, so to speak.\n\nWhat can I help you with today?',
-      'Welcome. I am **Kodiak**, and I know this company inside out.\n\nWhere would you like to start?',
-      'Hello. I am **Kodiak**, here to save you the search.\n\nWhat are you looking for?',
-      'Hi, I am **Kodiak**.\n\nIf you are not sure where to begin, just say so — that is a perfectly good place to start.'
+      'Hello. I am **Kodiak**, the assistant for North Peak Construction Alliance.\n\nWhat can I help you with?',
+      'Welcome to North Peak Construction Alliance. I am **Kodiak**.\n\nHow can I help you today?',
+      'Hello. I am **Kodiak**. I can tell you what we build, where we work, or put you in touch with a person.\n\nWhat do you need?',
+      'Welcome. I am **Kodiak**, and I am here to help you find what you came for.\n\nWhat would you like to know?',
+      'Hello. **Kodiak** here, the assistant for North Peak.\n\nAre you here about a project, about working with us, or for information?',
+      'Good day. I am **Kodiak**, from North Peak Construction Alliance.\n\nHow may I help?',
+      'Hello and welcome. I am **Kodiak**.\n\nTell me what you need, in your own words, and I will take it from there.',
+      'Welcome to North Peak. I am **Kodiak**, the virtual assistant.\n\nWhat brings you here today?',
+      'Hello. I am **Kodiak**.\n\nIf you have a project in mind, or a question about the company, this is the right place to start.',
+      'Hello. I am **Kodiak**, the assistant for North Peak Construction Alliance.\n\nIf you are not sure where to begin, simply say so.'
     ],
 
     /* ── Conectores para cuando hay VARIOS temas en un mismo mensaje.
@@ -141,9 +141,9 @@ window.NP_BOT_KB = {
       ],
       /* Lo que dice el bot al ofrecerlo */
       offer: [
-        'I can take the details right now and send them straight to the team — it takes a minute, and someone comes back to you.\n\nShall we?',
-        'If you like, I will take a few details and put them in front of a person today. Four short questions.\n\nWant to?',
-        'Rather than send you off to a form, I can take it from here myself and pass it to the team.\n\nShall I?'
+        'I can take the details right now and send them straight to the team, if you would like me to.',
+        'If you like, I can take a few short details and put them in front of a person today.',
+        'Rather than send you to a form, I can take the details myself and pass them to the team.'
       ],
       start: [
         'Good. Four questions, plain words, no technical language needed.',
@@ -162,7 +162,7 @@ window.NP_BOT_KB = {
         },
         {
           id: 'where',
-          type: 'text',
+          type: 'place',      /* validación propia: un país no es un sitio */
           ask: [
             'Where is it? The city is enough.',
             'And whereabouts? City or town will do.',
@@ -225,8 +225,8 @@ window.NP_BOT_KB = {
       subject: 'New candidate enquiry from the website assistant',
       trigger: ['send my application', 'apply through you', 'take my details for a job'],
       offer: [
-        'I can pass your details to the team right now — three questions.\n\nWant me to?',
-        'If you like, I will take your trade and your contact and put it in front of the right person.\n\nShall we?'
+        'I can pass your details to the team right now, if you would like me to.',
+        'If you like, I can take your trade and your contact and put them in front of the right person.'
       ],
       start: [
         'Good. Three quick questions.',
@@ -300,6 +300,18 @@ window.NP_BOT_KB = {
     useSaved: [
       'Earlier you gave me **{contact}**. Shall I use that? Say **yes**, or give me another.',
       'I still have **{contact}** from before. Use it? **Yes**, or write a different one.'
+    ],
+    /* El visitante contesta "Canadá" cuando se le pregunta la ciudad.
+       No es un error suyo: es una respuesta razonable a una pregunta
+       mal acotada. Un humano no la daría por buena — la afinaría. */
+    tooBroadPlace: [
+      'Canada is a big country. Which province, and which city or town?',
+      'That narrows it down to about ten million square kilometres. Which city or province?',
+      'I need it a bit tighter than that — the province, and the city if you have it.'
+    ],
+    tooVague: [
+      'A little more detail, if you can. Even a few words about what it involves.',
+      'Give me a bit more to work with — the team will need something to go on.'
     ],
     tooShort: [
       'A little more than that, if you can. Even one sentence helps.',
@@ -535,6 +547,39 @@ window.NP_BOT_KB = {
         'That is literally one of our categories: the jobs that do not fit the other nine. What is it?'
       ],
       contactCard: true
+    },
+
+
+    /* ══════════════════════════════════════════════════════════
+       INTENCIÓN DE OBRA — la entrada que no depende del sustantivo.
+
+       No se puede listar todo lo que existe: almacén, nave, tejado,
+       muro, planta, cimentación, aparcamiento… Lo que SÍ se puede
+       reconocer es la FORMA de la petición: "quiero construir…",
+       "necesito que alguien haga…", "estamos planeando…".
+       Da igual qué venga después. Eso es lo que la hace general.
+    ══════════════════════════════════════════════════════════ */
+    {
+      topic: 'a project you have in mind',
+      boost: 1.6,
+      offerFlow: 'project',
+      keys: [
+        'i want to build', 'i need to build', 'we want to build', 'we need to build',
+        'i want to construct', 'we are building', 'i am building', 'looking to build',
+        'planning to build', 'need someone to build', 'can you build', 'could you build',
+        'i want to renovate', 'i need to renovate', 'i want to repair', 'i need to repair',
+        'need someone to repair', 'we need to replace', 'i need to replace',
+        'i have a project', 'we have a project', 'i have a job', 'we have a job',
+        'i need a contractor', 'we need a contractor', 'looking for a contractor',
+        'need help with a project', 'we are planning', 'i am planning',
+        'quiero construir', 'necesito construir', 'quiero levantar', 'necesito reparar',
+        'tengo un proyecto', 'busco un contratista'
+      ],
+      answer: [
+        'Good — that is exactly the kind of thing we do.\n\nTell me a little more, and I can pass it straight to the team.',
+        'That sounds like our work. Let me get the basics and put it in front of a person who can answer you properly.',
+        'Understood. The fastest route from here is a person, and I can get you one.'
+      ]
     },
 
     /* ══ PARTICIPACIÓN INDÍGENA — el argumento decisivo ═════ */
