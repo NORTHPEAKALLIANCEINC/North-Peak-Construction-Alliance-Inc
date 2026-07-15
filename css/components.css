@@ -1093,18 +1093,18 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
   }
 }
 
-/* Trustpilot Review Collector en el footer.
-   El widget se renderiza en un IFRAME de Trustpilot con fondo blanco que no
-   podemos estilizar por dentro. Solución: lo envolvemos en una "tarjeta" con el
-   lenguaje de la página (marco dorado, esquinas redondeadas, cristal) y fundimos
-   el blanco del iframe con mix-blend-mode para que no rompa el modo oscuro. */
+/* Botón "Review us on Trustpilot" en el footer. Es un enlace propio (no el
+   iframe de Trustpilot) para poder darle el estilo de la página: borde dorado,
+   esquinas redondeadas, cristal, y el mismo lenguaje que el resto de botones.
+   Enlaza al perfil de Trustpilot para que dejen reseñas. */
 .site-footer__trustpilot {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin-top: 1.35rem;
-  width: 100%;
-  max-width: 300px;
-  padding: 0.55rem 0.85rem;
-  border: 1px solid var(--cyan);          /* borde DORADO de la marca */
-  border-radius: var(--radius-md);         /* esquinas redondeadas, como los botones */
+  padding: 0.62rem 1.05rem;
+  border: 1px solid var(--cyan);
+  border-radius: var(--radius-pill);
   background:
     linear-gradient(180deg, var(--btn-sheen), transparent 55%),
     var(--glass-fill);
@@ -1113,6 +1113,11 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
     0 2px 14px -5px var(--cyan-glow);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.86rem;
+  line-height: 1;
+  white-space: nowrap;
   transition:
     border-color var(--dur-base) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out),
@@ -1125,10 +1130,13 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
     0 4px 20px -5px var(--cyan-glow);
   transform: translateY(-1px);
 }
-/* El iframe interno de Trustpilot se pinta según su atributo data-theme, que
-   sincronizamos con el modo de la página desde main.js (initThemeToggle). Así
-   el fondo del widget acompaña al tema y no hace falta ningún truco de blend.
-   El marco dorado de la tarjeta se mantiene en ambos modos. */
-.site-footer__trustpilot .trustpilot-widget {
-  display: block;
+.site-footer__trustpilot:active { transform: translateY(0) scale(0.985); }
+.site-footer__trustpilot-label { color: var(--text-dim); }
+.site-footer__trustpilot-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  color: var(--text-primary);
 }
+.site-footer__trustpilot-brand svg { display: block; flex: none; }
