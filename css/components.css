@@ -1092,3 +1092,10 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
     max-width: 100%;
   }
 }
+
+/* Trustpilot Review Collector en el footer — ocupa el hueco bajo el tagline,
+   con un ancho contenido para que no se estire de lado a lado. */
+.site-footer__trustpilot {
+  margin-top: 1.1rem;
+  max-width: 260px;
+}
