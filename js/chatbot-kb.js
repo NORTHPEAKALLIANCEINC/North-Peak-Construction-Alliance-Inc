@@ -269,7 +269,7 @@ window.NP_BOT_KB = {
 
       place: {
         answer: [
-          'We are based in Toronto and work across Ontario and Canada.\n\n**Where is your project?** Name the city and you will get a straight answer.'
+          'We are based in Toronto and work across **Ontario**.\n\n**Where is your project?** Name the city and you will get a straight answer.'
         ],
         offerFlow: 'project'
       },
@@ -865,9 +865,9 @@ window.NP_BOT_KB = {
         'who is north peak', 'company information', 'background', 'your company', 'history'
       ],
       answer: [
-        'We are an **Indigenous-owned construction company** based in Toronto, working across Ontario and Canada.\n\nWe build for general contractors, public bodies and private clients. What would you like to know first?',
-        'North Peak is a Toronto construction company, Indigenous-owned, federally incorporated (No. **1521162-0**), working right across Canada.\n\nWhat matters most to you — what we build, or who we build it for?',
-        'Short version: real construction capability, authentic Indigenous partnership, Toronto base, Canada-wide reach.\n\nWant the longer version?'
+        'We are an **Indigenous-owned construction company** based in Toronto, working across **Ontario**.\n\nWe build for general contractors, public bodies and private clients. What would you like to know first?',
+        'North Peak is a Toronto construction company, Indigenous-owned, federally incorporated (No. **1521162-0**), working across Ontario.\n\nWhat matters most to you — what we build, or who we build it for?',
+        'Short version: real construction capability, authentic Indigenous partnership, based in Toronto, working across Ontario.\n\nWant the longer version?'
       ],
       more: [
         'We cover the full project cycle — from managing a job to putting the crew on site. Ten service areas, from general contracting to concrete and masonry.\n\nWhat sets us apart is that clients do not have to choose between meeting an Indigenous procurement target and hiring someone who can actually build. Here it is the same company.'
@@ -1060,8 +1060,8 @@ window.NP_BOT_KB = {
         'ottawa', 'hamilton', 'mississauga', 'far'
       ],
       answer: [
-        'Toronto is home, and we work across **Ontario and Canada**.\n\nWhere is your project? Name the city and you will get a straight answer about whether we can take it.',
-        'Across Ontario, and Canada-wide when the job calls for it.\n\nWhereabouts are you?',
+        'Toronto is home, and we work across **Ontario**.\n\nWhere is your project? Name the city and you will get a straight answer about whether we can take it.',
+        'Across Ontario.\n\nWhereabouts are you?',
         'We are based in Toronto — 37 Kodiak Crescent — and we work right across the country.\n\nWhere would this project be?'
       ]
     },
@@ -1072,7 +1072,8 @@ window.NP_BOT_KB = {
       keys: [
         'contact', 'phone', 'call', 'telephone', 'email', 'reach you', 'get in touch',
         'talk to a person', 'talk to someone', 'human', 'speak to someone', 'advisor',
-        'representative', 'whatsapp', 'address', 'where are you', 'office', 'your location'
+        'representative', 'whatsapp', 'address', 'where are you', 'office', 'your location',
+        'contacto', 'correo', 'telefono', 'llamar', 'como los contacto', 'a que correo escribo', 'a que numero llamo', 'quiero hablar con alguien', 'hablar con una persona', 'como me comunico', 'direccion', 'donde estan', 'donde quedan', 'como llego'
       ],
       answer: [
         'Of course. Pick whichever suits you:',
@@ -1401,7 +1402,7 @@ window.NP_BOT_KB = {
         'multiple projects', 'multiples proyectos', 'capacidad anual', 'gestionar multiples'
       ],
       answer: [
-        'The work is mostly commercial, institutional and infrastructure, plus supporting general contractors — for private owners, businesses and public bodies across Ontario and Canada.\n\nFor anything about capacity, international arrangements or handling several projects at once, that is a conversation for a person. What are you looking to build?'
+        'The work is mostly commercial, institutional and infrastructure, plus supporting general contractors — for private owners, businesses and public bodies across Ontario.\n\nFor anything about capacity, international arrangements or handling several projects at once, that is a conversation for a person. What are you looking to build?'
       ],
       offerFlow: 'project',
       contactCard: true,
@@ -1452,8 +1453,11 @@ window.NP_BOT_KB = {
         'que zonas', 'cobertura', 'trabajan en canada', 'trabajan solo en', 'en que zonas operan',
         'en que provincias operan', 'donde operan'
       ],
+      /* [CONFIRMADO por el dueño] Zona de trabajo: todo Ontario. (No se afirma
+         cobertura fuera de Ontario, que no está confirmada.) */
       answer: [
-        'The base is Toronto, Ontario, and the work spans Ontario and across Canada depending on the project.\n\nFor a job outside the usual area, a person will tell you straight whether it is feasible. Where is yours?'
+        'The company is based in Toronto and works **across Ontario**.\n\nFor a project elsewhere, a person will tell you straight whether it is feasible. Where is yours?',
+        'North Peak is based in Toronto and covers **all of Ontario**.\n\nIf your project is outside the province, the office will let you know honestly. Where is it?'
       ],
       offerFlow: 'project',
       contactCard: true,
@@ -1763,14 +1767,60 @@ window.NP_BOT_KB = {
       contactCard: true
     },
 
+    /* ══ URGENCIAS ══════════════════════════════════════════ */
+    {
+      /* [CONFIRMADO por el dueño] NO hay contacto de urgencia dedicado. El bot
+         no inventa una línea 24h: dirige al teléfono de oficina en horario. */
+      topic: 'emergency line',
+      keys: [
+        'emergency line', 'emergency number', '24/7', '24 7', 'out of hours',
+        'after hours emergency', 'urgent line', 'emergency contact',
+        'linea de emergencia', 'numero de urgencia', 'numero de urgencias',
+        'contacto de urgencia', 'linea de urgencia', 'urgencias', '24 horas',
+        'fuera de horario', 'emergencia'
+      ],
+      answer: [
+        'There is no separate emergency line. For anything urgent, call the office on **647 895 0939** during hours (8:00 am to 5:00 pm), and outside those times leave a message and the team will respond.',
+        'No dedicated out-of-hours line — the number for everything, urgent or not, is **647 895 0939**, staffed 8:00 am to 5:00 pm. Leave a message any other time.'
+      ],
+      contactCard: true,
+      noNudge: true
+    },
+
+    /* ══ REDES SOCIALES ═════════════════════════════════════ */
+    {
+      /* [CONFIRMADO por el dueño] La empresa NO tiene redes sociales. El bot no
+         debe inventar ni insinuar ninguna: dice la verdad y reconduce al canal
+         real (teléfono o correo). */
+      topic: 'social media',
+      keys: [
+        'social media', 'instagram', 'facebook', 'linkedin', 'twitter', 'tiktok',
+        'youtube', 'your instagram', 'your facebook', 'follow you', 'social',
+        'do you have social media', 'online presence', 'handle',
+        'redes sociales', 'tienen redes', 'tienen instagram', 'tienen facebook',
+        'los sigo', 'estan en redes', 'pagina de facebook', 'perfil'
+      ],
+      answer: [
+        'The company does not have social media accounts. The way to reach North Peak is by phone or email:',
+        'No social channels for now — the reliable way to get in touch is directly:'
+      ],
+      contactCard: true,
+      noNudge: true
+    },
+
     /* ══ HORARIO ════════════════════════════════════════════ */
     {
       topic: 'business hours',
-      keys: ['hours', 'opening hours', 'when are you open', 'business hours', 'what time', 'are you open', 'weekend'],
-      /* ⚠️ PENDIENTE: horario oficial. */
+      keys: [
+        'hours', 'opening hours', 'when are you open', 'business hours', 'what time',
+        'are you open', 'weekend', 'office hours', 'working hours', 'open today',
+        'horario', 'que horario', 'cual es el horario', 'a que hora abren', 'a que hora cierran',
+        'estan abiertos', 'horario de oficina', 'horario de atencion', 'fin de semana'
+      ],
+      /* [CONFIRMADO por el dueño] Horario oficial: 8:00 am – 5:00 pm. */
       answer: [
-        'Our hours are not published yet, so I will not guess. Call **647 895 0939** — and if nobody picks up, write, and you will get an answer.',
-        'I do not have the official hours to hand. The reliable route is the phone, or a message:'
+        'The office is open **Monday to Friday, 8:00 am to 5:00 pm**.\n\nCall **647 895 0939** during those hours, or send a message any time and the team will get back to you.',
+        'Our hours are **8:00 am to 5:00 pm, Monday to Friday**. Outside those times, leave a message and someone will reply.'
       ],
       contactCard: true
     },
@@ -1826,7 +1876,8 @@ window.NP_BOT_KB = {
       topic: 'visiting the office',
       keys: [
         'can i visit', 'come to your office', 'in person', 'meet you', 'meeting', 'drop by',
-        'where can i find you', 'face to face', 'sit down'
+        'where can i find you', 'face to face', 'sit down',
+        'puedo visitar', 'puedo ir', 'puedo pasar', 'es fisica', 'direccion fisica', 'tienen oficina fisica', 'puedo ir en persona', 'reunirme en persona', 'visitar la oficina', 'donde los visito', 'atienden en persona', 'can i come in person', 'physical address', 'is it a real office'
       ],
       answer: [
         'The office is at **37 Kodiak Crescent, Unit 11, Toronto, ON M3J 3G5**.\n\nCall **647 895 0939** first so someone is expecting you — that way you are not turning up to a locked door.',

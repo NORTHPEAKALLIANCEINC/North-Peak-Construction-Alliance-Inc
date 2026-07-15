@@ -2439,7 +2439,10 @@
          experiencia, su ciudad), es una respuesta, y se conduce. */
       var aporta = haContado || (seed && seed.work);
 
-      if (aporta && !isQuestion(text) && !flowTrigger(text) &&
+      /* [FALLO CORREGIDO] "SOLO SÍ O NO" (Marcus, impaciente) se tragaba como un
+         dato del formulario y lo arrancaba. Es una exigencia de respuesta
+         binaria, no un dato. NOT_YES la excluye aquí también. */
+      if (aporta && !isQuestion(text) && !flowTrigger(text) && !NOT_YES.test(n0) &&
           (haContado || !isUnintelligible(text)) &&
           (answering || haContado || (!detectTopics(text).length && !detectIntent(text)))) {
 
@@ -2504,8 +2507,12 @@
 
     /* Red de seguridad: si lo último que se habló ofrecía tomar los datos
        y el visitante dice "sí", se abre el flujo. Pase lo que pase con la
-       memoria, un "sí" nunca vuelve a repetir la respuesta anterior. */
+       memoria, un "sí" nunca vuelve a repetir la respuesta anterior.
+       [FALLO CORREGIDO] "SOLO SÍ O NO" son 4 palabras y casa con YES por el
+       "si" — abría el formulario a Marcus, que solo exigía una respuesta
+       binaria. NOT_YES y la exclusión de preguntas lo frenan. */
     if (YES.test(normalize(text)) && normalize(text).split(' ').length <= 4 &&
+        !NOT_YES.test(normalize(text)) && !isQuestion(text) &&
         lastEntry && lastEntry.offerFlow && DATA.flows[flowFor(lastEntry.offerFlow)]) {
       startFlow(flowFor(lastEntry.offerFlow), release, seed && seed.work, seed);
       return;
