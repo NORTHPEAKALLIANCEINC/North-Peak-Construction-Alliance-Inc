@@ -1098,8 +1098,9 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
    esquinas redondeadas, cristal, y el mismo lenguaje que el resto de botones.
    Enlaza al perfil de Trustpilot para que dejen reseñas. */
 .site-footer__trustpilot {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   margin-top: 1.35rem;
   padding: 0.62rem 1.05rem;
