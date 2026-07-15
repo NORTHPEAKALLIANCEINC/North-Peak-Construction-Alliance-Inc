@@ -1206,7 +1206,7 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
    página ya usa para separar la barra de datos del resto (.trust-bar::before):
    mismo degradado, misma máscara radial, mismo resplandor. Aquí se coloca en el
    borde inferior de la foto del hero. NO toca la sombra/scrim del hero. */
-@media (max-width: 859px) {
+@media (max-width: 1100px) {
   html[data-theme="light"] .hero__frame {
     position: relative;
     overflow: visible;
@@ -1260,7 +1260,7 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
    Dos versiones que se alternan según el tema: color en claro, blanco en
    oscuro. */
 .hero__mobile-logo { display: none; }
-@media (max-width: 859px) {
+@media (max-width: 1100px) {
   .hero__mobile-logo {
     display: block;
     position: absolute;
@@ -1286,7 +1286,7 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
 /* [C] Botón de menú (hamburguesa) con fondo SÓLIDO (no transparente) — SOLO
    MÓVIL. Cuadradito de bordes redondeados con sombra, como en el diseño de
    referencia. En claro va blanco; en oscuro, un tono oscuro sólido. */
-@media (max-width: 859px) {
+@media (max-width: 1100px) {
   .site-header__toggle {
     background: #FFFFFF;
     border: 1px solid rgba(15, 32, 62, 0.10);
@@ -1313,14 +1313,14 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
    que el logo pequeño (mark) de la esquina superior izquierda del header se
    oculta — solo queda el logo grande y el botón de menú, como en el diseño de
    referencia. Aplica a claro y oscuro. */
-@media (max-width: 859px) {
+@media (max-width: 1100px) {
   .site-header__mark { display: none; }
 }
 
 /* [1-móvil] La barra translúcida del header (.site-header__row: fondo, borde y
    blur) ya no debe verse en móvil — solo el botón de menú flota sobre la foto.
    En escritorio se mantiene igual. */
-@media (max-width: 859px) {
+@media (max-width: 1100px) {
   .site-header__row {
     background: transparent;
     border-color: transparent;
@@ -1336,12 +1336,13 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
   }
 }
 
-/* [3-móvil] Menú desplegable reestructurado. El antiguo enlace "Request a
+/* [menú] Menú desplegable reestructurado. El antiguo enlace "Request a
    consultation" es ahora el botón de WhatsApp (cristal verde, mismo estilo
    rectangular del CTA). Debajo, el interruptor de tema se divide en DOS botones
    rectangulares lado a lado: Light (sol) y Dark (luna), con el estilo dorado de
-   la página. Todo con el mismo margen lateral, uniforme. */
-@media (max-width: 859px) {
+   la página. El menú hamburguesa se usa hasta 1100px (móvil y tablet), así que
+   estos estilos cubren ese rango. */
+@media (max-width: 1100px) {
   /* WhatsApp: hereda el estilo del CTA (.site-nav__cta.btn), le damos el verde. */
   .site-nav__wa {
     display: flex;
@@ -1403,4 +1404,12 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
       linear-gradient(180deg, var(--btn-sheen), transparent 45%),
       var(--glass-fill-hover);
   }
+}
+
+/* El par de botones de tema (Light/Dark) es SOLO para el menú desplegable
+   (hamburguesa), que se usa en móvil y tablet hasta 1100px. En escritorio ancho
+   (≥1101px) la navegación es la barra horizontal con el interruptor circular de
+   siempre, así que el par se oculta. */
+@media (min-width: 1101px) {
+  .site-nav__theme-pair { display: none; }
 }
