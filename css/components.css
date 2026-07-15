@@ -1268,7 +1268,7 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 2;
-    width: min(62%, 260px);
+    width: min(44%, 200px);
     pointer-events: none;
   }
   .hero__mobile-logo-img {
@@ -1315,4 +1315,32 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
    referencia. Aplica a claro y oscuro. */
 @media (max-width: 859px) {
   .site-header__mark { display: none; }
+}
+
+/* [1-móvil] La barra translúcida del header (.site-header__row: fondo, borde y
+   blur) ya no debe verse en móvil — solo el botón de menú flota sobre la foto.
+   En escritorio se mantiene igual. */
+@media (max-width: 859px) {
+  .site-header__row {
+    background: transparent;
+    border-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  html[data-theme="light"] body.is-scrolled .site-header__row,
+  html[data-theme="dark"] body.is-scrolled .site-header__row,
+  body.is-scrolled .site-header__row {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* [3-móvil] Al desplegar el menú, el botón de tema (cuadradito a la derecha)
+   caía justo encima del icono del chatbot y no se podía tocar. Se mueve al
+   LADO IZQUIERDO del botón de WhatsApp usando order, sin tocar el HTML. Así el
+   tema queda lejos del chatbot y se puede pulsar sin problema. */
+@media (max-width: 859px) {
+  .site-nav__tools .theme-toggle--nav { order: 0; }
+  .site-nav__tools .wa-btn { order: 1; }
 }
