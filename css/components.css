@@ -1093,9 +1093,42 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
   }
 }
 
-/* Trustpilot Review Collector en el footer — ocupa el hueco bajo el tagline,
-   con un ancho contenido para que no se estire de lado a lado. */
+/* Trustpilot Review Collector en el footer.
+   El widget se renderiza en un IFRAME de Trustpilot con fondo blanco que no
+   podemos estilizar por dentro. Solución: lo envolvemos en una "tarjeta" con el
+   lenguaje de la página (marco dorado, esquinas redondeadas, cristal) y fundimos
+   el blanco del iframe con mix-blend-mode para que no rompa el modo oscuro. */
 .site-footer__trustpilot {
-  margin-top: 1.1rem;
-  max-width: 260px;
+  margin-top: 1.35rem;
+  width: 100%;
+  max-width: 300px;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--cyan);          /* borde DORADO de la marca */
+  border-radius: var(--radius-md);         /* esquinas redondeadas, como los botones */
+  background:
+    linear-gradient(180deg, var(--btn-sheen), transparent 55%),
+    var(--glass-fill);
+  box-shadow:
+    inset 0 1px 0 0 var(--btn-inner-light),
+    0 2px 14px -5px var(--cyan-glow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.site-footer__trustpilot:hover {
+  border-color: var(--cyan);
+  box-shadow:
+    inset 0 1px 0 0 var(--btn-inner-light),
+    0 4px 20px -5px var(--cyan-glow);
+  transform: translateY(-1px);
+}
+/* El iframe interno de Trustpilot se pinta según su atributo data-theme, que
+   sincronizamos con el modo de la página desde main.js (initThemeToggle). Así
+   el fondo del widget acompaña al tema y no hace falta ningún truco de blend.
+   El marco dorado de la tarjeta se mantiene en ambos modos. */
+.site-footer__trustpilot .trustpilot-widget {
+  display: block;
 }
