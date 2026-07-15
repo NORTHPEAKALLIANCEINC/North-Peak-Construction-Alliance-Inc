@@ -210,6 +210,18 @@ function initTraitFlip() {
    la preferencia. El cambio de imágenes de fondo (hero/banner) ya
    no lo maneja JS: son dos <img> superpuestas por CSS que hacen
    crossfade solo con el atributo data-theme, sin depender de red. */
+/* Sincroniza el tema del widget de Trustpilot con el modo de la página. El
+   widget se pinta según su atributo data-theme; al cambiarlo hay que pedirle a
+   Trustpilot que vuelva a renderizar el iframe con loadFromElement. */
+function syncTrustpilotTheme(theme) {
+  const el = document.querySelector('.site-footer__trustpilot .trustpilot-widget');
+  if (!el) return;
+  el.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+  if (window.Trustpilot && typeof window.Trustpilot.loadFromElement === 'function') {
+    window.Trustpilot.loadFromElement(el, true);
+  }
+}
+
 function initThemeToggle() {
   /* Hay DOS interruptores: el de la barra (escritorio) y el que vive
      dentro del panel del menú (móvil). Ambos comparten estado. */
@@ -231,6 +243,7 @@ function initThemeToggle() {
   const applyTheme = (theme, persist) => {
     root.setAttribute('data-theme', theme);
     toggles.forEach(btn => btn.setAttribute('aria-label', labels[theme] || labels.light));
+    syncTrustpilotTheme(theme);
     if (persist) {
       try { localStorage.setItem('etexca-theme', theme); } catch (e) { /* almacenamiento no disponible */ }
     }
