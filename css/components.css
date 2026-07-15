@@ -1163,3 +1163,52 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
 @media (prefers-reduced-motion: reduce) {
   .feature-grid--trio > .feature { opacity: 1; transform: none; transition: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   AJUSTES SOLO MÓVIL (≤560px) — hero y filas de botones.
+   No tocan el escritorio.
+   ═══════════════════════════════════════════════════════════ */
+
+/* [1] Botones en pareja (hero y sección de servicios): en móvil se veían
+   estrechos y apretados. Se agrandan, se reparten el ancho por igual y se les
+   da más separación. Aplica a modo claro y oscuro. */
+@media (max-width: 560px) {
+  .hero__actions,
+  .btn-row {
+    gap: 0.75rem;
+    width: 100%;
+  }
+  .hero__actions .btn,
+  .btn-row .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    padding: 0.95rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* [2] Título del hero: en móvil salía demasiado grande. Se reduce el tope del
+   clamp para móvil. Aplica a modo claro y oscuro. */
+@media (max-width: 560px) {
+  .hero__title {
+    font-size: clamp(1.5rem, 6.6vw, 1.9rem);
+  }
+}
+
+/* [3] División dura entre la foto del hero y la página: el scrim del hero
+   termina en azul muy oscuro (#070C16). En modo OSCURO se funde con el fondo,
+   pero en modo CLARO deja un escalón oscuro feo justo antes del contenido
+   claro. Solo en móvil + modo claro, se suaviza el final del degradado para que
+   la transición hacia la página sea limpia. */
+@media (max-width: 859px) {
+  html[data-theme="light"] .hero__frame-overlay {
+    background: linear-gradient(
+      180deg,
+      transparent 22%,
+      rgba(7, 12, 22, 0.30) 52%,
+      rgba(7, 12, 22, 0.52) 82%,
+      rgba(7, 12, 22, 0.42) 100%
+    );
+  }
+}
