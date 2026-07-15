@@ -1141,3 +1141,25 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
   color: var(--text-primary);
 }
 .site-footer__trustpilot-brand svg { display: block; flex: none; }
+
+/* About — "What defines us": los tres iconos entran EN ESCENA A LA VEZ, cada
+   uno por su eje (izquierda, abajo-centro, derecha), sincronizados con el
+   scroll. El contenedor lleva .reveal (el observador lo activa una sola vez), y
+   al hacerse visible, los tres hijos se deslizan juntos a su posición final.
+   Sin escalonado: es la entrada simultánea de los tres. */
+.feature-grid--trio > .feature {
+  opacity: 0;
+  transition: opacity var(--dur-reveal) var(--ease-soft),
+              transform var(--dur-reveal) var(--ease-soft);
+  will-change: opacity, transform;
+}
+.feature-grid--trio > .feature--from-left   { transform: translateX(-64px); }
+.feature-grid--trio > .feature--from-right  { transform: translateX(64px); }
+.feature-grid--trio > .feature--from-bottom { transform: translateY(48px); }
+.feature-grid--trio.is-visible > .feature {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .feature-grid--trio > .feature { opacity: 1; transform: none; transition: none; }
+}
