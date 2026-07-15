@@ -1169,9 +1169,11 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
    No tocan el escritorio.
    ═══════════════════════════════════════════════════════════ */
 
-/* [1] Botones en pareja (hero y sección de servicios): en móvil se veían
-   estrechos y apretados. Se agrandan, se reparten el ancho por igual y se les
-   da más separación. Aplica a modo claro y oscuro. */
+/* [2] Botones en pareja (hero y sección de servicios): en móvil quedaban de
+   tamaños dispares (el izquierdo más pequeño que el derecho), rompiendo la
+   uniformidad. Con flex:1 los DOS ocupan exactamente el mismo ancho —el
+   pequeño crece al tamaño del grande— sin comprimir el de palabra más larga.
+   Aplica a modo claro y oscuro. */
 @media (max-width: 560px) {
   .hero__actions,
   .btn-row {
@@ -1185,30 +1187,38 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
     justify-content: center;
     padding: 0.95rem 1rem;
     font-size: 0.9rem;
+    white-space: nowrap;
   }
 }
 
-/* [2] Título del hero: en móvil salía demasiado grande. Se reduce el tope del
-   clamp para móvil. Aplica a modo claro y oscuro. */
+/* [1] Título del hero: en móvil el título de dos frases se ve enorme. En móvil
+   se muestra una versión CORTA de tres palabras; en web se mantiene el título
+   completo de dos frases, sin cambios. Aplica a modo claro y oscuro. */
+.hero__title-short { display: none; }
 @media (max-width: 560px) {
-  .hero__title {
-    font-size: clamp(1.5rem, 6.6vw, 1.9rem);
-  }
+  .hero__title-full  { display: none; }
+  .hero__title-short { display: block; }
+  .hero__title { font-size: clamp(1.6rem, 7vw, 2.05rem); }
 }
 
-/* [3] División dura entre la foto del hero y la página: el scrim del hero
-   termina en azul muy oscuro (#070C16). En modo OSCURO se funde con el fondo,
-   pero en modo CLARO deja un escalón oscuro feo justo antes del contenido
-   claro. Solo en móvil + modo claro, se suaviza el final del degradado para que
-   la transición hacia la página sea limpia. */
+/* [3] Línea divisoria dorada entre la foto del hero y la página.
+   SOLO MÓVIL + SOLO TEMA CLARO (en tema oscuro el borde ya se ve bien).
+   Es la MISMA línea que usa el resto de la página (dorado que se desvanece a
+   los lados: transparent → --cyan → transparent), en el borde inferior de la
+   foto del hero. NO toca la sombra/scrim del hero. */
 @media (max-width: 859px) {
-  html[data-theme="light"] .hero__frame-overlay {
-    background: linear-gradient(
-      180deg,
-      transparent 22%,
-      rgba(7, 12, 22, 0.30) 52%,
-      rgba(7, 12, 22, 0.52) 82%,
-      rgba(7, 12, 22, 0.42) 100%
-    );
+  html[data-theme="light"] .hero__frame {
+    position: relative;
+  }
+  html[data-theme="light"] .hero__frame::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    z-index: 3;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    pointer-events: none;
   }
 }
