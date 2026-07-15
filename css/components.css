@@ -1336,18 +1336,71 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
   }
 }
 
-/* [3-móvil] Al desplegar el menú: el botón de tema se mueve al LADO IZQUIERDO
-   del WhatsApp (lejos del chatbot, que vive abajo a la derecha), y se reparte
-   todo con uniformidad. Antes el tema quedaba pegado al borde izquierdo y el
-   WhatsApp al derecho, descuadrados respecto al resto de elementos del menú.
-   Ahora el contenedor lleva el mismo margen lateral que el CTA de arriba, y el
-   gap entre ambos botones es parejo. */
+/* [3-móvil] Menú desplegable reestructurado. El antiguo enlace "Request a
+   consultation" es ahora el botón de WhatsApp (cristal verde, mismo estilo
+   rectangular del CTA). Debajo, el interruptor de tema se divide en DOS botones
+   rectangulares lado a lado: Light (sol) y Dark (luna), con el estilo dorado de
+   la página. Todo con el mismo margen lateral, uniforme. */
 @media (max-width: 859px) {
-  .site-nav__tools {
-    margin-left: 0.15rem;
-    margin-right: 0.15rem;
-    gap: 0.5rem;
+  /* WhatsApp: hereda el estilo del CTA (.site-nav__cta.btn), le damos el verde. */
+  .site-nav__wa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #25D366;
+    border-color: rgba(37, 211, 102, 0.45);
+    background:
+      linear-gradient(180deg, var(--btn-sheen), transparent 55%),
+      rgba(37, 211, 102, 0.10);
   }
-  .site-nav__tools .theme-toggle--nav { order: 0; }
-  .site-nav__tools .wa-btn { order: 1; }
+  .site-nav__wa:hover,
+  .site-nav__wa:active,
+  .site-nav__wa:focus-visible {
+    background:
+      linear-gradient(180deg, var(--btn-sheen), transparent 55%),
+      rgba(37, 211, 102, 0.18);
+    border-color: rgba(37, 211, 102, 0.65);
+    color: #25D366;
+  }
+
+  /* Par de botones de tema, lado a lado, mismo margen lateral que el CTA. */
+  .site-nav__theme-pair {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.6rem 0.15rem 0.15rem;
+  }
+  .site-nav__theme-btn {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 46px;
+    padding: 0 0.75rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    color: var(--btn-text);
+    border: 1px solid var(--btn-edge);
+    background:
+      linear-gradient(180deg, var(--btn-sheen), transparent 55%),
+      var(--glass-fill);
+    transition:
+      background var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
+  }
+  .site-nav__theme-btn:active { transform: scale(0.98); }
+  .site-nav__theme-btn svg { display: block; flex: none; }
+  /* El botón del tema ACTIVO se resalta con el borde dorado lleno. */
+  .site-nav__theme-btn[aria-pressed="true"] {
+    border-color: var(--cyan);
+    background:
+      linear-gradient(180deg, var(--btn-sheen), transparent 45%),
+      var(--glass-fill-hover);
+  }
 }
