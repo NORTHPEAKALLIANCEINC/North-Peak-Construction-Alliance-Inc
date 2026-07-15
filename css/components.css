@@ -1249,3 +1249,70 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
     filter: blur(6px);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MÓVIL — Logo sobre el hero y botón de menú sólido.
+   Todo dentro de @media móvil; el escritorio no se toca.
+   ═══════════════════════════════════════════════════════════ */
+
+/* [B] Logo centrado SOBRE la foto del hero — SOLO MÓVIL.
+   Oculto por defecto (en escritorio no aparece); se muestra en móvil.
+   Dos versiones que se alternan según el tema: color en claro, blanco en
+   oscuro. */
+.hero__mobile-logo { display: none; }
+@media (max-width: 859px) {
+  .hero__mobile-logo {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: min(62%, 260px);
+    pointer-events: none;
+  }
+  .hero__mobile-logo-img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  /* Conmutación por tema: color en claro, blanco en oscuro. */
+  .hero__mobile-logo-img--white { display: none; }
+  .hero__mobile-logo-img--color { display: block; }
+  html[data-theme="dark"] .hero__mobile-logo-img--color { display: none; }
+  html[data-theme="dark"] .hero__mobile-logo-img--white { display: block; }
+}
+
+/* [C] Botón de menú (hamburguesa) con fondo SÓLIDO (no transparente) — SOLO
+   MÓVIL. Cuadradito de bordes redondeados con sombra, como en el diseño de
+   referencia. En claro va blanco; en oscuro, un tono oscuro sólido. */
+@media (max-width: 859px) {
+  .site-header__toggle {
+    background: #FFFFFF;
+    border: 1px solid rgba(15, 32, 62, 0.10);
+    border-radius: 12px;
+    padding: 0.7rem 0.65rem;
+    box-shadow: 0 4px 14px -4px rgba(10, 18, 34, 0.28);
+  }
+  .site-header__toggle span {
+    width: 22px;
+    height: 2px;
+    background: #0A2A4A;
+  }
+  html[data-theme="dark"] .site-header__toggle {
+    background: #101826;
+    border: 1px solid rgba(150, 180, 235, 0.20);
+    box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.5);
+  }
+  html[data-theme="dark"] .site-header__toggle span {
+    background: #E8EEF9;
+  }
+}
+
+/* [B-extra] En móvil, el logo grande va centrado sobre la foto del hero, así
+   que el logo pequeño (mark) de la esquina superior izquierda del header se
+   oculta — solo queda el logo grande y el botón de menú, como en el diseño de
+   referencia. Aplica a claro y oscuro. */
+@media (max-width: 859px) {
+  .site-header__mark { display: none; }
+}
