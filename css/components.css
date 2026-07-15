@@ -1202,23 +1202,46 @@ html[data-theme="light"] .form-status--error{ color: #A93226; }
 }
 
 /* [3] Línea divisoria dorada entre la foto del hero y la página.
-   SOLO MÓVIL + SOLO TEMA CLARO (en tema oscuro el borde ya se ve bien).
-   Es la MISMA línea que usa el resto de la página (dorado que se desvanece a
-   los lados: transparent → --cyan → transparent), en el borde inferior de la
-   foto del hero. NO toca la sombra/scrim del hero. */
+   SOLO MÓVIL + SOLO TEMA CLARO. Es EXACTAMENTE la misma cinta dorada que la
+   página ya usa para separar la barra de datos del resto (.trust-bar::before):
+   mismo degradado, misma máscara radial, mismo resplandor. Aquí se coloca en el
+   borde inferior de la foto del hero. NO toca la sombra/scrim del hero. */
 @media (max-width: 859px) {
   html[data-theme="light"] .hero__frame {
     position: relative;
+    overflow: visible;
   }
-  html[data-theme="light"] .hero__frame::after {
-    content: '';
+  html[data-theme="light"] .hero__frame::before {
+    content: "";
     position: absolute;
+    z-index: 4;
+    pointer-events: none;
     left: 0;
     right: 0;
-    bottom: 0;
-    height: 1px;
+    bottom: -2px;
+    height: 5px;
+    border-radius: 999px;
+    background: linear-gradient(180deg,
+                rgba(255, 248, 230, 0.98) 0%,
+                #EBCB80 38%,
+                #C89B35 70%,
+                rgba(120, 90, 22, 0.92) 100%);
+    -webkit-mask-image: radial-gradient(ellipse 56% 100% at 50% 50%,
+                        #000 42%, rgba(0, 0, 0, 0.4) 70%, transparent 100%);
+    mask-image: radial-gradient(ellipse 56% 100% at 50% 50%,
+                #000 42%, rgba(0, 0, 0, 0.4) 70%, transparent 100%);
+  }
+  html[data-theme="light"] .hero__frame::after {
+    content: "";
+    position: absolute;
     z-index: 3;
-    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
     pointer-events: none;
+    left: 0;
+    right: 0;
+    bottom: -8px;
+    height: 18px;
+    background: radial-gradient(ellipse 40% 100% at 50% 50%,
+                rgba(217, 184, 99, 0.26), transparent 72%);
+    filter: blur(6px);
   }
 }
