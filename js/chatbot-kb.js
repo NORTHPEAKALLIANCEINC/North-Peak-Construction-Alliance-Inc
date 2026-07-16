@@ -1915,8 +1915,8 @@ window.NP_BOT_KB = {
         'who is in charge', 'leadership', 'founder', 'ceo', 'boss', 'principals'
       ],
       answer: [
-        'North Peak Construction Alliance Inc. is led by two directors: **Riley Birkett** and **Pavel Portelles Rivas**.\n\nYou can reach Pavel directly at **pavel@northalliancegroup.ca**, or the office at **admin@northalliancegroup.ca** / **647 895 0939**. It is not a faceless outfit — you can talk to the people who run it.',
-        'The company is run by its two directors, **Riley Birkett** and **Pavel Portelles Rivas**.\n\nTo reach leadership directly: **pavel@northalliancegroup.ca**, or the main office on **647 895 0939**.'
+        'North Peak Construction Alliance Inc. is led by its **Chief Executive Officer, Pavel Portelles Rivas**, and its **Chief Operating Officer, Riley Robert Birkett**.\n\nYou can reach Pavel directly at **pavel@northalliancegroup.ca**, or the office at **admin@northalliancegroup.ca** / **647 895 0939**. It is not a faceless outfit — you can talk to the people who run it.',
+        'The company is run by its **Chief Executive Officer, Pavel Portelles Rivas**, and its **Chief Operating Officer, Riley Robert Birkett**.\n\nTo reach leadership directly: **pavel@northalliancegroup.ca**, or the main office on **647 895 0939**.'
       ],
       contactCard: true,
       nav: { label: 'About the company', href: '/about' }
